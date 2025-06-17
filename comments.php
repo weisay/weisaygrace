@@ -68,8 +68,8 @@ jQuery(document).ready(function comment_page_ajas(){
 jQuery(document).ready(function() {
 var gravatarurl= 'https://cravatar.cn/avatar/';
 jQuery('#email').blur(function() {
-jQuery('#real-avatar .avatar').attr('src', gravatarurl + hex_md5(jQuery('#email').val()) + '?s=50&d=mm&r=g');
-jQuery('#real-avatar .avatar').attr('srcset', gravatarurl + hex_md5(jQuery('#email').val()) + '?s=100&d=mm&r=g 2x');
+jQuery('#real-avatar .avatar').attr('src', gravatarurl + sha256(jQuery('#email').val()) + '?s=50&d=mm&r=g');
+jQuery('#real-avatar .avatar').attr('srcset', gravatarurl + sha256(jQuery('#email').val()) + '?s=100&d=mm&r=g 2x');
 jQuery('#Get_Gravatar').fadeOut().html('看看右边头像对不对？').fadeIn('slow');
 });
 });
@@ -81,8 +81,8 @@ jQuery('#Get_Gravatar').fadeOut().html('看看右边头像对不对？').fadeIn(
 jQuery(document).ready(function() {
 var gravatarurl= 'https://gravatar.loli.net/avatar/';
 jQuery('#email').blur(function() {
-jQuery('#real-avatar .avatar').attr('src', gravatarurl + hex_md5(jQuery('#email').val()) + '?s=50&d=mm&r=g');
-jQuery('#real-avatar .avatar').attr('srcset', gravatarurl + hex_md5(jQuery('#email').val()) + '?s=100&d=mm&r=g 2x');
+jQuery('#real-avatar .avatar').attr('src', gravatarurl + sha256(jQuery('#email').val()) + '?s=50&d=mm&r=g');
+jQuery('#real-avatar .avatar').attr('srcset', gravatarurl + sha256(jQuery('#email').val()) + '?s=100&d=mm&r=g 2x');
 jQuery('#Get_Gravatar').fadeOut().html('看看右边头像对不对？').fadeIn('slow');
 });
 });
@@ -94,8 +94,8 @@ jQuery('#Get_Gravatar').fadeOut().html('看看右边头像对不对？').fadeIn(
 jQuery(document).ready(function() {
 var gravatarurl= 'https://cdn.sep.cc/avatar/';
 jQuery('#email').blur(function() {
-jQuery('#real-avatar .avatar').attr('src', gravatarurl + hex_md5(jQuery('#email').val()) + '?s=50&d=mm&r=g');
-jQuery('#real-avatar .avatar').attr('srcset', gravatarurl + hex_md5(jQuery('#email').val()) + '?s=100&d=mm&r=g 2x');
+jQuery('#real-avatar .avatar').attr('src', gravatarurl + sha256(jQuery('#email').val()) + '?s=50&d=mm&r=g');
+jQuery('#real-avatar .avatar').attr('srcset', gravatarurl + sha256(jQuery('#email').val()) + '?s=100&d=mm&r=g 2x');
 jQuery('#Get_Gravatar').fadeOut().html('看看右边头像对不对？').fadeIn('slow');
 });
 });
@@ -107,8 +107,8 @@ jQuery('#Get_Gravatar').fadeOut().html('看看右边头像对不对？').fadeIn(
 jQuery(document).ready(function() {
 var gravatarurl= 'https://weavatar.com/avatar/';
 jQuery('#email').blur(function() {
-jQuery('#real-avatar .avatar').attr('src', gravatarurl + hex_md5(jQuery('#email').val()) + '?s=50&d=mm&r=g');
-jQuery('#real-avatar .avatar').attr('srcset', gravatarurl + hex_md5(jQuery('#email').val()) + '?s=100&d=mm&r=g 2x');
+jQuery('#real-avatar .avatar').attr('src', gravatarurl + sha256(jQuery('#email').val()) + '?s=50&d=mm&r=g');
+jQuery('#real-avatar .avatar').attr('srcset', gravatarurl + sha256(jQuery('#email').val()) + '?s=100&d=mm&r=g 2x');
 jQuery('#Get_Gravatar').fadeOut().html('看看右边头像对不对？').fadeIn('slow');
 });
 });

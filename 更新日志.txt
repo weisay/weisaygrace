@@ -3,5 +3,10 @@ https://www.weisay.com/blog/wordpress-theme-weisay-grace.html
 
 
 版本更新日志：
+V1.1.0		2025-06-17
+根据manus对浅色系配色分析，改版深色模式配色；
+实时获取邮箱头像地址的加密方式由md5改为sha256；
+左侧文章目录取消离开文章区域就隐藏的判断；
+
 V1.0.0		2025-04-22
 主题发布

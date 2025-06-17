@@ -684,7 +684,7 @@ function weisay_comment($comment, $args, $depth) {
 		<?php comment_text() ?>
 	</div>
 	<div class="comment-info">
-		<span class="datetime"><?php comment_date('Y-m-d') ?> <?php comment_time() ?> <?php if(current_user_can('level_10')) : ?> 来自<?php if( !empty(get_comment_author_ip()) ){echo convertip(get_comment_author_ip());}else{echo '火星';} ?>
+		<span class="datetime"><?php comment_date('Y-m-d') ?> <?php comment_time() ?> <?php if(current_user_can('manage_options')) : ?> 来自<?php if( !empty(get_comment_author_ip()) ){echo convertip(get_comment_author_ip());}else{echo '火星';} ?>
 		<?php elseif (weisay_option('wei_ipshow') == 'display'): ?>来自<?php if( !empty(get_comment_author_ip()) ){echo convertipsimple(get_comment_author_ip());}else{echo '火星';} ?>
 		<?php endif; ?></span>
 		<span class="reply">
@@ -694,7 +694,7 @@ function weisay_comment($comment, $args, $depth) {
 		echo $replyButton;
 		?>
 		</span>
-		<?php if (weisay_option('wei_touching') == 'open' && current_user_can('level_10')) : ?>
+		<?php if (weisay_option('wei_touching') == 'open' && current_user_can('manage_options')) : ?>
 		<span class="touching-comments-button"><a class="karma-link" data-karma="<?php echo $comment->comment_karma; ?>" href="<?php echo wp_nonce_url( site_url('/comment-karma'), 'KARMA_NONCE' ); ?>" onclick="return post_karma(<?php comment_ID(); ?>, this.href, this)">
 		<?php if ($comment->comment_karma == 0) {
 		echo '<i class="iconfont hearticon" title="加入走心">&#xe602;</i>';
@@ -721,7 +721,7 @@ function weisay_touching_comments_list($comment) {
 	<?php $add_below = 'div-comment'; ?>
 	<div class="comment-avatar vcard"><?php echo get_avatar( $comment, 48, '', get_comment_author() ); ?></div>
 	<div class="comment-box">
-	<div class="fn comment-name"><?php comment_author_link() ?><?php if(current_user_can('level_10')) : ?><span class="comment-area">来自<?php if( !empty(get_comment_author_ip()) ){echo convertip(get_comment_author_ip());}else{echo '火星';} ?></span>
+	<div class="fn comment-name"><?php comment_author_link() ?><?php if(current_user_can('manage_options')) : ?><span class="comment-area">来自<?php if( !empty(get_comment_author_ip()) ){echo convertip(get_comment_author_ip());}else{echo '火星';} ?></span>
 	<?php elseif (weisay_option('wei_ipshow') == 'display'): ?><span class="comment-area">来自<?php if( !empty(get_comment_author_ip()) ){echo convertipsimple(get_comment_author_ip());}else{echo '火星';} ?></span>
 	<?php endif; ?></div>
 	<div class="comment-content">
@@ -767,7 +767,7 @@ function weisay_touching_comments_karma_request() {
 		'message'=> 'Login required.'
 	);
 
-	if (!is_user_logged_in() || !current_user_can('level_10')) {
+	if (!is_user_logged_in() || !current_user_can('manage_options')) {
 		header("HTTP/1.1 403 Forbidden");
 		die(json_encode($result));
 	}

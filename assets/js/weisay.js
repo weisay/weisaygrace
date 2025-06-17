@@ -154,8 +154,7 @@ jQuery(document).ready(function() {
 		isScrolling = setTimeout(() => {
 			const scrollTop = $(window).scrollTop();
 			const articleTop = $articleWidget.offset().top;
-			const articleBottom = articleTop + $articleWidget.outerHeight();
-			if (scrollTop > articleBottom + 40 || scrollTop < articleTop - 40) {
+			if (scrollTop < articleTop - 40) {
 				$sidebar.hide();
 			} else {
 				$sidebar.show();

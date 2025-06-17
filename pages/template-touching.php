@@ -12,11 +12,10 @@ Template Name: 走心评论
 	<div id="comments" class="comments-area">
 	<h3 class="article-title">目前已入选 <?php
 		global $wpdb;
-		$counts = $wpdb->get_results("SELECT * FROM $wpdb->comments WHERE comment_karma = '1' and comment_approved = '1'");
-		$karmamun = count($counts);
-		echo $karmamun;
+		$karmamun = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->comments WHERE comment_karma = '1' AND comment_approved = '1'");
+		echo number_format_i18n($karmamun);
 		?> 条走心评论<span class="article-subtitle">Prowered by <a target="_blank" href="https://www.weisay.com/blog/wordpress-plugin-touching-comments.html">Touching Comments</a></span></h3>
-	<div id="pagetext">
+	<div>
 		<ol class="comment-list touching-comments-list">
 		<?php
 		$comments = get_comments(array(
