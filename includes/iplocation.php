@@ -42,7 +42,9 @@ function showReadableIpAddr(array $ipaddrParts): string {
 		}
 
 		$ipaddrParts = array_map(
-			fn($v1, $v2): string => $v1 !== null ? trim($v1) . $v2 : '',
+			function($v1, $v2) {
+				return $v1 !== null ? trim($v1) . $v2 : '';
+			},
 			$ipaddrParts,
 			$suffix
 		);
