@@ -6,9 +6,10 @@ if (!function_exists('optionsframework_init')) {
 	load_template( $optionsfile );
 }
 
-include("includes/patch.php");
-include("includes/patch_emoji.php");
-include("includes/iplocation.php");
+require get_template_directory() . '/includes/patch.php';
+require get_template_directory() . '/includes/patch_emoji.php';
+require get_template_directory() . '/includes/iplocation.php';
+require get_template_directory() . '/includes/theme_updater.php';
 require get_template_directory() . '/includes/widgets.php';
 
 if (function_exists('register_sidebar'))
@@ -139,12 +140,7 @@ function my_comments_columns( $columns ){
 }
 add_filter( 'manage_edit-comments_columns', 'my_comments_columns' );
 function output_my_comments_columns(){
-	if( !empty(get_comment_author_ip()) ){
-		echo convertip(get_comment_author_ip());
-	} else
-	{
-		echo '火星';
-	}
+	echo convertip(get_comment_author_ip());
 }
 add_action( 'manage_comments_custom_column', 'output_my_comments_columns', 10, 2 );
 
@@ -186,39 +182,30 @@ add_filter('get_comment_author_link', function ($return, $author, $id) {
 
 //替换Gavatar头像地址
 $gravatar_urls = array('www.gravatar.com', '0.gravatar.com', '1.gravatar.com', '2.gravatar.com', 'secure.gravatar.com', 'cn.gravatar.com');
-function weavatar($avatar)
-{
-	global $gravatar_urls;
-	return str_replace($gravatar_urls, 'weavatar.com', $avatar);
-}
-function cravatar($avatar)
-{
-	global $gravatar_urls;
-	return str_replace($gravatar_urls, 'cravatar.cn', $avatar);
-}
-function loli_avatar($avatar)
-{
-	global $gravatar_urls;
-	return str_replace($gravatar_urls, 'gravatar.loli.net', $avatar);
-}
-function sep_cc_avatar($avatar)
-{
-	global $gravatar_urls;
-	return str_replace($gravatar_urls, 'cdn.sep.cc', $avatar);
-}
+$gravatar_mirrors = array(
+	'weavatar' => 'weavatar.com',
+	'cravatar' => 'cravatar.cn',
+	'loli' => 'gravatar.loli.net',
+	'sep_cc' => 'cdn.sep.cc',
+);
 if (weisay_option('wei_gravatar') == 'two') {
-	add_filter('get_avatar', 'cravatar');
-	add_filter('get_avatar_url', 'cravatar');
+	$gravatar_mirror = 'cravatar';
 } elseif (weisay_option('wei_gravatar') == 'three') {
-	add_filter('get_avatar', 'loli_avatar');
-	add_filter('get_avatar_url', 'loli_avatar');
+	$gravatar_mirror = 'loli';
 } elseif (weisay_option('wei_gravatar') == 'four') {
-	add_filter('get_avatar', 'sep_cc_avatar');
-	add_filter('get_avatar_url', 'sep_cc_avatar');
+	$gravatar_mirror = 'sep_cc';
 } else {
-	add_filter('get_avatar', 'weavatar');
-	add_filter('get_avatar_url', 'weavatar');
+	$gravatar_mirror = 'weavatar'; // 选项: weavatar, cravatar, loli, sep_cc
 }
+function custom_gravatar($avatar) {
+	global $gravatar_urls, $gravatar_mirror, $gravatar_mirrors;
+	if (isset($gravatar_mirrors[$gravatar_mirror])) {
+		return str_replace($gravatar_urls, $gravatar_mirrors[$gravatar_mirror], $avatar);
+	}
+	return $avatar; // 如果设置的镜像不存在，则原样返回
+}
+add_filter('get_avatar', 'custom_gravatar');
+add_filter('get_avatar_url', 'custom_gravatar');
 
 //搜索关键词为空跳首页
 function weisay_redirect_blank_search( $query_variables ) {
@@ -233,12 +220,15 @@ return $query_variables;
 add_filter( 'request', 'weisay_redirect_blank_search' );
 
 //分页
-function paging_nav(){
+function paging_nav() {
 	global $wp_query;
+	if ( $wp_query->max_num_pages <= 1 ) {
+		return; // 只有一页，不显示分页
+	}
 	$big = 999999999; // 需要一个不太可能的整数
 	$pagination_links = paginate_links( array(
 		'base' => str_replace( $big, '%#%', esc_url( get_pagenum_link( $big ) ) ),
-		'format' => '?paged=%#%',
+		'format' => get_option('permalink_structure') ? 'page/%#%/' : '?paged=%#%',
 		'current' => max( 1, get_query_var('paged') ),
 		'total' => $wp_query->max_num_pages
 	) );
@@ -247,46 +237,87 @@ function paging_nav(){
 	echo '</div>';
 }
 
-// 获得热评文章
-function simple_get_most_viewed($posts_num=10, $days=365){
+//热评日志
+function get_hot_reviews($posts_num = 10, $days = 365) {
 	global $wpdb;
-	$sql = "SELECT ID , post_title , comment_count
-			FROM $wpdb->posts
-			WHERE post_type = 'post' AND TO_DAYS(now()) - TO_DAYS(post_date) < $days
-			AND ($wpdb->posts.`post_status` = 'publish' OR $wpdb->posts.`post_status` = 'inherit')
-			ORDER BY comment_count DESC LIMIT 0 , $posts_num ";
-	$posts = $wpdb->get_results($sql);
-	$output = "";
-	foreach ($posts as $post){
-		$output .= "\n<li><a href= \"".get_permalink($post->ID)."\" rel=\"bookmark\" title=\"".$post->post_title." (".$post->comment_count."条评论)\" >". $post->post_title."</a></li>";
+	$posts_num = absint($posts_num);
+	$days = absint($days);
+	$cache_key = "hot_reviews_{$days}_{$posts_num}";
+	$output = get_transient($cache_key);
+	if ($output === false) {
+		$sql = $wpdb->prepare(
+			"SELECT ID, post_title, comment_count
+			FROM {$wpdb->posts}
+			WHERE post_type = 'post'
+			AND post_date >= DATE_SUB(NOW(), INTERVAL %d DAY)
+			AND (post_status = 'publish' OR post_status = 'inherit')
+			ORDER BY comment_count DESC
+			LIMIT %d",
+			$days,
+			$posts_num
+		);
+		$posts = $wpdb->get_results($sql);
+		$output = '';
+		if (!empty($posts)) {
+			foreach ($posts as $post) {
+				$title_attr = esc_attr($post->post_title . " ({$post->comment_count}条评论)");
+				$output .= sprintf(
+					'<li><a href="%s" rel="bookmark" title="%s">%s</a></li>' . "\n",
+					esc_url(get_permalink($post->ID)),
+					$title_attr,
+					esc_html($post->post_title)
+				);
+			}
+		}
+		set_transient($cache_key, $output, 1 * HOUR_IN_SECONDS);
 	}
-	echo $output;
+	return $output;
 }
 
 //热门日志
 function get_timespan_most_viewed($mode = '', $limit = 10, $days = 500, $display = true) {
-	global $wpdb, $post;
-	$limit_date = current_time('timestamp') - ($days*86400);
-	$limit_date = date("Y-m-d H:i:s",$limit_date);
-	$where = '';
+	global $wpdb;
+	$mode = sanitize_key($mode);
+	$limit = absint($limit);
+	$days = absint($days);
+	$limit_date = gmdate("Y-m-d H:i:s", current_time('timestamp') - ($days * DAY_IN_SECONDS));
+	$cache_key = "timespan_most_viewed_{$mode}_{$limit}_{$days}";
+	$most_viewed = get_transient($cache_key);
+	if ($most_viewed === false) {
+		$where = ($mode && $mode !== 'both') ? $wpdb->prepare("p.post_type = %s", $mode) : '1=1';
+		$sql = $wpdb->prepare(
+			"SELECT p.ID, p.post_title, (pm.meta_value+0) AS views
+			FROM {$wpdb->posts} p
+			LEFT JOIN {$wpdb->postmeta} pm ON pm.post_id = p.ID
+			WHERE p.post_date < %s
+			AND p.post_date > %s
+			AND {$where}
+			AND p.post_status = 'publish'
+			AND pm.meta_key = 'views'
+			AND p.post_password = ''
+			ORDER BY views DESC
+			LIMIT %d",
+			current_time('mysql'),
+			$limit_date,
+			$limit
+		);
+		$most_viewed = $wpdb->get_results($sql);
+		set_transient($cache_key, $most_viewed, 1 * HOUR_IN_SECONDS);
+	}
 	$temp = '';
-	if(!empty($mode) && $mode != 'both') {
-		$where = "post_type = '$mode'";
+	if (!empty($most_viewed)) {
+		foreach ($most_viewed as $post) {
+			$temp .= sprintf(
+				'<li><a href="%s" title="%s">%s</a></li>' . "\n",
+				esc_url(get_permalink($post->ID)),
+				esc_attr($post->post_title),
+				esc_html($post->post_title)
+			);
+		}
 	} else {
-		$where = '1=1';
+		$temp = '<li>' . esc_html__('暂无热门日志', 'wp-postviews') . '</li>' . "\n";
 	}
-	$most_viewed = $wpdb->get_results("SELECT DISTINCT $wpdb->posts.*, (meta_value+0) AS views FROM $wpdb->posts LEFT JOIN $wpdb->postmeta ON $wpdb->postmeta.post_id = $wpdb->posts.ID WHERE post_date < '".current_time('mysql')."' AND post_date > '".$limit_date."' AND $where AND post_status = 'publish' AND meta_key = 'views' AND post_password = '' ORDER  BY views DESC LIMIT $limit");
-	if($most_viewed) {
-	foreach ($most_viewed as $post) {
-		$post_title = get_the_title();
-		$post_views = intval($post->views);
-		$post_views = number_format($post_views);
-		$temp .= "<li><a href=\"".get_permalink()."\" title=\"".get_the_title()."\">$post_title</a></li>\n";
-	}
-	} else {
-		$temp = '<li>'.__('暂无热门日志', 'wp-postviews').'</li>'."\n";
-	}
-	if($display) {
+	if ($display) {
 		echo $temp;
 	} else {
 		return $temp;
@@ -306,32 +337,49 @@ function get_timespan_most_viewed_category($type, $mode = '', $limit = 10, $days
 	foreach ($categories as $category) {
 		array_push($category_id, $category->term_id);
 	}
-	$limit_date = current_time('timestamp') - ($days*86400);
-	$limit_date = date("Y-m-d H:i:s",$limit_date);
-	$where = '';
+	$limit = absint($limit);
+	$days = absint($days);
+	$mode = sanitize_key($mode);
+	$limit_date = date("Y-m-d H:i:s", current_time('timestamp') - ($days * DAY_IN_SECONDS));
+	$cache_key = "timespan_most_viewed_category_{$mode}_{$limit}_{$days}";
+	$category_sql = is_array($category_id) 
+		? "$wpdb->term_taxonomy.term_id IN (".implode(',', array_map('absint', $category_id)).')' 
+		: "$wpdb->term_taxonomy.term_id = ".absint($category_id);
+	$where = (!empty($mode) && $mode != 'both') 
+		? $wpdb->prepare("post_type = %s", $mode) 
+		: '1=1';
+	$sql = $wpdb->prepare(
+		"SELECT DISTINCT $wpdb->posts.*, (meta_value+0) AS views 
+		FROM $wpdb->posts 
+		LEFT JOIN $wpdb->postmeta ON $wpdb->postmeta.post_id = $wpdb->posts.ID 
+		INNER JOIN $wpdb->term_relationships ON ($wpdb->posts.ID = $wpdb->term_relationships.object_id) 
+		INNER JOIN $wpdb->term_taxonomy ON ($wpdb->term_relationships.term_taxonomy_id = $wpdb->term_taxonomy.term_taxonomy_id) 
+		WHERE post_date < %s 
+		AND post_date > %s 
+		AND $wpdb->term_taxonomy.taxonomy = 'category' 
+		AND $category_sql 
+		AND $where 
+		AND post_status = 'publish' 
+		AND meta_key = 'views' 
+		AND post_password = '' 
+		ORDER BY views DESC 
+		LIMIT %d",
+		current_time('mysql'),
+		$limit_date,
+		$limit
+	);
+	$most_viewed = $wpdb->get_results($sql);
+	set_transient($cache_key, $most_viewed, 1 * HOUR_IN_SECONDS);
 	$temp = '';
-	if(is_array($category_id)) {
-		$category_sql = "$wpdb->term_taxonomy.term_id IN (".join(',', $category_id).')';
-	} else {
-		$category_sql = "$wpdb->term_taxonomy.term_id = $category_id";
-	}
-	if(!empty($mode) && $mode != 'both') {
-		$where = "post_type = '$mode'";
-	} else {
-		$where = '1=1';
-	}
-	$most_viewed = $wpdb->get_results("SELECT DISTINCT $wpdb->posts.*, (meta_value+0) AS views FROM $wpdb->posts LEFT JOIN $wpdb->postmeta ON $wpdb->postmeta.post_id = $wpdb->posts.ID INNER JOIN $wpdb->term_relationships ON ($wpdb->posts.ID = $wpdb->term_relationships.object_id) INNER JOIN $wpdb->term_taxonomy ON ($wpdb->term_relationships.term_taxonomy_id = $wpdb->term_taxonomy.term_taxonomy_id) WHERE post_date < '".current_time('mysql')."' AND post_date > '".$limit_date."' AND $wpdb->term_taxonomy.taxonomy = 'category' AND $category_sql AND $where AND post_status = 'publish' AND meta_key = 'views' AND post_password = '' ORDER BY views DESC LIMIT $limit");
-	if($most_viewed) {
+	if ($most_viewed) {
 		foreach ($most_viewed as $post) {
 			$post_title = get_the_title();
-			$post_views = intval($post->views);
-			$post_views = number_format($post_views);
 			$temp .= "<li><a href=\"".get_permalink()."\" title=\"".get_the_title()."\">$post_title</a></li>\n";
 		}
 	} else {
 		$temp = '<li>'.__('暂无热门日志', 'wp-postviews').'</li>'."\n";
 	}
-	if($display) {
+	if ($display) {
 		echo $temp;
 	} else {
 		return $temp;
@@ -462,42 +510,48 @@ if(!empty($post->post_content))
 }
 else
 {
-	$article_clean_archive_config=array('usejs' => 1, 'monthorder' => 'new', 'postorder' => 'new');
+	$article_clean_archive_config = array('usejs' => 1, 'monthorder' => 'new', 'postorder' => 'new');
 }
 $article_archive = new article_archive();
 
 //时间轴日志归档
 function get_num_posts_by_year($year) {
 	static $cache = array();
+	$year = absint($year);
 	if (isset($cache[$year])) {
 		return $cache[$year];
 	}
 	global $wpdb;
-	$count = $wpdb->get_var(
-		$wpdb->prepare(
-			"SELECT COUNT(*) FROM $wpdb->posts 
-			WHERE YEAR(post_date) = %d 
-			AND post_type = 'post' 
-			AND post_status = 'publish'",
-			$year
-		)
-	);
-	$cache[$year] = $count;
-	return $count;
+	if (empty($cache)) {
+		$results = $wpdb->get_results("
+			SELECT YEAR(post_date) as y, COUNT(*) as cnt 
+			FROM $wpdb->posts 
+			WHERE post_type = 'post' 
+			AND post_status = 'publish' 
+			GROUP BY y
+		");
+		foreach ($results as $row) {
+			$cache[$row->y] = absint($row->cnt);
+		}
+	}
+	return isset($cache[$year]) ? $cache[$year] : 0;
 }
 function get_timeline_thumbnail($post_id) {
 	if (has_post_thumbnail($post_id)) {
 		$image_array = wp_get_attachment_image_src(get_post_thumbnail_id($post_id), 'thumbnail');
-		return $image_array[0];
+		return $image_array ? esc_url($image_array[0]) : '';
 	}
 	if ($thumbnail = get_post_meta($post_id, 'thumbnail', true)) {
 		return $thumbnail;
 	}
-	if (function_exists('catch_first_image') && ($first_image = catch_first_image())) {
-		return $first_image;
+	if (function_exists('catch_first_image')) {
+		$first_image = catch_first_image();
+		if (!empty($first_image)) {
+			return esc_url($first_image);
+		}
 	}
 	$random = mt_rand(1, 30);
-	return get_bloginfo('stylesheet_directory') . '/assets/images/random/'.$random.'.jpg';
+	return esc_url(get_template_directory_uri() . '/assets/images/random/' . $random . '.jpg');
 }
 function timeline_paged_link($i, $title = '', $linktype = '') {
 	if (empty($title)) {
@@ -505,7 +559,7 @@ function timeline_paged_link($i, $title = '', $linktype = '') {
 	}
 	$linktext = empty($linktype) ? $i : $linktype;
 	return sprintf(
-		' <a class="page-numbers" href="%s" title="%s">%s</a> ',
+		' <a class="page-numbers" href="%s" title="%s" rel="nofollow">%s</a> ',
 		esc_url(get_pagenum_link($i)),
 		esc_attr($title),
 		esc_html($linktext)
@@ -570,7 +624,6 @@ function timeline_archive() {
 		$post_year = get_the_time('Y');
 		$post_mon = get_the_time('m');
 		$image = get_timeline_thumbnail($post->ID);
-		
 		$posts_rebuild[$post_year][$post_mon][] = sprintf(
 '<li>
 	<div class="tl-archive-img">
@@ -604,7 +657,6 @@ get_comments_number()
 			get_num_posts_by_year($year)
 		);
 		$output .= '<ul class="tl-archive-ul">';
-		
 		foreach ($months as $month_posts) {
 			foreach ($month_posts as $post_html) {
 				$output .= $post_html;
@@ -615,7 +667,6 @@ get_comments_number()
 	$html .= $output;
 	$html .= '</div>';
 	$html .= timeline_paged_nav($the_query, $paged, 2);
-	
 	return $html;
 }
 
@@ -629,9 +680,9 @@ if ( function_exists('add_theme_support') )
 		ob_end_clean();
 		$output = preg_match_all('/<img.+src=[\'"]([^\'"]+)[\'"].*>/i', $post->post_content, $matches);
 		if(isset($matches [1] [0])){
-		$first_img = $matches [1] [0];
+			$first_img = $matches [1] [0];
 		}
-	return $first_img;
+		return $first_img;
 	}
 
 //评论回复自动添加@评论者
@@ -643,35 +694,75 @@ function wei_comment_add_at( $comment_text, $comment = '') {
 }
 add_filter( 'comment_text' , 'wei_comment_add_at', 20, 2);
 
+//计算评论楼层
+function calculate_comment_count() {
+	global $commentcount, $wpdb, $post;
+	// 如果已经计算过，直接返回
+	if (!empty($commentcount)) {
+		return $commentcount;
+	}
+	// 获取评论排序方式和当前页面信息
+	$comorder = get_option('comment_order');
+	$page = max(0, absint(get_query_var('cpage'))); // 获取当前评论页码，防止负数
+	$cpp = absint(get_option('comments_per_page')); // 获取每页评论数
+	// 计算楼层（分页显示评论时的序号）
+	if ($comorder == 'asc') {
+		// 旧的评论在页面顶部
+		$page = ($page > 0) ? $page - 1 : 0;
+		$commentcount = $cpp * $page;
+	} else {
+		// 新的评论在页面顶部
+		$post_id = absint($post->ID);
+		$cnt = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->comments} WHERE comment_post_ID = %d AND comment_type IN ('', 'comment') AND comment_approved = '1' AND comment_parent = 0",
+				$post_id
+			)
+		);
+		$cnt = absint($cnt); // 获取主评论总数量
+		$total_pages = ceil($cnt / $cpp); // 计算总页数
+		// 如果是最后一页或者只有一页，则从主评论总数开始
+		if ($total_pages == 1 || ($page > 1 && $page == $total_pages)) {
+			$commentcount = $cnt + 1;
+		} else {
+			$commentcount = ($cpp * $page) + 1;
+		}
+	}
+	$commentcount = absint($commentcount); // 确保评论计数为正整数
+	return $commentcount;
+}
+
 //评论
 function weisay_comment($comment, $args, $depth) {
 	$GLOBALS['comment'] = $comment;
-	global $commentcount, $wpdb, $post;
-	if(!$commentcount) { //初始化楼层计数器
-		$comments = $wpdb->get_results("SELECT * FROM $wpdb->comments WHERE comment_post_ID = $post->ID AND ( comment_type = '' OR comment_type = 'comment' ) AND comment_approved = '1' AND !comment_parent");
-		$cnt = count($comments);//获取主评论总数量
-		$page = get_query_var('cpage');//获取当前评论列表页码
-		$cpp=get_option('comments_per_page');//获取每页评论显示数量
-		if (ceil($cnt / $cpp) == 1 || ($page > 1 && $page  == ceil($cnt / $cpp))) {
-			$commentcount = intval($cnt) + 1;//如果评论只有1页或者是最后一页，初始值为主评论总数
-		} else {
-			$commentcount = intval($cpp) * intval($page) + 1;
-		}
-	}
+	global $commentcount, $post;
+	$commentcount = calculate_comment_count();
 ?>
 <li <?php comment_class(); ?> id="comment-<?php comment_ID() ?>">
 <div id="div-comment-<?php comment_ID() ?>" class="comment-body">
 <?php $add_below = 'div-comment'; ?>
-<div class="comment-avatar vcard"><?php echo get_avatar( $comment, 48, '', get_comment_author() ); ?></div>
+<div class="comment-avatar vcard"><?php echo get_avatar( $comment->comment_author_email, 48, '', get_comment_author() ); ?></div>
 <div class="comment-box">
 	<?php if ( $comment->comment_approved == '1' ) : ?>
 	<span class="floor"><?php
-	if(!$parent_id = $comment->comment_parent){
-		switch ($commentcount){
-		case 2 :echo "沙发";--$commentcount;break;
-		case 3 :echo "板凳";--$commentcount;break;
-		case 4 :echo "地板";--$commentcount;break;
-		default:printf('%1$s楼', --$commentcount);
+	if (!$comment->comment_parent) { // 只处理主评论
+		$comorder = get_option('comment_order');
+		if ($comorder == 'asc') {
+			// 正序排列 - 旧评论在前
+			switch ($commentcount) {
+				case 0: echo "沙发"; $commentcount++; break;
+				case 1: echo "板凳"; $commentcount++; break;
+				case 2: echo "地板"; $commentcount++; break;
+				default: printf('%1$s楼', ++$commentcount);
+			}
+		} else {
+			// 倒序排列 - 新评论在前
+			switch ($commentcount) {
+				case 2: echo "沙发"; $commentcount--; break;
+				case 3: echo "板凳"; $commentcount--; break;
+				case 4: echo "地板"; $commentcount--; break;
+				default: printf('%1$s楼', --$commentcount);
+			}
 		}
 	}
 	?></span><?php endif; ?>
@@ -684,8 +775,8 @@ function weisay_comment($comment, $args, $depth) {
 		<?php comment_text() ?>
 	</div>
 	<div class="comment-info">
-		<span class="datetime"><?php comment_date('Y-m-d') ?> <?php comment_time() ?> <?php if(current_user_can('manage_options')) : ?> 来自<?php if( !empty(get_comment_author_ip()) ){echo convertip(get_comment_author_ip());}else{echo '火星';} ?>
-		<?php elseif (weisay_option('wei_ipshow') == 'display'): ?>来自<?php if( !empty(get_comment_author_ip()) ){echo convertipsimple(get_comment_author_ip());}else{echo '火星';} ?>
+		<span class="datetime"><?php comment_date('Y-m-d') ?> <?php comment_time() ?> <?php if(current_user_can('manage_options')) : ?> 来自<?php echo convertip(get_comment_author_ip()); ?>
+		<?php elseif (weisay_option('wei_ipshow') == 'display'): ?>来自<?php echo convertipsimple(get_comment_author_ip()); ?>
 		<?php endif; ?></span>
 		<span class="reply">
 		<?php 
@@ -719,16 +810,16 @@ function weisay_touching_comments_list($comment) {
 <li <?php comment_class(); ?> id="comment-<?php comment_ID() ?>">
 <div id="div-comment-<?php comment_ID() ?>" class="comment-body">
 	<?php $add_below = 'div-comment'; ?>
-	<div class="comment-avatar vcard"><?php echo get_avatar( $comment, 48, '', get_comment_author() ); ?></div>
+	<div class="comment-avatar vcard"><?php echo get_avatar( $comment->comment_author_email, 48, '', get_comment_author() ); ?></div>
 	<div class="comment-box">
-	<div class="fn comment-name"><?php comment_author_link() ?><?php if(current_user_can('manage_options')) : ?><span class="comment-area">来自<?php if( !empty(get_comment_author_ip()) ){echo convertip(get_comment_author_ip());}else{echo '火星';} ?></span>
-	<?php elseif (weisay_option('wei_ipshow') == 'display'): ?><span class="comment-area">来自<?php if( !empty(get_comment_author_ip()) ){echo convertipsimple(get_comment_author_ip());}else{echo '火星';} ?></span>
+	<div class="fn comment-name"><?php comment_author_link() ?><?php if(current_user_can('manage_options')) : ?><span class="comment-area">来自<?php echo convertip(get_comment_author_ip()); ?></span>
+	<?php elseif (weisay_option('wei_ipshow') == 'display'): ?><span class="comment-area">来自<?php echo convertipsimple(get_comment_author_ip()); ?></span>
 	<?php endif; ?></div>
 	<div class="comment-content">
 	<?php comment_text() ?>
 	</div>
 	<div class="comment-info">
-	<span class="datetime"><?php comment_date('Y-m-d') ?> 评论于&nbsp;&nbsp;•&nbsp;&nbsp;<a href="<?php echo get_comment_link($comment->comment_ID, $cpage); ?>" target="_blank"><?php echo get_the_title($comment->comment_post_ID); ?></a></span>
+	<span class="datetime"><?php comment_date('Y-m-d') ?> 评论于<span class="bullet">•</span><a href="<?php echo get_comment_link($comment->comment_ID, $cpage); ?>" target="_blank"><?php echo get_the_title($comment->comment_post_ID); ?></a></span>
 	</div>
 	</div>
 </div><div class="clear"></div>
@@ -827,18 +918,6 @@ function weisay_touching_comments_karma_request() {
 
 add_action( 'template_redirect', 'weisay_touching_comments_karma_request', 0);
 
-//禁止垃圾评论提交到数据库
-function Banfuckspam($comment) {
-	if( is_user_logged_in()){ return $comment;}
-	if( wp_check_comment_disallowed_list( $comment['comment_author'],$comment['comment_author_email'],$comment['comment_author_url'], $comment['comment_content'], $comment['comment_author_IP'], $comment['comment_agent'] )) {
-		header("Content-type: text/html; charset=utf-8");
-		err( __('禁止发表评论！') );
-	} else {
-		return $comment;
-	}
-}
-add_filter('preprocess_comment', 'Banfuckspam');
-
 //评论邮件通知
 function comment_mail_notify($comment_id) {
 	$admin_email = get_bloginfo ('admin_email'); // $admin_email 可改為你指定的 e-mail.
@@ -848,10 +927,10 @@ function comment_mail_notify($comment_id) {
 	$to = $parent_id ? trim(get_comment($parent_id)->comment_author_email) : '';
 	$spam_confirmed = $comment->comment_approved;
 	if (($parent_id != '') && ($spam_confirmed != 'spam') && ($to != $admin_email) && ($comment_author_email == $admin_email)) {
-		$wp_email = 'no-reply@' . preg_replace('#^www\.#', '', strtolower($_SERVER['SERVER_NAME'])); // e-mail 發出點, no-reply 可改為可用的 e-mail.
-		$subject = '✨您在 [' . esc_html(get_option('blogname')) . '] 的评论有了新的回复';
-		$message = '
-		<table style="font-family:Arial,sans-serif;color:#333;margin:0;padding:0;max-width:820px;margin:0 auto;border-radius:0;" border="0" cellpadding="0" cellspacing="0">
+	$wp_email = 'no-reply@' . preg_replace('#^www\.#', '', strtolower($_SERVER['SERVER_NAME'])); // e-mail 發出點, no-reply 可改為可用的 e-mail.
+	$subject = '✨您在 [' . esc_html(get_option('blogname')) . '] 的评论有了新的回复';
+	$message = '
+	<table style="font-family:Arial,sans-serif;color:#333;margin:0;padding:0;max-width:820px;margin:0 auto;border-radius:0;" border="0" cellpadding="0" cellspacing="0">
 <tbody><tr>
 	<td>
 		<table style="padding:10px 0 30px;" border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -861,7 +940,7 @@ function comment_mail_notify($comment_id) {
 		</tbody></table>
 	<table style="margin-bottom:20px;" border="0" cellpadding="0" cellspacing="0" width="100%">
 		<tbody><tr>
-			<td style="font-size:16px;">您在 [<strong><a style="text-decoration:none;color:#333;font-weight:bold;" href="' . esc_url(get_option('home')) . '" target="_blank">' . esc_html(get_option('blogname')) . '</a></strong>] 文章《<strong><a style="text-decoration:none;color:#333;font-weight:bold;" href="' . esc_url(get_permalink($comment->comment_post_ID)) . '" target="_blank">' . esc_html(get_the_title($comment->comment_post_ID)) . '</a></strong>》 中的评论有了新回复：</td>
+			<td style="font-size:16px;">您在 [ <strong><a style="text-decoration:none;color:#333;" href="' . esc_url(get_option('home')) . '" target="_blank">' . esc_html(get_option('blogname')) . '</a></strong> ] 文章《<strong><a style="text-decoration:none;color:#da4453;" href="' . esc_url(get_permalink($comment->comment_post_ID)) . '" target="_blank">' . esc_html(get_the_title($comment->comment_post_ID)) . '</a></strong>》 中的评论有了新回复：</td>
 		</tr>
 	</tbody></table>
 		<table style="margin-bottom:20px;" border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -872,13 +951,13 @@ function comment_mail_notify($comment_id) {
 							<td style="padding:10px;border-radius:8px;overflow:hidden;color:#333;background-color:#eef1f4;" >
 								<div style="display:flex;align-items:center;justify-content:flex-start;">
 									<div style="flex-shrink:0;margin-right:10px;">
-										<img style="width:48px;height:48px;border-radius:50%;" alt="' . esc_attr(trim(get_comment($parent_id)->comment_author)) . '" src="' . esc_url(get_avatar_url(get_comment($parent_id)->comment_author_email, array('size' => 64))) . '">
+										<img style="width:48px;height:48px;border-radius:50%;" alt="' . esc_attr(trim(get_comment($parent_id)->comment_author)) . '" src="' . esc_url(get_avatar_url(get_comment($parent_id)->comment_author_email, array('size' => 96))) . '">
 									</div>
 									<div>
 										<strong style="font-size:16px;">' . esc_html(trim(get_comment($parent_id)->comment_author)) . '</strong>
 									</div>
 								</div>
-								<p style="margin-top:10px;margin-right:80px;line-height:26px;">' . nl2br(esc_html(get_comment($parent_id)->comment_content)) . '</p>
+								<p style="margin-top:10px;margin-right:60px;line-height:26px;">' . nl2br(esc_html(get_comment($parent_id)->comment_content)) . '</p>
 							</td>
 						</tr>
 					</tbody></table>
@@ -897,10 +976,10 @@ function comment_mail_notify($comment_id) {
 										<strong style="font-size:16px;">' . esc_html(trim($comment->comment_author)) . '</strong>
 									</div>
 									<div style="flex-shrink:0;margin-left:10px;">
-									<img style="width:48px;height:48px;border-radius:50%;" alt="' . esc_attr(trim($comment->comment_author)) . '" src="' . esc_url(get_avatar_url($comment->comment_author_email, array('size' => 64))) . '">
+									<img style="width:48px;height:48px;border-radius:50%;" alt="' . esc_attr(trim($comment->comment_author)) . '" src="' . esc_url(get_avatar_url($comment->comment_author_email, array('size' => 96))) . '">
 									</div>
 								</div>
-								<p style="margin-top:10px;margin-left:80px;line-height:26px;">' . nl2br(esc_html($comment->comment_content)) . '</p>
+								<p style="margin-top:10px;margin-left:60px;line-height:26px;">' . nl2br(esc_html($comment->comment_content)) . '</p>
 							</td>
 						</tr>
 					</tbody></table>
@@ -926,75 +1005,104 @@ function comment_mail_notify($comment_id) {
 	</td>
 </tr></tbody>
 </table>';
-		$message = convert_smilies($message);
-		$from = "From: \"" . esc_html(get_option('blogname')) . "\" <$wp_email>";
-		$headers = "$from\nContent-Type: text/html; charset=" . get_option('blog_charset') . "\n";
-		wp_mail( $to, $subject, $message, $headers );
-		//echo 'mail to ', $to, '<br/> ' , $subject, $message; // for testing
+	$message = convert_smilies($message);
+	$from = "From: \"" . esc_html(get_option('blogname')) . "\" <$wp_email>";
+	$headers = "$from\nContent-Type: text/html; charset=" . get_option('blog_charset') . "\n";
+	wp_mail( $to, $subject, $message, $headers );
+	//echo 'mail to ', $to, '<br/> ' , $subject, $message; // for testing
 	}
 }
 add_action('comment_post', 'comment_mail_notify');
 
 //评论翻页Ajax
-function AjaxCommentsPage(){
-	if( isset($_POST['action'])&& $_POST['action'] == 'compageajax'){
-			$postid = $_POST['postid'];
-			$pageid = $_POST['pageid'];/*$args数组将请求的评论页页码做为参数传入评论分页函数*/
-			$post = new stdClass();
-			$post->ID = $postid;
-			$args = array(
-				'current' => $pageid,
-				'echo' => true
+function AjaxCommentsPage() {
+	if ( isset($_POST['action']) && $_POST['action'] === 'compageajax' ) {
+		// 只允许 POST 请求
+		if ( $_SERVER['REQUEST_METHOD'] !== 'POST' ) {
+			die('Method not allowed.');
+		}
+		// 验证 Nonce
+		check_ajax_referer( 'comment_paging_nonce', 'nonce_field' );
+		// 安全过滤输入
+		$postid = isset($_POST['postid']) ? absint($_POST['postid']) : 0;
+		$pageid = isset($_POST['pageid']) ? absint($_POST['pageid']) : 1;
+		// postid 必须有效
+		if ( $postid <= 0 ) {
+			wp_die( esc_html__( 'Invalid post ID.', 'textdomain' ) );
+		}
+		// 构造 Post 对象
+		$post = new stdClass();
+		$post->ID = $postid;
+		// 处理为顺序输出
+		$order = 'ASC';
+		global $wp_query, $wpdb, $user_ID;
+		// 获取当前评论者信息
+		$commenter = wp_get_current_commenter();
+		$comment_author = $commenter['comment_author'];
+		$comment_author_email = $commenter['comment_author_email'];
+		// 根据登录/匿名状态获取评论
+		if ( $user_ID ) {
+			$comments = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT * FROM $wpdb->comments
+					WHERE comment_post_ID = %d
+					AND (comment_approved = '1' OR ( user_id = %d AND comment_approved = '0' ))
+					ORDER BY comment_date_gmt $order",
+					$post->ID,
+					$user_ID
+				)
 			);
-			$order = 'DESC'; 
-			/*处理为倒序输出*/
-			if( 'asc' != get_option('comment_order') ){
-					$order = 'ASC'; 
-			}
-	global $wp_query, $wpdb, $id, $comment, $user_login, $user_ID, $user_identity;
-	/**
-	 * Comment author information fetched from the comment cookies.
-	 *
-	 * @uses wp_get_current_commenter()
-	 */
-	$commenter = wp_get_current_commenter();
-	/**
-	 * The name of the current comment author escaped for use in attributes.
-	 */
-	$comment_author = $commenter['comment_author']; // Escaped by sanitize_comment_cookies()
-	/**
-	 * The email address of the current comment author escaped for use in attributes.
-	 */
-	$comment_author_email = $commenter['comment_author_email'];  // Escaped by sanitize_comment_cookies()
-	/**
-	 * The url of the current comment author escaped for use in attributes.
-	 */
-	// $comment_author_url = esc_url($commenter['comment_author_url']);
-	/** @todo Use API instead of SELECTs. */
-	if ( $user_ID) {
-		$comments = $wpdb->get_results($wpdb->prepare("SELECT * FROM $wpdb->comments WHERE comment_post_ID = %d AND (comment_approved = '1' OR ( user_id = %d AND comment_approved = '0' ) )  ORDER BY comment_date_gmt $order", $post->ID, $user_ID));
-	} else if ( empty($comment_author) ) {
-		$comments = get_comments( array('post_id' => $post->ID, 'status' => 'approve', 'order' => $order ) );
-	} else {
-		$comments = $wpdb->get_results($wpdb->prepare("SELECT * FROM $wpdb->comments WHERE comment_post_ID = %d AND ( comment_approved = '1' OR ( comment_author = %s AND comment_author_email = %s AND comment_approved = '0' ) ) ORDER BY comment_date_gmt $order", $post->ID, wp_specialchars_decode($comment_author,ENT_QUOTES), $comment_author_email ));
-	}
-	// keep $comments for legacy's sake
-	$wp_query->comments = apply_filters( 'comments_array', $comments, $post->ID );
-	$comments = &$wp_query->comments;
-	$wp_query->comment_count = count($wp_query->comments);
-	update_comment_cache($wp_query->comments);
-
-		/*下面的输入写入评论页的#ajaxcomment id所在的层*/
-		echo "<ol class=\"comment-list\">";
-		echo wp_list_comments('callback=weisay_comment&type=comment&end-callback=weisay_end_comment&max_depth=23&page=' . $pageid, $comments);
-		//echo wp_list_comments( array( 'callback' => 'weisay_comment' ) );
-		echo "</ol><div class=\"pagination comment-navigation\" id=\"commentpager\">";
-		$comment_pages = paginate_comments_links($args);
-		echo $comment_pages."</div>";
+		} elseif ( empty( $comment_author ) ) {
+			$comments = get_comments(
+				array(
+					'post_id' => $post->ID,
+					'status' => 'approve',
+					'order' => $order
+				)
+			);
+		} else {
+			$comments = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT * FROM $wpdb->comments
+					WHERE comment_post_ID = %d
+					AND ( comment_approved = '1'
+					OR ( comment_author = %s AND comment_author_email = %s AND comment_approved = '0' ))
+					ORDER BY comment_date_gmt $order",
+					$post->ID,
+					wp_specialchars_decode( $comment_author, ENT_QUOTES ),
+					$comment_author_email
+				)
+			);
+		}
+		$wp_query->comments = apply_filters( 'comments_array', $comments, $post->ID );
+		$wp_query->comment_count = count( $wp_query->comments );
+		update_comment_cache( $wp_query->comments );
+		$max_depth = absint( get_option('thread_comments_depth', 10) );
+		// 评论分页参数
+		$args = array(
+			'current' => $pageid,
+			'echo' => false,
+			'type' => ''
+		);
+		// 输出评论列表
+		echo '<ol class="comment-list">';
+		echo wp_list_comments(
+			array(
+				'type' => 'comment',
+				'callback' => 'weisay_comment',
+				'end-callback' => 'weisay_end_comment',
+				'max_depth' => $max_depth,
+				'page' => $pageid,
+			),
+			$wp_query->comments
+		);
+		echo '</ol><div class="pagination comment-navigation" id="commentpager">';
+		$comment_pages = paginate_comments_links( $args );
+		echo $comment_pages . '</div>';
 		die();
 	}
 }
-add_action('template_redirect', 'AjaxCommentsPage');
+add_action( 'template_redirect', 'AjaxCommentsPage' );
 
 //全部设置结束
 ?>

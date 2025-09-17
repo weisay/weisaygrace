@@ -35,8 +35,7 @@
 .dark .main .post-title a:hover,.dark .main .sticky-title a:hover{color:#ed5565;}
 .dark .main .post .edit{background:#3a3f45;}
 .dark .main .post .edit a:link,.dark .main .post .edit a:visited{color:#8a8e94;}
-.dark .main .post-content{color:#b4b7bb;}
-.dark .main .post .post-content p{color:#c1c4c9;}
+.dark .main .post-content p{color:#c1c4c9;}
 .dark .main .post-info {color:#8a8e94;}
 .dark .main .crumb{background:#21252c;border-bottom:3px solid #161a20;box-shadow:0 0 4px #070b10;}
 .dark .main .expand .expandicon{color:#9da1a7;}
@@ -57,6 +56,8 @@
 .dark .main .read-more a:link, .dark .main .read-more a:visited{color:#e8eaed;}
 .dark .main .article h3.article-title{background:#252a30;color:#c1c4c9;}
 .dark .wp-block-image figcaption,.dark .wp-block-gallery figcaption,.dark .article .article-content p.wp-caption-text{color:#9da1a7;}
+.dark .article-index-widget a.current{box-shadow:inset 0 -0.375rem 0 0 #4a3235;}
+.dark .article-index-widget ol > li:has(.current)::before{color:#e76775;}
 .dark .fixed-index::-webkit-scrollbar-thumb{border-radius:0.65rem;box-shadow:inset 0 0 5px rgba(0, 0, 0, 0.1);background:#767a80;}
 .dark .fixed-index::-webkit-scrollbar-thumb:hover{background:#8a8e94;}
 .dark .fixed-index::-webkit-scrollbar-track{border-radius:0.65rem;box-shadow:inset 0 0 5px rgba(0, 0, 0, 0.1);background:#454a50;}
@@ -92,7 +93,8 @@
 .dark .comment-list .comment-box .comment-content p a:hover{color:#ed5565;}
 .dark .comment-list .comment-box .comment-content blockquote{background:#454a50;border-top:1px solid #767a80;border-right:1px solid #767a80;border-bottom:1px solid #767a80;border-left:0.375rem solid #767a80;}
 .dark .comment-list .comment-box .comment-content code{background:#2e333a;color:#c391b4;}
-.dark .ajaxcomm{color:#9da1a7;background:#21252c;}
+.dark .comment-ajax-tip{color:#9da1a7;background:#21252c;}
+.dark .comment-ajax-tip-error{color:#ed6c02;background:#21252c;}
 .dark .comment-respond{border-top:1px solid #3a3f45;}
 .dark .comment-list .comment-respond{border-top:none;}
 .dark .comment-respond .comment-reply-title{color:#9da1a7;}

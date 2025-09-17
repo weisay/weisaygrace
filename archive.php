@@ -1,10 +1,7 @@
 <?php get_header(); ?>
 <div class="container">
 <div class="main">
-<div class="crumb">当前位置： <a title="返回首页" href="<?php bloginfo('url'); ?>/">首页</a> &gt; 
-<?php if (have_posts()) : ?> 
-<?php $post = $posts[0]; ?>
-<?php if (is_category()) { ?><h1><?php single_cat_title(); ?></h1>
+<div class="crumb">当前位置： <a title="返回首页" href="<?php bloginfo('url'); ?>/">首页</a> &gt; <?php if (have_posts()) : ?><?php $post = $posts[0]; ?><?php if (is_category()) { ?><h1><?php single_cat_title(); ?></h1>
 <?php } elseif( is_tag() ) { ?><h1><?php single_tag_title(); ?></h1>
 <?php } elseif (is_day()) { ?><h1><?php the_time('Y年n月j日'); ?>发布的所有文章</h1>
 <?php } elseif (is_month()) { ?><h1><?php the_time('Y年n月'); ?>发布的所有文章</h1>
@@ -12,8 +9,7 @@
 <?php } elseif (is_author()) { ?><h1><?php the_author(); ?>发布的所有文章</h1>
 <?php } elseif (isset($_GET['paged']) && !empty($_GET['paged'])) { ?>
 博客分类
-<?php } ?><?php endif; ?>
-</div>
+<?php } ?><?php endif; ?></div>
 <?php if (have_posts()) : ?>
 <?php while (have_posts()) : the_post(); ?>
 <?php if(is_sticky()) : ?>
@@ -22,12 +18,12 @@
 <?php else : ?>
 <div <?php post_class(); ?> id="post-<?php the_ID(); ?>" itemscope itemtype="http://schema.org/Article">
 <?php edit_post_link('编辑', '<span class="edit" style="display:none;">', '</span>'); ?>
-<h2 class="post-title" itemprop="headline"><a href="<?php the_permalink() ?>" rel="bookmark" title="<?php the_title_attribute(); ?>" itemprop="url"><?php the_title(); ?></a><span class="new"><?php include('includes/new.php'); ?></span></h2>
+<h2 class="post-title" itemprop="headline"><a href="<?php the_permalink() ?>" rel="bookmark" title="<?php the_title_attribute(); ?>" itemprop="url"><?php the_title(); ?></a><span class="new"><?php require get_template_directory() . '/includes/new.php'; ?></span></h2>
 <?php if (weisay_option('wei_thumbnail') == 'two') { ?>
-<?php include('includes/thumbnail_two.php'); ?>
+<?php require get_template_directory() . '/includes/thumbnail_two.php'; ?>
 <?php } else if (weisay_option('wei_thumbnail') == 'three') { ?>
-<?php include('includes/thumbnail_three.php'); ?>
-<?php } else { include('includes/thumbnail_one.php'); } ?>
+<?php require get_template_directory() . '/includes/thumbnail_three.php'; ?>
+<?php } else { require get_template_directory() . '/includes/thumbnail_one.php'; } ?>
 <div class="post-content" itemprop="description"><?php
 	if(is_singular()){the_content();}else{
 	$pc=$post->post_content;
@@ -38,7 +34,7 @@
 		the_content('');
 	elseif(function_exists('mb_strimwidth'))
 		echo'<p>'
-		.mb_strimwidth($st,0,300,' ...')
+		.mb_strimwidth($st,0,270,' ...')
 		.'</p>';
 	else the_content();
 }?></div>

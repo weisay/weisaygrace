@@ -110,24 +110,24 @@ class Popular_Posts_Widget extends WP_Widget {
 	// 前端显示
 	public function widget($args, $instance) {
 		echo $args['before_widget'];
-		
 		if (!empty($instance['title'])) {
 			echo $args['before_title'] . apply_filters('widget_title', $instance['title']) . $args['after_title'];
 		}
-
-		echo '<ul>';
-
-		if (is_single() || is_category()) {
-			// 显示分类热门日志
-			$days = !empty($instance['category_days']) ? $instance['category_days'] : 2000;
-			get_timespan_most_viewed_category('single', 'post', $instance['number'], $days, true);
+		if (function_exists('the_views')) {
+			echo '<ul>';
+			if (is_single() || is_category()) {
+				// 显示分类热门日志
+				$days = !empty($instance['category_days']) ? $instance['category_days'] : 2000;
+				get_timespan_most_viewed_category('single', 'post', $instance['number'], $days, true);
+			} else {
+				// 显示全局热门日志
+				$days = !empty($instance['global_days']) ? $instance['global_days'] : 500;
+				get_timespan_most_viewed('post', $instance['number'], $days, true);
+			}
+			echo '</ul>';
 		} else {
-			// 显示全局热门日志
-			$days = !empty($instance['global_days']) ? $instance['global_days'] : 500;
-			get_timespan_most_viewed('post', $instance['number'], $days, true);
+			echo '<ul><li>热门日志功能需安装 <strong><a href="https://wordpress.org/plugins/wp-postviews/" target="_blank">WP-PostViews</a></strong> 插件。</li></ul>';
 		}
-
-		echo '</ul>';
 		echo $args['after_widget'];
 	}
 
@@ -224,8 +224,8 @@ class Tabbed_Posts_Widget extends WP_Widget {
 			<!-- 热评日志 -->
 			<ul class="active">
 				<?php 
-				if(function_exists('simple_get_most_viewed')) {
-					simple_get_most_viewed($popular_posts_num, $popular_days);
+				if(function_exists('get_hot_reviews')) {
+					echo get_hot_reviews($popular_posts_num, $popular_days);
 				} else {
 					echo '<li>'.__('暂无热评日志', 'weisaygrace_theme').'</li>';
 				}

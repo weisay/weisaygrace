@@ -9,12 +9,12 @@
 <?php else : ?>
 <div <?php post_class(); ?> id="post-<?php the_ID(); ?>" itemscope itemtype="http://schema.org/Article">
 <?php edit_post_link('编辑', '<span class="edit" style="display:none;">', '</span>'); ?>
-<h2 class="post-title" itemprop="headline"><a href="<?php the_permalink() ?>" rel="bookmark" title="<?php the_title_attribute(); ?>" itemprop="url"><?php the_title(); ?></a><span class="new"><?php include('includes/new.php'); ?></span></h2>
+<h2 class="post-title" itemprop="headline"><a href="<?php the_permalink() ?>" rel="bookmark" title="<?php the_title_attribute(); ?>" itemprop="url"><?php the_title(); ?></a><span class="new"><?php require get_template_directory() . '/includes/new.php'; ?></span></h2>
 <?php if (weisay_option('wei_thumbnail') == 'two') { ?>
-<?php include('includes/thumbnail_two.php'); ?>
+<?php require get_template_directory() . '/includes/thumbnail_two.php'; ?>
 <?php } else if (weisay_option('wei_thumbnail') == 'three') { ?>
-<?php include('includes/thumbnail_three.php'); ?>
-<?php } else { include('includes/thumbnail_one.php'); } ?>
+<?php require get_template_directory() . '/includes/thumbnail_three.php'; ?>
+<?php } else { require get_template_directory() . '/includes/thumbnail_one.php'; } ?>
 <div class="post-content" itemprop="description"><?php
 	if(is_singular()){the_content();}else{
 	$pc=$post->post_content;
@@ -25,7 +25,7 @@
 		the_content('');
 	elseif(function_exists('mb_strimwidth'))
 		echo'<p>'
-		.mb_strimwidth($st,0,300,' ...')
+		.mb_strimwidth($st,0,270,' ...')
 		.'</p>';
 	else the_content();
 }?></div>

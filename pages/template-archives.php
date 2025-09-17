@@ -4,7 +4,7 @@ Template Name: 归档页面
 */
 ?>
 <?php get_header(); ?>
-<script type="text/javascript" src="<?php bloginfo('template_directory'); ?>/assets/js/archives.min.js?ver=<?php echo get_weisaygrace_version(); ?>"></script>
+<script type="text/javascript" src="<?php echo esc_url(get_template_directory_uri() . '/assets/js/archives.min.js?ver=' . get_weisaygrace_version()); ?>"></script>
 <div class="container">
 <div class="main">
 <div class="crumb">当前位置： <a title="返回首页" href="<?php bloginfo('url'); ?>/">首页</a> &gt; <?php the_title(); ?></div>
@@ -56,8 +56,36 @@ echo $output;
 		<p class="archives-counts"><span class="archives-count"><?php echo intval(wp_count_posts('page')->publish); ?></span>+</p>
 		<p class="archives-title">页面</p>
 	</li>
-	<li title="访客<?php $my_email = get_bloginfo ('admin_email'); $comment_visitor_count = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->comments WHERE comment_approved = '1' AND comment_author_email !='$my_email'"); echo $comment_visitor_count; ?>条，博主<?php $comment_visitor_count = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->comments WHERE comment_approved = '1' AND comment_author_email ='$my_email'"); echo $comment_visitor_count; ?>条">
-		<p class="archives-counts"><span class="archives-count"><?php $comment_count = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->comments WHERE comment_approved = '1'"); echo $comment_count; ?></span>+</p>
+<?php
+global $wpdb;
+$my_email = get_bloginfo('admin_email');
+$comment_stats = get_transient('archives_comment_stats');
+if ($comment_stats === false) {
+	$visitor_comments = $wpdb->get_var(
+		$wpdb->prepare(
+			"SELECT COUNT(*) FROM $wpdb->comments WHERE comment_approved = '1' AND comment_author_email != %s",
+			$my_email
+		)
+	);
+	$author_comments = $wpdb->get_var(
+		$wpdb->prepare(
+			"SELECT COUNT(*) FROM $wpdb->comments WHERE comment_approved = '1' AND comment_author_email = %s",
+			$my_email
+		)
+	);
+	$total_comments = $wpdb->get_var(
+		"SELECT COUNT(*) FROM $wpdb->comments WHERE comment_approved = '1'"
+	);
+	$comment_stats = [
+		'visitor' => (int) $visitor_comments,
+		'author'  => (int) $author_comments,
+		'total'   => (int) $total_comments,
+	];
+	set_transient('archives_comment_stats', $comment_stats, 10 * MINUTE_IN_SECONDS);
+}
+?>
+	<li title="访客<?php echo $comment_stats['visitor']; ?>条，博主<?php echo $comment_stats['author']; ?>条">
+		<p class="archives-counts"><span class="archives-count"><?php echo $comment_stats['total']; ?></span>+</p>
 		<p class="archives-title">评论</p>
 	</li>
 	<li>

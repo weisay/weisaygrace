@@ -145,20 +145,45 @@ jQuery(".mainmenu ul li,.top-page ul li").hoverDelay(".mainmenu ul li,.top-page 
 jQuery(document).ready(function() {
 	const $sidebar = $('.fixed-index');
 	const $articleWidget = $('.article-index-area');
-	if ($sidebar.length === 0 || $articleWidget.length === 0) {
-		return;
+	const $indexLinks = $('.article-index-widget a');
+	const $titles = $('[id^="title-"]');
+	if ($sidebar.length === 0 || $articleWidget.length === 0) return;
+	let scrollTimer;
+	function clearHighlight() {
+		$indexLinks.each(function () {
+			$(this).removeClass('current');
+			if (this.className.trim() === '') {
+				this.removeAttribute('class');
+			}
+		});
 	}
-	let isScrolling;
+	function highlightCurrentSection() {
+		const scrollTop = $(window).scrollTop();
+		const articleTop = $articleWidget.offset().top;
+		const articleBottom = articleTop + $articleWidget.outerHeight();
+		if (scrollTop > articleBottom + 40) {
+			clearHighlight();
+			return;
+		}
+		let currentId = '';
+		$titles.each(function () {
+			const $el = $(this);
+			if ($el.offset().top - 30 <= scrollTop) {
+				currentId = '#' + $el.attr('id');
+			}
+		});
+		clearHighlight();
+		if (currentId) {
+			$indexLinks.filter(`[href="${currentId}"]`).addClass('current');
+		}
+	}
 	function handleScroll() {
-		clearTimeout(isScrolling);
-		isScrolling = setTimeout(() => {
+		clearTimeout(scrollTimer);
+		scrollTimer = setTimeout(() => {
 			const scrollTop = $(window).scrollTop();
 			const articleTop = $articleWidget.offset().top;
-			if (scrollTop < articleTop - 40) {
-				$sidebar.hide();
-			} else {
-				$sidebar.show();
-			}
+			$sidebar.toggle(scrollTop >= articleTop - 40);
+			highlightCurrentSection();
 		});
 	}
 	handleScroll();
@@ -175,7 +200,7 @@ jQuery(document).on('click', '.article-index-widget a[href^="#"]', function(e) {
 	var pos = $id.offset().top - 20;
 		jQuery('html, body').animate({
 			scrollTop: pos
-		}, 600);
+		}, 300);
 });
 
 //侧边栏固定跟随滚动

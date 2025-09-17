@@ -45,7 +45,7 @@ add_action( 'init', 'coolwp_remove_open_sans_from_wp_core' );
 //评论表情路径
 add_filter('smilies_src','custom_smilies_src',1,10);
 function custom_smilies_src ($img_src, $img, $siteurl){
-	return get_bloginfo('template_directory').'/assets/images/smilies/'.$img;
+	return esc_url(get_template_directory_uri() . '/assets/images/smilies/' . $img);
 }
 
 //禁用embeds链接嵌入

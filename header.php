@@ -4,30 +4,30 @@
 <meta charset="<?php bloginfo('charset'); ?>" />
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,maximum-scale=2.0,shrink-to-fit=no" />
 <meta name="color-scheme" content="light dark" />
-<?php include('includes/seo.php'); ?>
+<?php require get_template_directory() . '/includes/seo.php'; ?>
 <?php
 	if (weisay_option('wei_opengraph') != 'close') {
-		include('includes/og.php');
+		require get_template_directory() . '/includes/og.php';
 	}
 	?>
 <link rel="profile" href="http://gmpg.org/xfn/11">
-<script type="text/javascript" src="<?php bloginfo('template_directory'); ?>/assets/js/jquery.min.js?ver=3.7.1"></script>
-<script type="text/javascript" src="<?php bloginfo('template_directory'); ?>/assets/js/jquery.mmenu.min.js?ver=<?php echo get_weisaygrace_version(); ?>"></script>
-<script type="text/javascript" src="<?php bloginfo('template_directory'); ?>/assets/js/dark.min.js?ver=<?php echo get_weisaygrace_version(); ?>"></script>
+<script type="text/javascript" src="<?php echo esc_url(get_template_directory_uri() . '/assets/js/jquery.min.js?ver=3.7.1'); ?>"></script>
+<script type="text/javascript" src="<?php echo esc_url(get_template_directory_uri() . '/assets/js/jquery.mmenu.min.js?ver=' . get_weisaygrace_version()); ?>"></script>
+<script type="text/javascript" src="<?php echo esc_url(get_template_directory_uri() . '/assets/js/dark.min.js?ver=' . get_weisaygrace_version()); ?>"></script>
 <?php if ( is_singular() ){ ?>
 <?php if (weisay_option('wei_prismjs') == 'open') : ?>
-<script type="text/javascript" src="<?php bloginfo('template_directory'); ?>/assets/js/prism.min.js?ver=<?php echo get_weisaygrace_version(); ?>"></script>
+<script type="text/javascript" src="<?php echo esc_url(get_template_directory_uri() . '/assets/js/prism.min.js?ver=' . get_weisaygrace_version()); ?>"></script>
 <?php endif; ?>
-<script type="text/javascript" src="<?php bloginfo('template_directory'); ?>/assets/js/com-post-ajax.js?ver=<?php echo get_weisaygrace_version(); ?>"></script>
-<script type="text/javascript" src="<?php bloginfo('template_directory'); ?>/assets/js/realgravatar.min.js?ver=<?php echo get_weisaygrace_version(); ?>"></script>
+<script type="text/javascript" src="<?php echo esc_url(get_template_directory_uri() . '/assets/js/com-post-ajax.js?ver=' . get_weisaygrace_version()); ?>"></script>
+<script type="text/javascript" src="<?php echo esc_url(get_template_directory_uri() . '/assets/js/realgravatar.min.js?ver=' . get_weisaygrace_version()); ?>"></script>
 <?php } ?>
 <?php if ( is_single() ) { ?>
-<link rel="stylesheet" type="text/css" href="<?php bloginfo('template_directory'); ?>/assets/css/jquery.fancybox.min.css?ver=<?php echo get_weisaygrace_version(); ?>" />
-<script type="text/javascript" src="<?php bloginfo('template_directory'); ?>/assets/js/jquery.fancybox.min.js?ver=<?php echo get_weisaygrace_version(); ?>"></script>
+<link rel="stylesheet" type="text/css" href="<?php echo esc_url(get_template_directory_uri() . '/assets/css/jquery.fancybox.min.css?ver=' . get_weisaygrace_version()); ?>" />
+<script type="text/javascript" src="<?php echo esc_url(get_template_directory_uri() . '/assets/js/jquery.fancybox.min.js?ver=' . get_weisaygrace_version()); ?>"></script>
 <?php } ?>
 <?php wp_head(); ?>
-<script type="text/javascript" src="<?php bloginfo('template_directory');?>/assets/js/lazyload.min.js?ver=<?php echo get_weisaygrace_version(); ?>"></script>
-<script type="text/javascript" src="<?php bloginfo('template_directory'); ?>/assets/js/weisay.min.js?ver=<?php echo get_weisaygrace_version(); ?>"></script>
+<script type="text/javascript" src="<?php echo esc_url(get_template_directory_uri() . '/assets/js/lazyload.min.js?ver=' . get_weisaygrace_version()); ?>"></script>
+<script type="text/javascript" src="<?php echo esc_url(get_template_directory_uri() . '/assets/js/weisay.min.js?ver=' . get_weisaygrace_version()); ?>"></script>
 <link rel="pingback" href="<?php bloginfo('pingback_url'); ?>" />
 </head>
 <body>
@@ -71,6 +71,6 @@
 </div>
 </div>
 <div class="roll">
-<div id="dark-mode-toggle-button" onclick="applyCustomDarkModeSettings(toggleCustomDarkMode());" title="点击切换显示模式" class="roll-dark"><i class="iconfont rollmodeicon"></i></div>
+<div id="dark-mode-toggle-button" onclick="toggleColorScheme()" title="点击切换显示模式" class="roll-dark"><i class="iconfont rollmodeicon"></i></div>
 <div title="回到顶部" class="roll-top"><i class="iconfont rollicon">&#xe614;</i></div>
 </div>

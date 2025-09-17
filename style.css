@@ -5,7 +5,7 @@
 	Author: Weisay
 	Author URI: http://www.weisay.com
 	Tags: 响应式,深色模式,小工具,IP归属地,SEO,两栏,优雅,代码高亮,特色图片,自定义菜单,走心评论,ajax评论,威言威语
-	Version: 1.1.0
+	Version: 1.5.0
 */
 @font-face {
 font-family: 'iconfont';
@@ -113,10 +113,12 @@ input,textarea{appearance:none;-moz-appearance:none;-webkit-appearance:none;}
 .main .post-title a:hover,.main .sticky-title a:hover{color:#da4453;text-decoration:none;}
 .main .post .topicon{font-size:1.25rem;color:#ed5565}
 .main .post .newicon{font-size:1.875rem;padding-left:0.375rem;}
-.thumbnail{float:left;margin:0 1rem 0.325rem 0;width:10.99rem;height:7.85rem;}
+.thumbnail{float:left;margin-right:1rem;width:10.99rem;height:7.85rem;}
 .thumbnail img{position:absolute;z-index:3;border-radius:0.375rem;width:10.99rem;height:7.85rem;object-fit:cover;}
-.main .post-content{color:#484848;line-height:2rem;}
-.main .post-info{font-size:0.875rem;margin-top:0.325rem;overflow:hidden;height:1.875rem;line-height:1.875rem;color:#707070;}
+.main .post-content{overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:4;}
+.main .post-content p{color:#555;line-height:2rem;}
+.main .post-content img{width:auto;max-width:100%;height:auto;}
+.main .post-info{font-size:0.875rem;margin-top:0.4rem;overflow:hidden;height:1.875rem;line-height:1.875rem;color:#707070;}
 .main .post-info .info-icon,.main .article-info .info-icon{margin-right:1rem;}
 .main .read-more{float:right;position:relative;}
 .main .read-more a:link,.main .read-more a:visited{color:#fff;}
@@ -186,9 +188,11 @@ input,textarea{appearance:none;-moz-appearance:none;-webkit-appearance:none;}
 /* 文章目录索引 */
 .fixed-index{max-height:76%;overflow:auto;position:fixed;padding-right:0.1875rem;left:50%;top:2.5rem;width:10rem;border-radius:0.25rem;z-index:93;display:none;}
 .fixed-index .widget-title{font-size:1.0625rem;font-weight:bold;padding:0.625rem 0 0.875rem 0.75rem;text-align:center;}
+.article-index-widget a.current{font-weight:600;box-shadow:inset 0 -0.375rem 0 0 #f6dfdf;}
 .article-index-widget ol{padding-right:0.25rem;}
 .article-index-widget ol li{font-size:0.9rem;line-height:1.75rem;position:relative;list-style:none;word-break:break-all;}
 .article-index-widget ol > li::before{content:"\e6ed";font-family:"iconfont";color:#777;}
+.article-index-widget ol > li:has(.current)::before{color:#ed5565;}
 .article-index-widget ol ul{margin:0;padding-left:0.5rem;}
 .article-index-widget ol > ul{margin:0;padding-left:1.25rem;}
 .article-index-widget ol ul li{list-style:none;font-size:0.8125rem;line-height:1.5rem;}
@@ -283,13 +287,15 @@ figure.wp-block-image{width:fit-content;}
 .comment-list .comment-box .reply .replyicon{font-size:1rem;}
 .comment-list .comment-box .post-author{font-size:0.75rem;margin-left:0.1875rem;padding:0.05rem 0.2rem 0.1rem 0.2rem;background:#434a54;border-radius:0.25rem;color:#fff;}
 #edita{padding:0.625rem 0 0 2.5rem;}
-.ajaxcomm{color:#999;background:#fff;line-height:2.75rem;height:2.75rem;font-style:normal}
+.comment-ajax-tip{color:#999;background:#fff;line-height:2.75rem;height:2.75rem;font-style:normal;}
+.comment-ajax-tip-error{color:#ed6c02;background:#fff;line-height:2.75rem;height:2.75rem;font-style:normal;}
 .comment-list .comment-box .comment-content p a{color:#948284;text-decoration:none;}
 .comment-list .comment-box .comment-content p a:hover{color:#da4453;}
 .comment_at{position:relative;margin-right:0.625rem;}
 .comment_at:before{-webkit-transition:all 0.4s ease-in-out;-moz-transition:all 0.4s ease-in-out;transition:all 0.4s ease-in-out;position:absolute;right:100%;bottom:-2px;display:block;height:1px;background:#da4453;content:'';}
 .comment_at:hover:before{right:0;left:0;}
 /* 走心评论 */
+.comment-list .comment-box .bullet{margin:0 0.425rem;}
 .comment-list .comment-box .touching-comments-button{float:right;}
 .comment-list .comment-box .touching-comments-button .hearticon{font-size:1rem;}
 .comment-list .comment-box .touching-comments-button a{outline:none;}
@@ -351,7 +357,7 @@ figure.wp-block-image{width:fit-content;}
 /* 归档 */
 .archives-content p.no-posts{padding:1rem;}
 .archives-statistics{border:1px solid #ddd;border-radius:0.25rem;padding:1.25rem 0 0.625rem 0;margin:1.25rem 1rem;}
-.archives-info{color:#fff;position:absolute;margin:-2rem 0 0 1.25rem;background:#ed5565;padding:0.25rem 0.5rem;border-radius:0.25rem;font-size:0.75rem}
+.archives-info{color:#fff;position:absolute;margin:-2rem 0 0 1.25rem;background:#ed5565;padding:0.25rem 0.5rem;border-radius:0.25rem;font-size:0.75rem;}
 .archives-title{color:#666;font-size:1rem;padding-bottom:0.625rem}
 .archives-counts{font-size:1.5rem;color:#ababab;padding:1rem 0;}
 .archives-statistics ul{list-style:none;display:grid;grid-template-columns:repeat(6,1fr);margin:0 0.5rem;}
@@ -359,7 +365,7 @@ figure.wp-block-image{width:fit-content;}
 .archives-statistics ul li:hover{background:#f8f8f8;border-radius:0.25rem;}
 .car-container{padding:0 1rem 0.625rem 1rem;}
 .car-collapse .car-yearmonth{cursor:pointer;color:#ed5565;}
-a.car-toggler{line-height:2rem;padding-left:0.5rem;font-size:1rem;color:#c30}
+a.car-toggler{line-height:2rem;padding-left:0.5rem;font-size:1rem;color:#c30;}
 .car-list li{list-style:none;line-height:2rem}
 .car-list li ul{padding-left:2rem}
 .car-plus, .car-minus{color:#444;width:1rem;display:block;float:left;font-family:Courier New, Lucida Console, MS Gothic, MS Mincho;}
@@ -541,7 +547,8 @@ html.mm-right .mm-menu .mm-listview{font-size:1rem;}
 .main .crumb,.main .article{margin:0 0.5rem 1rem 0.5rem;}
 .thumbnail{margin-right:0.675rem;width:7.7rem;height:5.5rem;}
 .thumbnail img{width:7.7rem;height:5.5rem;}
-.main .post .post-content p{display:block;height:6rem;overflow:hidden;font-size:1rem;color:#555;}
+.main .post-content{-webkit-line-clamp:3;}
+.main .post-content p{font-size:1rem;line-height:1.875rem;}
 .pagination{margin-right:0.5rem;}
 .touching-comments-picture{margin:0 0.5rem 1rem 0.5rem;}
 .comment-list .comment-body .touching-comments-chosen{background:#fee598;padding:0.125rem 0.5rem;margin:0.375rem 0;border-radius:0.5rem 0;font-size:0.875rem;display:inline-block;}

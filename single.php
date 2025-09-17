@@ -50,7 +50,7 @@ echo implode( ',', $category_names );
 </ul>
 </div>
 <div class="article">
-<?php include('includes/related.php'); ?>
+<?php require get_template_directory() . '/includes/related.php'; ?>
 </div>
 <div class="article">
 <?php comments_template(); ?>

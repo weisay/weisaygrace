@@ -8,53 +8,20 @@
 		return;
 	}
 ?>
+<?php
+// 生成ajax分页用的 nonce
+$comment_paging_nonce = wp_create_nonce('comment_paging_nonce');
+?>
 <div id="comments" class="comments-area">
 <?php if ( have_comments() ) : ?>
 <h3 class="article-title"><span class="comment-title"><?php the_title(); ?>：</span>目前有 <?php comments_number('', '1 条', '% 条' );?>评论</h3>
-<span id="cp_post_id" style="display:none;"><?php the_ID(); ?></span>
-<div id="pagetext">
+<div id="comment-ajax">
 <ol class="comment-list">
 <?php wp_list_comments('type=comment&callback=weisay_comment&end-callback=weisay_end_comment&max_depth=' .get_option('thread_comments_depth'). ' '); ?>
 </ol>
 <div class="pagination" id="commentpager"><?php paginate_comments_links(); ?></div>
 </div>
-<script type="text/javascript">
-//<![CDATA[
-jQuery(document).ready(function comment_page_ajas(){
-	jQuery('#commentpager a').click(function(){
-		var post_id = jQuery('#cp_post_id').html() //当前文章ID-- post_id
-		//文章ID获得
-		//获取欲取得的评论页页码
-		var compageUrl = jQuery(this).attr("href");
-		var page_id = compageUrl.match(/page[\-|=][0-9]{1,4}/);
-		var arr_temp_1 = page_id[0].split(/\-|=/);
-		var page_id = arr_temp_1[1]; 
-		jQuery.ajax({
-			url: compageUrl,
-			type:"POST",
-			data:"action=compageajax&postid="+post_id+"&pageid="+page_id,
-			beforeSend:function() {
-				document.body.style.cursor = 'wait';   
-				if (jQuery("#cancel-comment-reply-link")) // 取消未回复的评论
-					jQuery("#cancel-comment-reply-link").trigger("click");
-					jQuery('#commentpager').html('<em class="ajaxcomm">正在努力为您载入中...</em>');
-			},
-			error:function (xhr, textStatus, thrownError) { 
-				alert("readyState: " + xhr.readyState + " status:" + xhr.status + " statusText:" + xhr.statusText +" responseText:" +xhr.responseText + " responseXML:" + xhr.responseXML + " onreadystatechange" +xhr.onreadystatechange);         
-				alert(thrownError);
-			},
-			success: function (data) {
-				jQuery('#pagetext').html(data);
-				document.body.style.cursor = 'auto';
-				jQuery('html,body').animate({scrollTop:jQuery('#comments').offset().top}, 800);
-				comment_page_ajas();
-			}
-		});
-		return false;
-	});
-})
-// ]]>
-</script>
+<script type="text/javascript">var commentPagingNonce = '<?php echo esc_js( $comment_paging_nonce ); ?>';</script>
 <?php endif; // have_comments() ?>
 <?php if ( ('0' == $post->comment_count) && comments_open() ) : ?>
 <h3 class="article-title"><span class="comment-title"><?php the_title(); ?>：</span>等您坐沙发呢！</h3>
@@ -62,59 +29,34 @@ jQuery(document).ready(function comment_page_ajas(){
 <?php if ( comments_open() ) : ?>
 <div id="respond" class="comment-respond">
 <h3 id="reply-title" class="comment-reply-title">发表评论</h3><small><?php cancel_comment_reply_link('[点击取消回复]'); ?></small>
-<?php if (weisay_option('wei_gravatar') == 'two') : ?>
+<?php
+switch (weisay_option('wei_gravatar')) {
+	case 'two':
+		$gravatarurl = 'https://cravatar.cn/avatar/';
+		break;
+	case 'three':
+		$gravatarurl = 'https://gravatar.loli.net/avatar/';
+		break;
+	case 'four':
+		$gravatarurl = 'https://cdn.sep.cc/avatar/';
+		break;
+	default:
+		$gravatarurl = 'https://weavatar.com/avatar/';
+}
+?>
 <script type="text/javascript">
-//<![CDATA[
-jQuery(document).ready(function() {
-var gravatarurl= 'https://cravatar.cn/avatar/';
-jQuery('#email').blur(function() {
-jQuery('#real-avatar .avatar').attr('src', gravatarurl + sha256(jQuery('#email').val()) + '?s=50&d=mm&r=g');
-jQuery('#real-avatar .avatar').attr('srcset', gravatarurl + sha256(jQuery('#email').val()) + '?s=100&d=mm&r=g 2x');
-jQuery('#Get_Gravatar').fadeOut().html('看看右边头像对不对？').fadeIn('slow');
+var gravatarurl = "<?php echo esc_url($gravatarurl); ?>";
+jQuery(document).ready(function ($) {
+	$('#email').on('blur', function () {
+		let email = $('#email').val().trim();
+		if (email !== '') {
+			let hash = sha256(email.toLowerCase());
+			$('#real-avatar .avatar').attr('src', gravatarurl + hash + '?s=50&d=mm&r=g');
+			$('#real-avatar .avatar').attr('srcset', gravatarurl + hash + '?s=100&d=mm&r=g 2x');
+		}
+	});
 });
-});
-//]]>
 </script>
-<?php elseif (weisay_option('wei_gravatar') == 'three') : ?>
-<script type="text/javascript">
-//<![CDATA[
-jQuery(document).ready(function() {
-var gravatarurl= 'https://gravatar.loli.net/avatar/';
-jQuery('#email').blur(function() {
-jQuery('#real-avatar .avatar').attr('src', gravatarurl + sha256(jQuery('#email').val()) + '?s=50&d=mm&r=g');
-jQuery('#real-avatar .avatar').attr('srcset', gravatarurl + sha256(jQuery('#email').val()) + '?s=100&d=mm&r=g 2x');
-jQuery('#Get_Gravatar').fadeOut().html('看看右边头像对不对？').fadeIn('slow');
-});
-});
-//]]>
-</script>
-<?php elseif (weisay_option('wei_gravatar') == 'four') : ?>
-<script type="text/javascript">
-//<![CDATA[
-jQuery(document).ready(function() {
-var gravatarurl= 'https://cdn.sep.cc/avatar/';
-jQuery('#email').blur(function() {
-jQuery('#real-avatar .avatar').attr('src', gravatarurl + sha256(jQuery('#email').val()) + '?s=50&d=mm&r=g');
-jQuery('#real-avatar .avatar').attr('srcset', gravatarurl + sha256(jQuery('#email').val()) + '?s=100&d=mm&r=g 2x');
-jQuery('#Get_Gravatar').fadeOut().html('看看右边头像对不对？').fadeIn('slow');
-});
-});
-//]]>
-</script>
-<?php else: ?>
-<script type="text/javascript">
-//<![CDATA[
-jQuery(document).ready(function() {
-var gravatarurl= 'https://weavatar.com/avatar/';
-jQuery('#email').blur(function() {
-jQuery('#real-avatar .avatar').attr('src', gravatarurl + sha256(jQuery('#email').val()) + '?s=50&d=mm&r=g');
-jQuery('#real-avatar .avatar').attr('srcset', gravatarurl + sha256(jQuery('#email').val()) + '?s=100&d=mm&r=g 2x');
-jQuery('#Get_Gravatar').fadeOut().html('看看右边头像对不对？').fadeIn('slow');
-});
-});
-//]]>
-</script>
-<?php endif; ?>
 	<?php if ( get_option('comment_registration') && !is_user_logged_in() ) : ?>
 <div class="must-log-in"><?php print '您必须'; ?><a href="<?php bloginfo('url'); ?>/wp-login.php?redirect_to=<?php echo urlencode(get_permalink()); ?>"> [ 登录 ] </a>才能发表评论！</div>
 	<?php else : ?>
@@ -167,17 +109,18 @@ jQuery('#Get_Gravatar').fadeOut().html('看看右边头像对不对？').fadeIn(
 			</p>
 			<p class="comment-input">
 			<label for="url"><i class="iconfont icon-aria-link"></i></label>
-			<input type="url" name="url" id="url" class="text" placeholder="网站" value="<?php echo $comment_author_url; ?>" />
+			<input placeholder="网站" type="url" name="url" id="url" class="text" value="<?php echo $comment_author_url; ?>" />
 			</p>
 		</div>
 		<?php endif; ?>
 			<div class="comment-emoji">
 				<p class="emoji-post"><a class="emoji" href="javascript:void(0)" title="插入表情"><i class="iconfont emojiicon">&#xe681;</i></a></p>
-				<p class="emoji-smilies"><?php include('includes/smilies.php'); ?></p>
+				<p class="emoji-smilies"><?php require get_template_directory() . '/includes/smilies.php'; ?></p>
 			</div>
 			<textarea name="comment" id="comment" placeholder="互动可以先从评论开始…" ></textarea>
 			<p class="form-submit">
-				<input id="submit" class="submit" name="submit" type="submit" value="提交<?php if ( is_page(2)) : ?>留言<?php else: ?>评论<?php endif; ?>" />
+				<input id="submit" class="submit" name="submit" type="submit" value="提交评论" />
+				<?php wp_nonce_field('comment_nonce', '_wpnonce', false); // 在评论表单中添加 nonce	?>
 				<?php comment_id_fields(); do_action('comment_form', $post->ID); ?>
 			</p>
 		</div>

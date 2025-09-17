@@ -4,94 +4,99 @@ const darkModeStorageKey = "user-color-scheme";
 const validColorModeKeys = { dark: true, light: true };
 const invertDarkModeObj = { dark: "light", light: "dark" };
 
-const setLocalStorage = (key, value) => {
-	try {
-		localStorage.setItem(key, value);
-	} catch (e) {}
-};
-
-const removeLocalStorage = (key) => {
-	try {
-		localStorage.removeItem(key);
-	} catch (e) {}
-};
-
-const getLocalStorage = (key) => {
+// localStorage 操作封装
+const storage = {
+	get: (key) => {
 	try {
 		return localStorage.getItem(key);
 	} catch (e) {
+		console.error("Storage Get Error:", e);
 		return null;
 	}
+	},
+	set: (key, value) => {
+	try {
+		localStorage.setItem(key, value);
+		return true;
+	} catch (e) {
+		console.error("Storage Set Error:", e);
+		return false;
+	}
+	},
+	remove: (key) => {
+	try {
+		localStorage.removeItem(key);
+		return true;
+	} catch (e) {
+		console.error("Storage Remove Error:", e);
+		return false;
+	}
+	},
 };
 
-const getModeFromCSSMediaQuery = () => {
-	return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-};
+// 获取系统偏好色彩方案
+const getSystemColorScheme = () =>
+	window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 
-const setColorScheme = (mode) => {
-	rootElement.classList.remove(mode, invertDarkModeObj[mode]);
+// 应用主题：先清除，再添加
+const applyColorScheme = (mode) => {
+	rootElement.classList.remove(...Object.keys(validColorModeKeys));
+	if (validColorModeKeys[mode]) {
 	rootElement.classList.add(mode);
-};
-
-const resetRootDarkModeClassAndLocalStorage = () => {
-	rootElement.classList.remove(darkModeClassName, invertDarkModeObj[darkModeClassName]);
-	removeLocalStorage(darkModeStorageKey);
-};
-
-const applyCustomDarkModeSettings = (mode) => {
-	// 接受从「开关」处传来的模式，或者从 localStorage 读取
-	const currentSetting = mode || getLocalStorage(darkModeStorageKey);
-	if (currentSetting === getModeFromCSSMediaQuery()) {
-		// 当用户自定义的显示模式和 prefers-color-scheme 相同时重置、恢复到自动模式
-		resetRootDarkModeClassAndLocalStorage();
-		setColorScheme(currentSetting);
-	} else if (validColorModeKeys[currentSetting]) {
-		rootElement.classList.add(currentSetting);
-		rootElement.classList.remove(invertDarkModeObj[currentSetting]);
-	} else {
-		// 首次访问或从未使用过开关、localStorage 中没有存储的值，currentSetting 是 null
-		// 或者 localStorage 被篡改，currentSetting 不是合法值
-		resetRootDarkModeClassAndLocalStorage();
-		// 使用系统当前方案
-		setColorScheme(getModeFromCSSMediaQuery());
 	}
 };
 
-const toggleCustomDarkMode = () => {
-	let currentSetting = getLocalStorage(darkModeStorageKey);
-	if (validColorModeKeys[currentSetting]) {
-		// 从 localStorage 中读取模式，并取相反的模式
-		currentSetting = invertDarkModeObj[currentSetting];
-	} else if (currentSetting === null) {
-		// localStorage 中没有相关值，或者 localStorage 抛了 Error
-		// 从 CSS 中读取当前 prefers-color-scheme 并取相反的模式
-		currentSetting = invertDarkModeObj[getModeFromCSSMediaQuery()];
+// 重置为系统默认主题并移除本地存储
+const resetColorScheme = () => {
+	rootElement.classList.remove(...Object.keys(validColorModeKeys));
+	storage.remove(darkModeStorageKey);
+	applyColorScheme(getSystemColorScheme());
+};
+
+// 初始化主题逻辑：首次访问或加载时执行
+const initializeColorScheme = (mode = null) => {
+	const savedSetting = mode ?? storage.get(darkModeStorageKey);
+	const systemScheme = getSystemColorScheme();
+
+	if (savedSetting === systemScheme) {
+	// 用户自定义设置与系统一致 → 视为不需要记住，回到系统控制
+	resetColorScheme();
+	} else if (validColorModeKeys[savedSetting]) {
+	applyColorScheme(savedSetting);
 	} else {
-		// 不知道出了什么幺蛾子，比如 localStorage 被篡改成非法值
-		return; // 直接 return;
+	// 无效或无设置 → 跟随系统
+	resetColorScheme();
 	}
-	// 将相反的模式写入 localStorage
-	setLocalStorage(darkModeStorageKey, currentSetting);
-
-	return currentSetting;
 };
 
-// 当页面加载时，将显示模式设置为 localStorage 中自定义的值（如果有的话）
-applyCustomDarkModeSettings();
+// 切换主题：手动按钮调用
+const toggleColorScheme = () => {
+	const savedSetting = storage.get(darkModeStorageKey);
+	const currentMode = validColorModeKeys[savedSetting]
+		? savedSetting
+		: getSystemColorScheme();
+	const newMode = invertDarkModeObj[currentMode];
 
-const onSystemSchemeChanged = (event) => {
-	// 获取新的系统主题方案
-	const newColorScheme = event.matches ? "dark" : "light";
-	// 用户主动配置了系统方案，清除用户之前记忆
-	resetRootDarkModeClassAndLocalStorage();
-	// 使用系统当前方案
-	setColorScheme(newColorScheme);
+	storage.set(darkModeStorageKey, newMode);
+	applyColorScheme(newMode);
+
+	return newMode;
 };
 
-const darkModePreference = window.matchMedia("(prefers-color-scheme: dark)");
+// 系统主题变更监听
+const handleSystemSchemeChange = (event) => {
+	const newScheme = event.matches ? "dark" : "light";
+	resetColorScheme();
+	applyColorScheme(newScheme);
+};
 
-// recommended method for newer browsers: specify event-type as first argument
-darkModePreference.addEventListener("change", onSystemSchemeChanged);
+// 初始化主题
+initializeColorScheme();
 
-// deprecated method for backward compatibility
-darkModePreference.addListener(onSystemSchemeChanged);
+// 监听系统主题变化
+const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+if (typeof mediaQuery.addEventListener === "function") {
+	mediaQuery.addEventListener("change", handleSystemSchemeChange);
+} else if (typeof mediaQuery.addListener === "function") {
+	mediaQuery.addListener(handleSystemSchemeChange); // 兼容旧浏览器
+}

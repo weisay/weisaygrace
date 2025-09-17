@@ -6,8 +6,8 @@ Template Name: 走心评论
 <?php get_header(); ?>
 <div class="container">
 <div class="main main-all">
-<div class="crumb">当前位置： <a title="返回首页" href="<?php bloginfo('url'); ?>/">首页</a> &gt; <h1><?php the_title(); ?></h1></div>
-<div class="main-all touching-comments-picture"><img src="<?php bloginfo('template_directory'); ?>/assets/images/touching<?php echo rand(1,4)?>.jpg" alt="每一条评论，都是一个故事"></div>
+<div class="crumb">当前位置： <a title="返回首页" href="<?php bloginfo('url'); ?>/">首页</a> &gt; <h1><?php the_title(); ?>评论</h1></div>
+<div class="main-all touching-comments-picture"><img src="<?php echo esc_url(get_template_directory_uri() . '/assets/images/touching' . rand(1,4) . '.jpg'); ?>" alt="每一条评论，都是一个故事"></div>
 <div class="article">
 	<div id="comments" class="comments-area">
 	<h3 class="article-title">目前已入选 <?php
