@@ -7,7 +7,7 @@
 <h1 class="post-title" itemprop="headline"><?php the_title(); ?></h1>
 <div class="article-info">
 <div class="article-infomation">
-<span class="vcard author info-icon" itemprop="author" itemscope itemtype="https://schema.org/Person"><a itemprop="url" href="<?php echo get_author_posts_url(get_the_author_meta('ID')); ?>" style="display:none;"><span itemprop="name"><?php the_author() ?></span></a><span class="fn"><i class="iconfont posticon">&#xe603;</i><?php the_author() ?></span></span><span class="date info-icon" itemprop="datePublished" content="<?php the_time('c') ?>"><i class="iconfont posticon">&#xe689;</i><?php the_time('Y-m-d') ?><span class="date-hi"><?php the_time(' H:i') ?></span></span><span class="category info-icon" itemprop="articleSection" content="<?php
+<span class="vcard author info-icon" itemprop="author" itemscope itemtype="https://schema.org/Person"><a itemprop="url" href="<?php echo get_author_posts_url(get_the_author_meta('ID')); ?>" style="display:none;"><span itemprop="name"><?php the_author() ?></span></a><span class="fn"><i class="iconfont posticon">&#xe603;</i><?php the_author() ?></span></span><span class="date info-icon" itemprop="datePublished" content="<?php the_time('c') ?>"><i class="iconfont posticon">&#xe689;</i><?php the_time('Y-m-d') ?> <span class="date-hi"><?php the_time('H:i') ?></span></span><span class="category info-icon" itemprop="articleSection" content="<?php
 $categories = get_the_category();
 $category_names = array();
 foreach( $categories as $category ) { $category_names[] = esc_html( $category->name ); }
@@ -23,7 +23,11 @@ echo implode( ',', $category_names );
 <?php wp_link_pages(array('before' => '', 'after' => '', 'next_or_number' => 'number', 'link_before' =>'<span>', 'link_after'=>'</span>')); ?>
 <?php wp_link_pages(array('before' => '', 'after' => '</div>', 'next_or_number' => 'next', 'previouspagelink' => '', 'nextpagelink' => "<span>下一页</span>")); ?>
 </div>
-<?php the_tags('<div class="article-tags"><i class="iconfont posticon" style="padding-right:8px;">&#xe843;</i><span itemprop="keywords">', ', ', '</span></div>'); ?>
+<?php if (weisay_option('wei_tagshow') == 'hide') : ?>
+<?php echo get_post_tags(false); ?>
+<?php else : ?>
+<?php echo get_post_tags(true); ?>
+<?php endif; ?>
 <div class="clear"></div>
 </div>
 <?php if (weisay_option('wei_reward') == 'display') : ?>
@@ -43,14 +47,40 @@ echo implode( ',', $category_names );
 </div>
 </div>
 <?php endif; ?>
-<div class="article">
-<ul class="pre-nex">
-<li><?php previous_post_link('【上一篇】%link') ?></li>
-<li><?php next_post_link('【下一篇】%link') ?></li>
-</ul>
+<div class="article article-navigation">
+<?php
+$prev_post = get_previous_post();
+if ($prev_post) {
+	echo '<a class="nav-item nav-prev" href="' . get_permalink($prev_post->ID) . '">' . "\n";
+	echo '<div class="nav-item-image"><img src="' . multi_post_thumbnail_url($prev_post->ID, 'thumbnail') . '" alt="' . get_the_title($prev_post->ID) . '" itemprop="image" loading="lazy" /></div>' . "\n";
+	echo '<div class="nav-item-content">';
+	echo '<div class="nav-item-label">上一篇</div>';
+	echo '<div class="nav-item-title"><p>' . get_the_title($prev_post->ID) . '</p></div>';
+	echo '</div>' . "\n";
+	echo '</a>' . "\n";
+} else {
+	echo '<div class="nav-item nav-prev nav-item-empty"><div class="nav-item-content">已是最早的文章了</div></div>' . "\n";
+}
+$next_post = get_next_post();
+if ($next_post) {
+	echo '<a class="nav-item nav-next" href="' . get_permalink($next_post->ID) . '">' . "\n";
+	echo '<div class="nav-item-content">';
+	echo '<div class="nav-item-label">下一篇</div>';
+	echo '<div class="nav-item-title"><p>' . get_the_title($next_post->ID) . '</p></div>';
+	echo '</div>' . "\n";
+	echo '<div class="nav-item-image"><img src="' . multi_post_thumbnail_url($next_post->ID, 'thumbnail') . '" alt="' . get_the_title($next_post->ID) . '" itemprop="image" loading="lazy" /></div>' . "\n";
+	echo '</a>' . "\n";
+} else {
+	echo '<div class="nav-item nav-next nav-item-empty"><div class="nav-item-content">已是最新的文章了</div></div>' . "\n";
+}
+?>
 </div>
-<div class="article">
+<div class="article article-related">
+<?php if (weisay_option('wei_related') == 'two') : ?>
 <?php require get_template_directory() . '/includes/related.php'; ?>
+<?php else: ?>
+<?php require get_template_directory() . '/includes/related_img.php'; ?>
+<?php endif; ?>
 </div>
 <div class="article">
 <?php comments_template(); ?>

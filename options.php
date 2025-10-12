@@ -3,6 +3,30 @@ function optionsframework_option_name() {
 	return 'weisaygrace-theme';
 }
 
+// 读取changelog.txt 更新日志文件
+function get_changelog_content() {
+	$changelog_file = get_template_directory() . '/changelog.txt';
+	if (!file_exists($changelog_file)) return '<div class="update-item"><p>暂无更新日志</p></div>';
+	$lines = file($changelog_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+	$changelog_html = '';
+	$current_version = '';
+	foreach ($lines as $line) {
+		$line = trim($line);
+		if (empty($line)) continue;
+		if (strpos($line, "\t\t") !== false) {
+			if (!empty($current_version)) $changelog_html .= '</ol></div>';
+			list($version, $date) = explode("\t\t", $line, 2);
+			$changelog_html .= '<div class="update-item"><h4 class="heading">版本 ' 
+				. esc_html(trim($version)) . '<span class="update-date">' 
+				. esc_html(trim($date)) . '</span></h4><ol class="changelog">';
+			$current_version = $version;
+		} else {
+			$changelog_html .= '<li>' . esc_html($line) . '</li>';
+		}
+	}
+	return !empty($current_version) ? $changelog_html . '</ol></div>' : '<div class="update-item"><p>暂无更新日志</p></div>';
+}
+
 function optionsframework_options() {
 	$shortname = "wei";
 	
@@ -27,6 +51,11 @@ function optionsframework_options() {
 		'two' => __( 'Cravatar源', 'theme-textdomain' ),
 		'three' => __( 'Loli源', 'theme-textdomain' ),
 		'four' => __( 'sep.cc源', 'theme-textdomain' ),
+	);
+	
+	$related_array = array(
+		'one' => __( '带缩略图', 'theme-textdomain' ),
+		'two' => __( '不带缩略图', 'theme-textdomain' ),
 	);
 
 	$options = array();
@@ -183,6 +212,24 @@ function optionsframework_options() {
 	);
 	
 	$options[] = array(
+		'name' => __( '是否显示文章底部标签(tag)的数量', 'theme-textdomain' ),
+		'desc' => __( '默认显示', 'theme-textdomain' ),
+		'id' => $shortname."_tagshow",
+		'std' => 'display',
+		'type' => 'select',
+		'options' => $whether_array
+	);
+	
+	$options[] = array(
+		'name' => __( '相关日志类型', 'theme-textdomain' ),
+		'desc' => __( '选择是否带缩略图的相关日志，默认带缩略图', 'theme-textdomain' ),
+		'id' => $shortname."_related",
+		'std' => 'one',
+		'type' => 'select',
+		'options' => $related_array
+	);
+	
+	$options[] = array(
 		'name' => __( '是否开启代码高亮功能(Prism.js)', 'theme-textdomain' ),
 		'desc' => __( '默认关闭', 'theme-textdomain' ),
 		'id' => $shortname."_prismjs",
@@ -234,6 +281,18 @@ function optionsframework_options() {
 		'desc' => __( '微信收款二维码图片，大小建议：170px*170px', 'theme-textdomain' ),
 		'id' => $shortname."_wxpay",
 		'type' => 'upload'
+	);
+	
+	$options[] = array(
+		'name' => __( '更新日志', 'theme-textdomain' ),
+		'type' => 'heading'
+	);
+
+
+	$options[] = array(
+		'desc' => get_changelog_content(),
+		'id' => $shortname . "_changelog",
+		'type' => 'info'
 	);
 
 	return $options;

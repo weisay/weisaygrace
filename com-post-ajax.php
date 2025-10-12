@@ -114,13 +114,6 @@ if ($raw_comment === '' || is_null($raw_comment)) {
 	err(__('错误：请输入评论内容。'));
 }
 
-// 错误提示功能
-function err($ErrMsg) {
-	header('HTTP/1.1 405 Method Not Allowed');
-	echo esc_html($ErrMsg);
-	exit;
-}
-
 // 评论重复检查
 $dupe = $wpdb->prepare(
 	"SELECT comment_ID FROM $wpdb->comments WHERE comment_post_ID = %d AND (comment_author = %s ",
@@ -188,6 +181,13 @@ if ($edit_id) {
 
 $comment = get_comment($comment_id);
 do_action('set_comment_cookies', $comment, $user);
+
+// 错误提示功能
+function err($ErrMsg) {
+	header('HTTP/1.1 405 Method Not Allowed');
+	echo esc_html($ErrMsg);
+	exit;
+}
 
 // 计算评论深度
 $comment_depth = 1;

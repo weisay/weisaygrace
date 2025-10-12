@@ -783,28 +783,32 @@ class Reader_Wall_Widget extends WP_Widget {
 		}
 
 		global $wpdb;
-		$my_email = get_bloginfo('admin_email');
-		
-		$query = $wpdb->prepare(
-			"SELECT COUNT(comment_ID) AS cnt, comment_author, comment_author_url, comment_author_email 
-			FROM (SELECT * FROM $wpdb->comments 
-			LEFT OUTER JOIN $wpdb->posts ON ($wpdb->posts.ID=$wpdb->comments.comment_post_ID) 
-			WHERE comment_date > date_sub(NOW(), INTERVAL %d DAY) 
-			AND comment_author_email != %s 
-			AND post_password = '' 
-			AND comment_author_url != '' 
-			AND comment_approved = '1' 
-			AND (comment_type = '' OR comment_type = 'comment')) AS tempcmt 
-			GROUP BY comment_author_email 
-			ORDER BY cnt DESC 
-			LIMIT %d",
-			$days,
-			$my_email,
-			$limit
-		);
+		$cache_key = 'reader_wall_' . $days . '_' . $limit;
+		$wall = get_transient($cache_key);
+		if ( false === $wall ) {
+			$my_email = get_bloginfo('admin_email');
+			$query = $wpdb->prepare(
+				"SELECT COUNT(comment_ID) AS cnt, comment_author, comment_author_url, comment_author_email 
+				FROM (SELECT * FROM $wpdb->comments 
+				LEFT OUTER JOIN $wpdb->posts ON ($wpdb->posts.ID=$wpdb->comments.comment_post_ID) 
+				WHERE comment_date > date_sub(NOW(), INTERVAL %d DAY) 
+				AND comment_author_email != %s 
+				AND post_password = '' 
+				AND comment_author_url != '' 
+				AND comment_approved = '1' 
+				AND (comment_type = '' OR comment_type = 'comment')) AS tempcmt 
+				GROUP BY comment_author_email 
+				ORDER BY cnt DESC 
+				LIMIT %d",
+				$days,
+				$my_email,
+				$limit
+			);
+			$wall = $wpdb->get_results($query);
+			set_transient($cache_key, $wall, 2 * HOUR_IN_SECONDS);
+		}
 
-		$wall = $wpdb->get_results($query);
-		
+		// 输出读者墙
 		echo '<ul class="reader-wall-list">';
 		foreach ($wall as $comment) {
 			$url = $comment->comment_author_url ? esc_url($comment->comment_author_url) : '#';
@@ -813,7 +817,7 @@ class Reader_Wall_Widget extends WP_Widget {
 			if ($show_count) {
 				$title_text .= esc_attr('（留下' . $comment->cnt . '个脚印）');
 			}
-			
+
 			echo '<li>';
 			echo '<a href="' . $url . '" rel="external nofollow" title="' . $title_text . '">';
 			echo get_avatar($comment->comment_author_email, 60, '', $comment->comment_author);
@@ -821,7 +825,7 @@ class Reader_Wall_Widget extends WP_Widget {
 			echo '</li>';
 		}
 		echo '</ul>';
-		
+
 		echo $args['after_widget'];
 	}
 
@@ -1047,5 +1051,247 @@ function register_article_index_widget() {
 	register_widget('Article_Index_Widget');
 }
 add_action('widgets_init', 'register_article_index_widget');
+
+//评论者等级小工具
+class Comment_Level_Widget extends WP_Widget {
+	public function __construct() {
+		parent::__construct(
+			'comment_level_widget',
+			'weisay评论者等级',
+			array(
+				'description' => '配置评论等级区间和等级名称'
+			)
+		);
+	}
+
+	// 小工具前端显示 - 空内容，只作为配置载体
+	public function widget($args, $instance) {
+		return;
+	}
+
+	// 小工具后台表单
+	public function form($instance) {
+		$level_settings = !empty($instance['level_settings']) ? $instance['level_settings'] : $this->get_default_levels();
+		?>
+
+		<p>
+			<label>等级设置 (格式: 阈值|等级数字|等级名称，每行一个):</label>
+			<textarea class="widefat" rows="10" 
+					  name="<?php echo $this->get_field_name('level_settings'); ?>" 
+					  id="<?php echo $this->get_field_id('level_settings'); ?>"><?php 
+				echo esc_textarea($level_settings); 
+			?></textarea>
+			<small>示例: 499|12|神话<br>按阈值从高到低排列</small>
+		</p>
+		
+		<?php
+	}
+
+	// 更新小工具设置
+	public function update($new_instance, $old_instance) {
+		$instance = array();
+
+		if (!empty($new_instance['level_settings'])) {
+			$levels = $this->parse_level_settings($new_instance['level_settings']);
+			if (!empty($levels)) {
+				$instance['level_settings'] = $new_instance['level_settings'];
+			} else {
+				$instance['level_settings'] = $this->get_default_levels();
+			}
+		} else {
+			$instance['level_settings'] = $this->get_default_levels();
+		}
+		
+		return $instance;
+	}
+
+	// 获取默认等级设置
+	private function get_default_levels() {
+		return "499|12|神话\n369|11|传奇\n269|10|无双\n189|9|泰斗\n129|8|宗师\n89|7|大侠\n59|6|豪侠\n39|5|侠客\n24|4|游侠\n13|3|少侠\n6|2|新锐\n2|1|新秀";
+	}
+
+	// 解析等级设置
+	private function parse_level_settings($settings) {
+		$levels = array();
+		$lines = explode("\n", $settings);
+		
+		foreach ($lines as $line) {
+			$line = trim($line);
+			if (empty($line)) continue;
+			
+			$parts = explode('|', $line);
+			if (count($parts) === 3) {
+				$threshold = intval(trim($parts[0]));
+				$level_num = intval(trim($parts[1]));
+				$level_name = trim($parts[2]);
+				
+				if ($threshold > 0 && $level_num > 0 && !empty($level_name)) {
+					$levels[$threshold] = array(
+						'level' => $level_num,
+						'name' => $level_name
+					);
+				}
+			}
+		}
+
+		krsort($levels);
+		return $levels;
+	}
+
+	// 获取评论等级HTML
+	public static function get_comment_level_html($user_id, $email) {
+		// 博主标识
+		if ($user_id && user_can($user_id, 'manage_options')) {
+			return '<span class="post-author">博主</span>';
+		}
+
+		$email = sanitize_email($email);
+		if (empty($email)) return '';
+
+		// 获取评论数
+		$comment_count = self::get_cached_comment_count($email);
+
+		// 获取等级设置
+		$level_settings = self::get_level_settings();
+		foreach ($level_settings as $threshold => $info) {
+		if ($comment_count >= $threshold) {
+			return sprintf(
+				'<span class="com-level vip%d" title="%s"><span class="iconfont vipicon"></span><sub>%d</sub></span>',
+				$info['level'],
+				esc_attr($info['name']),
+				$info['level']
+			);
+		}
+	}
+	return '';
+	}
+
+	// 获取等级设置
+	private static function get_level_settings() {
+		$widget_settings = get_option('widget_comment_level_widget');
+		
+		if (!$widget_settings) {
+			return self::get_default_levels_array();
+		}
+
+		// 获取第一个有效实例的设置
+		foreach ($widget_settings as $key => $settings) {
+			if (is_array($settings) && !empty($settings['level_settings'])) {
+				return self::parse_level_settings_static($settings['level_settings']);
+			}
+		}
+
+		return self::get_default_levels_array();
+	}
+
+	// 静态解析等级设置
+	private static function parse_level_settings_static($settings) {
+		$levels = array();
+		$lines = explode("\n", $settings);
+
+		foreach ($lines as $line) {
+			$line = trim($line);
+			if (empty($line)) continue;
+			
+			$parts = explode('|', $line);
+			if (count($parts) === 3) {
+				$threshold = intval(trim($parts[0]));
+				$level_num = intval(trim($parts[1]));
+				$level_name = trim($parts[2]);
+				
+				if ($threshold > 0 && $level_num > 0 && !empty($level_name)) {
+					$levels[$threshold] = array(
+						'level' => $level_num,
+						'name' => $level_name
+					);
+				}
+			}
+		}
+
+		krsort($levels);
+		return $levels;
+	}
+
+	// 获取默认等级设置数组
+	private static function get_default_levels_array() {
+		return self::parse_level_settings_static("499|12|神话\n369|11|传奇\n269|10|无双\n189|9|泰斗\n129|8|宗师\n89|7|大侠\n59|6|豪侠\n39|5|侠客\n24|4|游侠\n13|3|少侠\n6|2|新锐\n2|1|新秀");
+	}
+
+	// 获取缓存的评论数
+	private static function get_cached_comment_count($email) {
+		global $wpdb;
+		$email = sanitize_email($email);
+		if (empty($email)) return 0;
+
+		$first = strtolower($email[0]);
+		$group = ctype_alnum($first) ? $first : 'other';
+		$cache_key = 'comment_level_counts_' . $group;
+
+		$comment_counts = get_transient($cache_key);
+		if (!is_array($comment_counts)) $comment_counts = [];
+		if (!isset($comment_counts[$email])) {
+			$count = (int) $wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT COUNT(comment_ID)
+					 FROM $wpdb->comments
+					 WHERE comment_approved = 1
+					 AND comment_author_email = %s
+					 AND (comment_type = '' OR comment_type = 'comment')",
+					$email
+				)
+			);
+			$comment_counts[$email] = $count;
+			set_transient($cache_key, $comment_counts, 2 * HOUR_IN_SECONDS);
+		}
+		return $comment_counts[$email];
+	}
+}
+function register_comment_level_widget() {
+	register_widget('Comment_Level_Widget');
+}
+add_action('widgets_init', 'register_comment_level_widget');
+function display_comment_level($comment = null) {
+	if (!$comment) {
+		global $comment;
+	}
+	if (!$comment || empty($comment->comment_author_email)) {
+		return '';
+	}
+
+	// 获取小工具实例配置
+	$widget_settings = get_option('widget_comment_level_widget');
+	if (empty($widget_settings) || !is_array($widget_settings)) {
+		return '';
+	}
+
+	// 获取当前已注册的侧边栏挂载信息
+	$sidebars_widgets = wp_get_sidebars_widgets();
+	$allowed_sidebar = 'sidebar-7'; // 仅允许此侧边栏启用输出
+	$enabled = false;
+
+	// 检查该小工具是否在指定 sidebar 中启用
+	if (!empty($sidebars_widgets[$allowed_sidebar])) {
+		foreach ($sidebars_widgets[$allowed_sidebar] as $widget_id) {
+			if (strpos($widget_id, 'comment_level_widget') === 0) {
+				$instance_number = str_replace('comment_level_widget-', '', $widget_id);
+				if (isset($widget_settings[$instance_number]['level_settings']) && !empty($widget_settings[$instance_number]['level_settings'])) {
+					$enabled = true;
+					break;
+				}
+			}
+		}
+	}
+	if (!$enabled) {
+		return ''; // 没有配置，不输出
+	}
+	// 输出等级 HTML
+	return Comment_Level_Widget::get_comment_level_html($comment->user_id, $comment->comment_author_email);
+}
+// 将等级显示在作者链接后面
+add_filter('get_comment_author_link', function($author_link, $author, $comment_id) {
+	$comment = get_comment($comment_id);
+	$level_html = display_comment_level($comment);
+	return $author_link . $level_html;
+}, 10, 3);
 
 ?>

@@ -34,8 +34,7 @@ if (false === $counts) {
 	);
 	$counts = $wpdb->get_results($query);
 	if ($counts) {
-		// 设置缓存1小时
-		set_transient($cache_key, $counts, 1 * HOUR_IN_SECONDS);
+		set_transient($cache_key, $counts, 2 * HOUR_IN_SECONDS);
 	}
 }
 $mostactive = '';

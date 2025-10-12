@@ -8,6 +8,9 @@ add_filter( 'use_widgets_block_editor', '__return_false' );
 //加载后台友情链接管理
 add_filter( 'pre_option_link_manager_enabled', '__return_true' );
 
+//文章编辑页增加特色图片
+add_theme_support('post-thumbnails');
+
 //移除头部冗余代码
 remove_action( 'wp_head', 'wp_generator' );// WP版本信息
 remove_action( 'wp_head', 'rsd_link' );// 离线编辑器接口

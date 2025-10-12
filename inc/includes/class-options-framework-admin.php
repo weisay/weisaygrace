@@ -88,8 +88,8 @@ class Options_Framework_Admin {
             'mode' => 'submenu',
 
             // Submenu default settings
-            'page_title' => __( '主题设置', 'theme-textdomain' ),
-			'menu_title' => __( '当前主题设置', 'theme-textdomain' ),
+            'page_title' => __( 'Weisay Grace主题设置', 'theme-textdomain' ),
+			'menu_title' => '<span class="dashicons dashicons-art" style="font-size:16px;vertical-align:-3px;margin-right:-3px;"></span> '. __( '当前主题设置', 'theme-textdomain' ),
 			'capability' => 'edit_theme_options',
 			'menu_slug' => 'options-framework',
             'parent_slug' => 'themes.php',

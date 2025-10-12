@@ -47,7 +47,7 @@ jQuery(document).ready( function () {
 
 //图片懒加载和渐隐
 jQuery(document).ready(function(){
-	jQuery('.thumbnail img,.link-image img,.tl-archive-img img,.reader-wall-list img').lazyload({
+	jQuery('.thumbnail img,.related-img img,.link-image img,.tl-archive-img img,.reader-wall-list img').lazyload({
 		placeholder:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==",
 		effect:"fadeIn"
 	});
@@ -90,6 +90,39 @@ jQuery(document).ready(function(){
 jQuery(document).ready(function(){
 	jQuery("a[rel='external'],a[rel='external nofollow']").click(
 	function(){window.open(this.href);return false})
+});
+
+//带缩略图版相关日志点击换一批
+jQuery(document).ready(function($) {
+	const $list = $(".article-related .related-list");
+	const $items = $list.find(".related-item");
+	const $btn = $("#toggle-related");
+	const groupSize = 4;
+	const total = $items.length;
+	const groupCount = Math.ceil(total / groupSize);
+	let currentGroup = 0;
+	let isAnimating = false;
+	if (total <= 5) {$btn.hide();}
+	function showGroup(index) {
+		if (isAnimating) return;
+		isAnimating = true;
+		const start = index * groupSize;
+		const end = start + groupSize;
+		const $visible = $items.filter(":visible");
+		const $next = $items.slice(start, end);
+		$visible.stop(true, true).fadeOut(200, function() {
+			$next.stop(true, true).fadeIn(300, function() {
+				isAnimating = false;
+			});
+		});
+	}
+	$btn.on("click", function() {
+		if (isAnimating) return;
+		currentGroup = (currentGroup + 1) % groupCount;
+		showGroup(currentGroup);
+	});
+	$items.hide();
+	$items.slice(0, groupSize).show();
 });
 
 //赏弹层
