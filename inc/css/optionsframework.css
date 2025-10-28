@@ -16,6 +16,10 @@
 	font-size: 1.15em;
 }
 
+#optionsframework .sub-level  h4 {
+	font-size: 1.05em;
+}
+
 #optionsframework .update-item {
 	border-bottom: 1px solid #f0f0f1;
 }
@@ -243,4 +247,10 @@
 }
 #optionsframework .section:after {
 	clear: both;
+}
+
+#distinguish {
+	margin-top: 18px;
+	clear: both;
+	border-top: 1px solid #ddd;
 }

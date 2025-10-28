@@ -66,28 +66,35 @@ function weisay_comment($comment, $args, $depth) {
 <?php if ( $comment->comment_approved == '1' ) : ?>
 <span class="floor"><?php
 if (!$comment->comment_parent) { // 只处理主评论
-	$comorder = get_option('comment_order');
-	if ($comorder == 'asc') {
-		// 正序排列 - 旧评论在前
-		switch ($commentcount) {
-			case 0: echo "沙发"; $commentcount++; break;
-			case 1: echo "板凳"; $commentcount++; break;
-			case 2: echo "地板"; $commentcount++; break;
-			default: printf('%1$s楼', ++$commentcount);
-		}
-	} else {
-		// 倒序排列 - 新评论在前
-		switch ($commentcount) {
-			case 2: echo "沙发"; $commentcount--; break;
-			case 3: echo "板凳"; $commentcount--; break;
-			case 4: echo "地板"; $commentcount--; break;
-			default: printf('%1$s楼', --$commentcount);
-		}
+$comorder = get_option('comment_order');
+if ($comorder == 'asc') {
+	// 正序排列 - 旧评论在前
+	switch ($commentcount) {
+		case 0: echo "沙发"; $commentcount++; break;
+		case 1: echo "板凳"; $commentcount++; break;
+		case 2: echo "地板"; $commentcount++; break;
+		default: printf('%1$s楼', ++$commentcount);
 	}
+} else {
+	// 倒序排列 - 新评论在前
+	switch ($commentcount) {
+		case 2: echo "沙发"; $commentcount--; break;
+		case 3: echo "板凳"; $commentcount--; break;
+		case 4: echo "地板"; $commentcount--; break;
+		default: printf('%1$s楼', --$commentcount);
+	}
+}
 }
 ?></span><?php endif; ?>
 <div class="fn comment-name"><?php comment_author_link() ?><?php if ( is_active_sidebar( 'sidebar-7' ) ) : ?><?php dynamic_sidebar( 'sidebar-7' ); ?><?php endif; ?>：<?php if(function_exists('wpua_custom_output')) { wpua_custom_output(); } ?></div>
-<?php if( (weisay_option('wei_touching') == 'open') && ( $comment->comment_karma == '1' )) : ?><div class="touching-comments-chosen"><a href="<?php echo weisay_option('wei_touchingurl'); ?>" target="_blank"><span>入选走心评论</span></a></div><?php endif; ?>
+<?php if( (weisay_option('wei_touching') == 'open') && ( $comment->comment_karma == '1' )) : ?><div class="touching-comments-chosen"><?php
+$touchingUrl = weisay_option('wei_touchingurl');
+if ($touchingUrl) {
+	echo '<a href="' . $touchingUrl . '" target="_blank"><span>入选走心评论</span></a>';
+} else {
+	echo '<span>入选走心评论</span>';
+}
+?></div><?php endif; ?>
 <div class="comment-content">
 <?php if ( $comment->comment_approved == '0' ) : ?>
 <p class="comment-approved">您的评论正在等待审核中...</p>
@@ -120,9 +127,7 @@ echo '<i class="iconfont hearticon" title="取消走心">&#xe601;</i>';
 </div>
 <?php
 }
-function weisay_end_comment() {
-	echo '</li>';
-}
+function weisay_end_comment() {	echo '</li>'; }
 
 //走心评论独立页面使用
 function weisay_touching_comments_list($comment) {
@@ -131,24 +136,19 @@ function weisay_touching_comments_list($comment) {
 <li <?php comment_class(); ?> id="comment-<?php comment_ID() ?>">
 <div id="div-comment-<?php comment_ID() ?>" class="comment-body">
 <?php $add_below = 'div-comment'; ?>
-<div class="comment-avatar vcard"><?php echo get_avatar( $comment->comment_author_email, 48, '', get_comment_author() ); ?></div>
-<div class="comment-box">
-<div class="fn comment-name"><?php comment_author_link() ?><?php if(current_user_can('manage_options')) : ?><span class="comment-area">来自<?php echo convertip(get_comment_author_ip()); ?></span>
-<?php elseif (weisay_option('wei_ipshow') == 'display'): ?><span class="comment-area">来自<?php echo convertipsimple(get_comment_author_ip()); ?></span>
-<?php endif; ?></div>
-<div class="comment-content">
-<?php comment_text() ?>
-</div>
 <div class="comment-info">
-<span class="datetime"><?php comment_date('Y-m-d') ?> 评论于<span class="bullet">•</span><a href="<?php echo get_comment_link($comment->comment_ID, $cpage); ?>" target="_blank"><?php echo get_the_title($comment->comment_post_ID); ?></a></span>
+<div class="comment-author">
+<p class="fn comment-name"><?php comment_author_link(); ?></p>
+<p class="comment-datetime"><?php comment_date('Y-m-d'); ?></p>
 </div>
+<div class="comment-avatar vcard"><?php echo get_avatar( $comment->comment_author_email, 48, '', get_comment_author() ); ?></div>
 </div>
+<div class="comment-content"><?php comment_text() ?></div>
+<div class="comment-from">评论于<span class="bullet">•</span><a href="<?php echo get_comment_link($comment->comment_ID, $cpage); ?>" target="_blank"><?php echo get_the_title($comment->comment_post_ID); ?></a></div>
 </div><div class="clear"></div>
 <?php
 }
-function weisay_touching_comments_end_list() {
-	echo '</li>';
-}
+function weisay_touching_comments_end_list() { echo '</li>'; }
 
 /**
  * 处理走心评论

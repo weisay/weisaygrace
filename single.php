@@ -19,9 +19,7 @@ echo implode( ',', $category_names );
 <?php endif; ?>
 <div class="article-content article-index-area" itemprop="articleBody">
 <?php the_content('Read more...'); ?>
-<?php wp_link_pages(array('before' => '<div class="fenye">分页：', 'after' => '', 'next_or_number' => 'next', 'previouspagelink' => '<span>上一页</span>', 'nextpagelink' => "")); ?>
-<?php wp_link_pages(array('before' => '', 'after' => '', 'next_or_number' => 'number', 'link_before' =>'<span>', 'link_after'=>'</span>')); ?>
-<?php wp_link_pages(array('before' => '', 'after' => '</div>', 'next_or_number' => 'next', 'previouspagelink' => '', 'nextpagelink' => "<span>下一页</span>")); ?>
+<?php wp_link_pages_ellipsis(); ?>
 </div>
 <?php if (weisay_option('wei_tagshow') == 'hide') : ?>
 <?php echo get_post_tags(false); ?>
@@ -52,7 +50,9 @@ echo implode( ',', $category_names );
 $prev_post = get_previous_post();
 if ($prev_post) {
 	echo '<a class="nav-item nav-prev" href="' . get_permalink($prev_post->ID) . '">' . "\n";
-	echo '<div class="nav-item-image"><img src="' . multi_post_thumbnail_url($prev_post->ID, 'thumbnail') . '" alt="' . get_the_title($prev_post->ID) . '" itemprop="image" loading="lazy" /></div>' . "\n";
+	if (weisay_option('wei_navimg') != 'hide') {
+	echo '<div class="nav-item-image"><img src="' . esc_url(multi_post_thumbnail_url($prev_post->ID, 'thumbnail')) . '" alt="' . esc_attr(get_the_title($prev_post->ID)) . '" itemprop="image" loading="lazy" /></div>' . "\n";
+	}
 	echo '<div class="nav-item-content">';
 	echo '<div class="nav-item-label">上一篇</div>';
 	echo '<div class="nav-item-title"><p>' . get_the_title($prev_post->ID) . '</p></div>';
@@ -68,7 +68,9 @@ if ($next_post) {
 	echo '<div class="nav-item-label">下一篇</div>';
 	echo '<div class="nav-item-title"><p>' . get_the_title($next_post->ID) . '</p></div>';
 	echo '</div>' . "\n";
+	if (weisay_option('wei_navimg') != 'hide') {
 	echo '<div class="nav-item-image"><img src="' . multi_post_thumbnail_url($next_post->ID, 'thumbnail') . '" alt="' . get_the_title($next_post->ID) . '" itemprop="image" loading="lazy" /></div>' . "\n";
+	}
 	echo '</a>' . "\n";
 } else {
 	echo '<div class="nav-item nav-next nav-item-empty"><div class="nav-item-content">已是最新的文章了</div></div>' . "\n";

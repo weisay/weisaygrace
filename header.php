@@ -29,6 +29,7 @@
 <script type="text/javascript" src="<?php echo esc_url(get_template_directory_uri() . '/assets/js/lazyload.min.js?ver=' . get_weisaygrace_version()); ?>"></script>
 <script type="text/javascript" src="<?php echo esc_url(get_template_directory_uri() . '/assets/js/weisay.min.js?ver=' . get_weisaygrace_version()); ?>"></script>
 <link rel="pingback" href="<?php bloginfo('pingback_url'); ?>" />
+<?php echo weisay_option('wei_headcustom'); ?>
 </head>
 <body>
 <div class="header">
@@ -58,7 +59,7 @@
 <div class="headermenu">
 <a id="hamburger" onfocus="this.blur()" href="#menu" rel="nofollow"><span></span></a><?php bloginfo('name'); ?><a class="icon-right" href="#menu-right" rel="nofollow"><i class="iconfont righticon"></i></a>
 </div>
-<div class="navigation">
+<div class="header-navigation">
 <div class="container mainmenu">
 <?php wp_nav_menu( array( 'theme_location' => 'menunav' ) ); ?>
 <?php if (weisay_option('wei_search') != 'hide') : ?>
@@ -71,6 +72,11 @@
 </div>
 </div>
 <div class="roll">
-<div id="dark-mode-toggle-button" onclick="toggleColorScheme()" title="点击切换显示模式" class="roll-dark"><i class="iconfont rollmodeicon"></i></div>
-<div title="回到顶部" class="roll-top"><i class="iconfont rollicon">&#xe614;</i></div>
+<div id="dark-mode-toggle-button" onclick="toggleColorScheme()" class="roll-toggle">
+<div class="toggle-icon">
+<i class="iconfont sunmoon sunicon" title="点击切到浅色模式">&#xe61e;</i>
+<i class="iconfont sunmoon moonicon" title="点击切到深色模式">&#xe61d;</i>
+</div>
+</div>
+<div title="回到顶部" class="roll-top"><i class="iconfont rollicon">&#xe61a;</i></div>
 </div>

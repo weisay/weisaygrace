@@ -1154,15 +1154,38 @@ class Comment_Level_Widget extends WP_Widget {
 		// 获取等级设置
 		$level_settings = self::get_level_settings();
 		foreach ($level_settings as $threshold => $info) {
-		if ($comment_count >= $threshold) {
-			return sprintf(
-				'<span class="com-level vip%d" title="%s"><span class="iconfont vipicon"></span><sub>%d</sub></span>',
-				$info['level'],
-				esc_attr($info['name']),
-				$info['level']
-			);
+			if ($comment_count >= $threshold) {
+				$current_level_name = $info['name'];
+				$current_level_num = $info['level'];
+				$next_levels = array_keys($level_settings);
+				$next_threshold = null;
+				foreach ($next_levels as $idx => $key) {
+					if ($key == $threshold && isset($next_levels[$idx - 1])) {
+						$next_threshold = $next_levels[$idx - 1];
+						break;
+					}
+				}
+				if ($next_threshold) {
+					$next_level_name = $level_settings[$next_threshold]['name'];
+					$need = $next_threshold - $comment_count;
+					$title = sprintf(
+						'%s · %d评 · 再%d评升至%s',
+						$current_level_name, $comment_count, $need, $next_level_name
+					);
+				} else {
+					$title = sprintf(
+						'%s · %d评 · 已达最高级',
+						$current_level_name, $comment_count
+					);
+				}
+				return sprintf(
+					'<span class="com-level vip%d" title="%s"><span class="iconfont vipicon"></span><sub>%d</sub></span>',
+					$current_level_num,
+					esc_attr($title),
+					$current_level_num
+				);
+			}
 		}
-	}
 	return '';
 	}
 

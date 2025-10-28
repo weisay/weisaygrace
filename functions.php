@@ -8,10 +8,16 @@ if (!function_exists('optionsframework_init')) {
 
 require get_template_directory() . '/includes/patch.php';
 require get_template_directory() . '/includes/patch_emoji.php';
-require get_template_directory() . '/includes/iplocation.php';
 require get_template_directory() . '/includes/theme_updater.php';
 require get_template_directory() . '/includes/widgets.php';
 require get_template_directory() . '/com-functions.php';
+
+//IP归属地数据库切换
+if (weisay_option('wei_ipv6') == 'open') {
+	require get_template_directory() . '/includes/ip2region_full.php';
+} else {
+	require get_template_directory() . '/includes/ip2region.php';	
+}
 
 if (function_exists('register_sidebar'))
 {
@@ -139,7 +145,7 @@ QTags.addButton( 'h6', '标题6', "<h6>", "</h6>" );
 		QTags.addButton(aLanguage[i], aLanguage[i], '<pre class="line-numbers"><code class="language-' + aLanguage[i] + '">\n', '\n</code></pre>');
 	}
 </script>
-<?php endif; ?>	
+<?php endif; ?>
 <?php
 }
 add_action('after_wp_tiny_mce', 'my_quicktags');
@@ -225,7 +231,7 @@ return $query_variables;
 }
 add_filter( 'request', 'weisay_redirect_blank_search' );
 
-//分页
+//列表页分页
 function paging_nav() {
 	global $wp_query;
 	if ( $wp_query->max_num_pages <= 1 ) {
@@ -241,6 +247,61 @@ function paging_nav() {
 	echo '<div class="pagination">';
 	echo $pagination_links;
 	echo '</div>';
+}
+
+//文章内容分页
+function wp_link_pages_ellipsis($args = array()) {
+	global $page, $numpages, $multipage, $more;
+	if (!$multipage) return;
+	$defaults = array(
+		'before' => '<div class="fenye">',
+		'after' => '</div>',
+		'link_before' => '<span>',
+		'link_after' => '</span>',
+		'echo' => 1,
+		'show_all' => false,
+		'end_size' => 1,
+		'mid_size' => 2,
+		'nextpagelink' => '下一页 »',
+		'previouspagelink' => '« 上一页'
+	);
+	$args = wp_parse_args($args, $defaults);
+	extract($args, EXTR_SKIP);
+	$output = $before;
+	// 上一页
+	if ($page > 1) {
+		$output .= _wp_link_page($page - 1) . $link_before . $previouspagelink . $link_after . '</a>';
+	}
+	// 页码循环
+	for ($i = 1; $i <= $numpages; $i++) {
+		if ($i == $page) {
+			$output .= '<span class="current">' . $i . '</span>';
+		} elseif (
+			$i <= $end_size ||
+			($i >= $page - $mid_size && $i <= $page + $mid_size) ||
+			$i > $numpages - $end_size
+		) {
+			$output .= _wp_link_page($i) . $link_before . $i . $link_after . '</a>';
+		} elseif (
+			$i == $end_size + 1 && $i < $page - $mid_size
+		) {
+			$output .= '<span class="dots">...</span>';
+		} elseif (
+			$i == $page + $mid_size + 1 && $i < $numpages - $end_size
+		) {
+			$output .= '<span class="dots">...</span>';
+		}
+	}
+	// 下一页
+	if ($page < $numpages) {
+		$output .= _wp_link_page($page + 1) . $link_before . $nextpagelink . $link_after . '</a>';
+	}
+	$output .= $after;
+	if ($echo) {
+		echo $output;
+	} else {
+		return $output;
+	}
 }
 
 //热评日志
@@ -747,6 +808,36 @@ get_comments_number()
 	$html .= '</div>';
 	$html .= timeline_paged_nav($the_query, $paged, 2);
 	return $html;
+}
+
+//检查是否使用小工具
+function has_any_active_sidebar($sidebars = null) {
+	if ($sidebars === null) {
+		global $wp_registered_sidebars;
+		$sidebars = array_keys($wp_registered_sidebars);
+	}
+	if (is_string($sidebars)) {
+		$sidebars = array($sidebars);
+	}
+	if (empty($sidebars) || !is_array($sidebars)) {
+		return false;
+	}
+	foreach ($sidebars as $sidebar) {
+		if (is_active_sidebar($sidebar)) {
+			return true;
+		}
+	}
+	return false;
+}
+function display_global_sidebar_notice($sidebars = null) {
+	if (!has_any_active_sidebar($sidebars) && current_user_can('edit_theme_options')) {
+		echo '<div class="widget">';
+		echo '<h3 class="widget-title">添加小工具</h3>';
+		echo '<ul><li>';
+		echo '<a href="' . admin_url('widgets.php') . '" target="_blank">为侧边栏添加小工具</a>';
+		echo '</li></ul>';
+		echo '</div>';
+	}
 }
 
 //全部设置结束

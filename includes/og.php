@@ -53,14 +53,7 @@ echo get_category_link($thisCat->term_id); ?>" />
 <?php } ?>
 <?php endif; ?>
 <?php if ( is_single() ) { ?>
-<?php if (has_post_thumbnail()) : ?>
-<meta property="og:image" content="<?php echo get_the_post_thumbnail_url(get_the_ID(),'thumbnail'); ?>" />
-<?php elseif ( get_post_meta($post->ID, 'thumbnail', true) ) : ?>
-<?php $image = get_post_meta($post->ID, 'thumbnail', true); ?>
-<meta property="og:image" content="<?php echo $image; ?>" />
-<?php elseif (function_exists('catch_first_image') && ($first_image = catch_first_image())) : ?>
-<meta property="og:image" content="<?php echo esc_url($first_image); ?>" />
-<?php endif; ?>
+<meta property="og:image" content="<?php echo multi_post_thumbnail_url($post->ID, 'thumbnail'); ?>" />
 <meta property="article:published_time" content="<?php the_time('c') ?>" />
 <meta property="article:modified_time" content="<?php the_modified_time('c') ?>" />
 <meta property="article:author" content="<?php echo get_the_author_meta('display_name', $post->post_author); ?>" />

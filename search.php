@@ -8,7 +8,7 @@
 <?php edit_post_link('编辑', '<span class="edit" style="display:none;">', '</span>'); ?>
 <h2 class="post-title" itemprop="headline"><a href="<?php the_permalink() ?>" rel="bookmark" title="<?php the_title_attribute(); ?>" itemprop="url"><?php the_title(); ?></a><span class="new"><?php require get_template_directory() . '/includes/new.php'; ?></span></h2>
 <div class="thumbnail"><a href="<?php the_permalink() ?>" rel="nofollow" title="<?php the_title(); ?>">
-<img class="diagram" src="<?php echo multi_post_thumbnail_url(); ?>" alt="<?php the_title(); ?>" itemprop="image" loading="lazy" />
+<img class="diagram" src="<?php echo multi_post_thumbnail_url($post->ID, 'thumbnail'); ?>" alt="<?php the_title(); ?>" itemprop="image" loading="lazy" />
 </a></div>
 <div class="post-content" itemprop="description"><?php
 	if(is_singular()){the_content();}else{
@@ -25,7 +25,7 @@
 	else the_content();
 }?></div>
 <div class="clear"></div>
-<div class="post-info"><span class="vcard author info-icon" itemprop="author" itemscope itemtype="https://schema.org/Person"><a itemprop="url" href="<?php echo get_author_posts_url(get_the_author_meta('ID')); ?>" style="display:none;"><span itemprop="name"><?php the_author() ?></span></a><span class="fn"><i class="iconfont posticon">&#xe603;</i><?php the_author() ?></span></span><span class="date info-icon" itemprop="datePublished" content="<?php the_time('c') ?>"><i class="iconfont posticon">&#xe689;</i><?php the_time('Y-m-d') ?> <span class="date-hi"><?php the_time('H:i') ?></span></span><span class="category info-icon" itemprop="articleSection" content="<?php
+<div class="post-info"><span class="vcard author info-icon" itemprop="author" itemscope itemtype="https://schema.org/Person"><a itemprop="url" href="<?php echo get_author_posts_url(get_the_author_meta('ID')); ?>" style="display:none;"><span itemprop="name"><?php the_author() ?></span></a><span class="fn"><i class="iconfont posticon">&#xe603;</i><?php the_author() ?></span></span><span class="date info-icon" itemprop="datePublished" content="<?php the_time('c') ?>"><i class="iconfont posticon">&#xe689;</i><?php the_time('Y-m-d') ?></span><span class="category info-icon" itemprop="articleSection" content="<?php
 $categories = get_the_category();
 $category_names = array();
 foreach( $categories as $category ) { $category_names[] = esc_html( $category->name ); }

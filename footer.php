@@ -2,7 +2,7 @@
 <?php require get_template_directory() . '/includes/sideright.php'; ?>
 <div class="clear"></div>
 <div class="footer" id="footers">
-<div class="footer-info container">
+<div class="<?php $footerClass = weisay_option('wei_footlayout') == 'layout_c' ? 'footer-vertical' : 'footer-horizontal';echo $footerClass; ?> container">
 <div class="footer-left">
 <p>© <?php
 $start_date = weisay_option('wei_websitedate');
@@ -17,10 +17,12 @@ if (!empty($start_date) && strtotime($start_date) !== false && strtotime($start_
 } else {
 	echo date('Y');
 }
-?> <?php bloginfo('name'); ?>. <span class="footer-hide">Powered by <a href="https://wordpress.org/" rel="external">WordPress</a>. Theme by <a href="https://www.weisay.com/" rel="external">Weisay</a>.</span></p>
+?> <?php bloginfo('name'); ?>. <span class="footer-hide">Powered by <a href="https://wordpress.org/" rel="external">WordPress</a>. Theme by <a href="https://www.weisay.com/blog/wordpress-theme-weisay-grace.html?theme" rel="external">Weisay</a>. <?php if (weisay_option('wei_footlayout') == 'layout_c') : ?><?php echo weisay_option('wei_custom1'); ?><?php endif; ?></span></p>
+<?php if (weisay_option('wei_footlayout') == 'layout_lr') : ?><?php echo weisay_option('wei_custom1') ? '<p class="footer-hide">' . weisay_option('wei_custom1') . '</p>' : ''; ?><?php endif; ?>
 </div>
 <div class="footer-right">
-<p><span class="footer-hide"><?php if (weisay_option('wei_beian') == 'display') : ?><a href="https://beian.miit.gov.cn/" rel="external nofollow"><?php echo weisay_option('wei_beianhao'); ?></a>. <?php endif; ?><?php if (weisay_option('wei_gwab') == 'display') : ?><a href="https://www.beian.gov.cn/portal/registerSystemInfo" rel="external nofollow"><?php echo weisay_option('wei_gwabh'); ?></a>.<?php endif; ?></span></p>
+<p><span class="footer-hide"><?php if (weisay_option('wei_beian') == 'display') : ?><a href="https://beian.miit.gov.cn/" rel="external nofollow"><?php echo weisay_option('wei_beianhao'); ?></a>. <?php endif; ?><?php if (weisay_option('wei_gwab') == 'display') : ?><a href="https://www.beian.gov.cn/portal/registerSystemInfo" rel="external nofollow"><?php echo weisay_option('wei_gwabh'); ?></a>.<?php endif; ?> <?php if (weisay_option('wei_footlayout') == 'layout_c') : ?><?php echo weisay_option('wei_custom2'); ?><?php endif; ?></span></p>
+<?php if (weisay_option('wei_footlayout') == 'layout_lr') : ?><?php echo weisay_option('wei_custom2') ? '<p class="footer-hide">' . weisay_option('wei_custom2') . '</p>' : ''; ?><?php endif; ?>
 </div>
 </div>
 </div>
