@@ -63,7 +63,7 @@
 .dark .article-tag-count{background:#3a3f45;color:#9da1a7;border:1px solid #454a50;}
 .dark .article-tag-item:hover .article-tag-count{background:#973641;border:1px solid #973641;color:#c1c4c9;}
 .dark .article-tag-item .topicicon{color:#767a80;}
-.dark .article-tags-items:hover .topicicon{color:#f6dfdf;}
+.dark .article-tag-item:hover .topicicon{color:#f6dfdf;}
 .dark .article-navigation:after{background:#2e333a;}
 .dark .article-navigation .nav-item:hover{background:#252a30;}
 .dark .article-navigation .nav-item-label{color:#767a80;}
@@ -171,19 +171,19 @@
 .dark .car-list h3{border-bottom:1px dotted #454a50;}
 .dark .car-list .cy-yeartitle{box-shadow:inset 0 -0.5rem 0 0 #4a3235;}
 .dark .car-list .car-days{background:#2e333a;color:#767a80;}
-.dark .tag-index li{background:#32363c;color:#454a50;}
-.dark .tag-index li:hover{background:#ed5565;}
-.dark .tag-index li a{color:#c1c4c9;}
-.dark .tag-index li a:hover{color:#f5f7fa;}
-.dark .tag-index li:hover:not(:has(a)){background:#32363c;}
-.dark .tag-list li{border-bottom:1px dashed #2e333a;}
-.dark .tag-list li:last-child{border:none;}
-.dark .tag-cloud-item{background:#282e35;border:1px solid #3a3f45;}
-.dark .tag-cloud-item:hover{background:#ed5565;border:1px solid #ed5565;color:#e8eaed;}
-.dark .tag-cloud-count{background:#3a3f45;color:#9da1a7;border:1px solid #454a50;}
-.dark .tag-cloud-item:hover .tag-cloud-count{background:#973641;border:1px solid #973641;color:#c1c4c9;}
-.dark .tag-cloud-item .topicicon{color:#767a80;}
-.dark .tag-cloud-item:hover .topicicon{color:#f6dfdf;}
+.dark .article-tag-cloud .tag-index li{background:#32363c;color:#454a50;}
+.dark .article-tag-cloud .tag-index li:hover{background:#ed5565;}
+.dark .article-tag-cloud .tag-index li a{color:#c1c4c9;}
+.dark .article-tag-cloud .tag-index li a:hover{color:#f5f7fa;}
+.dark .article-tag-cloud .tag-index li:hover:not(:has(a)){background:#32363c;}
+.dark .article-tag-cloud .tag-list li{border-bottom:1px dashed #2e333a;}
+.dark .article-tag-cloud .tag-list li:last-child{border:none;}
+.dark .article-tag-cloud .tag-cloud-item{background:#282e35;border:1px solid #3a3f45;}
+.dark .article-tag-cloud .tag-cloud-item:hover{background:#ed5565;border:1px solid #ed5565;color:#e8eaed;}
+.dark .article-tag-cloud .tag-cloud-count{background:#3a3f45;color:#9da1a7;border:1px solid #454a50;}
+.dark .article-tag-cloud .tag-cloud-item:hover .tag-cloud-count{background:#973641;border:1px solid #973641;color:#c1c4c9;}
+.dark .article-tag-cloud .tag-cloud-item .topicicon{color:#767a80;}
+.dark .article-tag-cloud .tag-cloud-item:hover .topicicon{color:#f6dfdf;}
 .dark .link-blogger ul li{background:#2c3138;color:#9da1a7;}
 .dark .link-blogger ul li img{background:#767a80;}
 .dark .top-comment ul li img{border:1px solid #767a80;background:#454a50;}

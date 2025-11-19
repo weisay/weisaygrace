@@ -10,7 +10,7 @@ jQuery(document).on('click','.tag-index a[href^="#"]',function(e){e.preventDefau
 <div class="container">
 <div class="main main-all">
 <div class="crumb">当前位置： <a title="返回首页" href="<?php bloginfo('url'); ?>/">首页</a> &gt; <h1><?php the_title(); ?></h1></div>
-<div class="article">
+<div class="article article-tag-cloud">
 <?php tag_groups_html(); ?>
 </div>
 </div>
