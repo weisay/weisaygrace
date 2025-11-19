@@ -1,6 +1,6 @@
 <?php
 function optionsframework_option_name() {
-	return 'weisaygrace-theme';
+	return 'weisaygrace';
 }
 
 // 读取changelog.txt 更新日志文件
@@ -219,6 +219,54 @@ function optionsframework_options() {
 		'name' => __( '基础功能设置', 'theme-textdomain' ),
 		'type' => 'heading'
 	);
+
+	$options[] = array(
+		'name' => __( '首页布局选择', 'theme-textdomain' ),
+		'id' => $shortname."_layout",
+		'std' => 'blog',
+		'type' => 'radio',
+		'options' => array(
+			'blog' => '博客布局',
+			'card' => '卡片布局',
+		)
+	);
+
+	$options[] = array(
+		'name' => __( '卡片布局设置', 'theme-textdomain' ),
+		'id' => 'card_distinguish',
+		'class' => 'sub-level',
+		'type' => 'info',
+	);
+
+	$options[] = array(
+		'name' => '',
+		'desc' => '显示文章摘要',
+		'id' => $shortname."_layout_card_excerpt",
+		'std' => '0',
+		'type' => 'checkbox'
+	);
+	
+	$options[] = array(
+		'name' => '',
+		'desc' => '显示侧边栏',
+		'id' => $shortname."_layout_card_sidebar",
+		'std' => '0',
+		'type' => 'checkbox'
+	);
+
+	$options[] = array(
+		'name' => '',
+		'desc' => '',
+		'id' => $shortname."_layout_card_col",
+		'class' => 'sub-level hidden',
+		'std' => '3',
+		'type' => 'radio',
+		'options' => array(
+			'2' => '2列',
+			'3' => '3列',
+			'4' => '4列',
+		)
+	);
 	
 	$options[] = array(
 		'name' => __( '是否启用旧版小工具', 'theme-textdomain' ),
@@ -393,6 +441,21 @@ function optionsframework_options() {
 		'class' => 'sub-level',
 		'std' => '',
 		'type' => 'text'
+	);
+
+	$options[] = array(
+		'name' => __( '走心评论独立页面显示几列', 'theme-textdomain' ),
+		'desc' => __( '此设置只针对pc端，移动端根据宽度自适应', 'theme-textdomain' ),
+		'id' => $shortname."_touchingcol",
+		'class' => 'sub-level',
+		'std' => '4',
+		'type' => 'radio',
+		'options' => array(
+			'1' => '1列',
+			'2' => '2列',
+			'3' => '3列',
+			'4' => '4列',
+		)
 	);
 
 	$options[] = array(

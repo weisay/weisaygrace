@@ -1,5 +1,5 @@
 <?php require get_template_directory() . '/includes/menu.php'; ?>
-<?php require get_template_directory() . '/includes/sideright.php'; ?>
+<?php require get_template_directory() . '/includes/sidebar-mobile.php'; ?>
 <div class="clear"></div>
 <div class="footer" id="footers">
 <div class="<?php $footerClass = weisay_option('wei_footlayout') == 'layout_c' ? 'footer-vertical' : 'footer-horizontal';echo $footerClass; ?> container">
@@ -26,15 +26,15 @@ if (!empty($start_date) && strtotime($start_date) !== false && strtotime($start_
 </div>
 </div>
 </div>
-<?php wp_footer(); ?>
 <?php if (is_single() || is_page() ) { ?>
 <script type="text/javascript" src="<?php echo esc_url(get_template_directory_uri() . '/assets/js/activate-power-mode.min.js'); ?>"></script>
-<script>
+<script type="text/javascript">
 POWERMODE.colorful = true;
 POWERMODE.shake = false;
 document.body.addEventListener('input', POWERMODE);
 </script>
 <?php }?>
+<?php wp_footer(); ?>
 <?php if ( is_user_logged_in() ) : ?><style type="text/css">@media screen and (max-width:992px){#wpadminbar {display:none;}html {margin-top:0px !important;}}</style><?php endif; ?>
 </body>
 </html>

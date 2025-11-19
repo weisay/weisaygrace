@@ -6,9 +6,17 @@ Template Name: 友链页面
 <?php get_header(); ?>
 <div class="container">
 <div class="main main-all">
-<div class="crumb">当前位置： <a title="返回首页" href="<?php bloginfo('url'); ?>/">首页</a> &gt; <?php the_title(); ?></div>
+<div class="crumb">当前位置： <a title="返回首页" href="<?php bloginfo('url'); ?>/">首页</a> &gt; <h1><?php the_title(); ?></h1></div>
+<?php
+$content = trim(get_the_content());
+if (!empty($content)) : ?>
+<div class="article">
+<div class="article-content" itemprop="articleBody">
+<?php the_content('Read more...'); ?>
+</div>
+</div>
+<?php endif; ?>
 <div class="article article-link">
-
 <div class="link-blogger">
 <?php wp_list_bookmarks (
 	array (
@@ -30,7 +38,6 @@ Template Name: 友链页面
 		'orderby' => 'link_id',	//友情链接排序，可用：link_id、rand、url、name、target、description、owner、rating、updated、rss、length 等
 ) ); ?>
 </div>
-
 </div>
 <div class="article">
 <?php comments_template(); ?>

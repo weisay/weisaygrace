@@ -254,3 +254,41 @@
 	clear: both;
 	border-top: 1px solid #ddd;
 }
+#card_distinguish h4{margin:10px;}
+
+#section-wei_layout_card_col {
+	margin:-20px 0 0 15px;
+}
+#section-wei_layout_card_excerpt {
+	margin:-25px 0 0 15px;
+}
+#section-wei_layout_card_sidebar {
+	margin:-25px 0 0 15px;
+}
+.section-radio .controls::before {
+	content: '✓';
+	position: absolute;
+	display: none;
+	color: #da4453;
+	transition: 0.5s ease;
+	position-anchor: --checked;
+	top: anchor(center);
+	left: calc(anchor(right) + 5px);
+	translate: 0 -50%;
+}
+@-moz-document url-prefix() {
+	.section-radio .controls::before {
+		all: unset;
+	}
+}
+.section-radio .controls:has(:checked)::before {
+	display: block;
+	animation: fade-in 0.2s ease-in-out;
+}
+.section-radio .controls :checked + label {
+	anchor-name: --checked;
+}
+@keyframes fade-in {
+	0% { opacity: 0; }
+	100% { opacity: 1; }
+}

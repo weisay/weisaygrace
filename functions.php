@@ -7,14 +7,15 @@ if (!function_exists('optionsframework_init')) {
 }
 
 require get_template_directory() . '/includes/patch.php';
-require get_template_directory() . '/includes/patch_emoji.php';
-require get_template_directory() . '/includes/theme_updater.php';
-require get_template_directory() . '/includes/widgets.php';
-require get_template_directory() . '/com-functions.php';
+require get_template_directory() . '/includes/patch-emoji.php';
+require get_template_directory() . '/includes/theme-updater.php';
+require get_template_directory() . '/includes/tags.php'; //标签tag
+require get_template_directory() . '/includes/widgets.php'; //小工具
+require get_template_directory() . '/com-functions.php'; //评论相关
 
 //IP归属地数据库切换
 if (weisay_option('wei_ipv6') == 'open') {
-	require get_template_directory() . '/includes/ip2region_full.php';
+	require get_template_directory() . '/includes/ip2region-full.php';
 } else {
 	require get_template_directory() . '/includes/ip2region.php';	
 }
@@ -128,6 +129,12 @@ function get_weisaygrace_version() {
 		$version = $theme->get('Version');
 	}
 	return $version;
+}
+
+//独立页面增加摘要功能
+add_action('init', 'page_excerpt');
+function page_excerpt() {
+	add_post_type_support('page', array('excerpt'));
 }
 
 //添加HTML编辑器自定义快捷按钮
@@ -497,7 +504,7 @@ function multi_post_thumbnail_url($post_id = null, $size = 'thumbnail') {
 			return esc_url($image);
 		} else {
 			$rand = rand(1, 30);
-			return esc_url(get_template_directory_uri() . '/assets/images/random/' . $rand . '.jpg');
+			return esc_url(get_template_directory_uri() . '/assets/images/random/' . $rand . '.png');
 		}
 	}
 	// three 模式：特色图 > 自定义字段 > 第一张图 > 随机图
@@ -511,12 +518,12 @@ function multi_post_thumbnail_url($post_id = null, $size = 'thumbnail') {
 			return esc_url($first_img);
 		} else {
 			$rand = rand(1, 30);
-			return esc_url(get_template_directory_uri() . '/assets/images/random/' . $rand . '.jpg');
+			return esc_url(get_template_directory_uri() . '/assets/images/random/' . $rand . '.png');
 		}
 	}
 	// one 默认模式：只用随机图
 	$rand = rand(1, 30);
-	return esc_url(get_template_directory_uri() . '/assets/images/random/' . $rand . '.jpg');
+	return esc_url(get_template_directory_uri() . '/assets/images/random/' . $rand . '.png');
 }
 
 //文章标签
@@ -524,15 +531,15 @@ function get_post_tags($show_count = true) {
 	$tags = get_the_tags();
 	$out = '';
 	if ($tags && count($tags) > 0) {
-		$out .= '<div class="article-tags">';
+		$out .= '<div class="article-tag">';
 		foreach ($tags as $tag) {
 			$tag_link = get_tag_link($tag->term_id);
 			$tag_name = esc_html($tag->name);
 			$tag_count = $tag->count;
-			$out .= '<a class="article-tags-items" href="' . esc_url($tag_link) . '" rel="tag">';
+			$out .= '<a class="article-tag-item" href="' . esc_url($tag_link) . '" rel="tag">';
 			$out .= '<span><i class="iconfont topicicon">&#xe659;</i></span>' . $tag_name;
 			if ($show_count) {
-				$out .= '<span class="article-tags-count">' . $tag_count . '</span>';
+				$out .= '<span class="article-tag-count">' . $tag_count . '</span>';
 			}
 			$out .= '</a>';
 		}

@@ -81,7 +81,7 @@ if ($next_post) {
 <?php if (weisay_option('wei_related') == 'two') : ?>
 <?php require get_template_directory() . '/includes/related.php'; ?>
 <?php else: ?>
-<?php require get_template_directory() . '/includes/related_img.php'; ?>
+<?php require get_template_directory() . '/includes/related-img.php'; ?>
 <?php endif; ?>
 </div>
 <div class="article">
