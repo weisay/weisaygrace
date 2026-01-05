@@ -21,9 +21,11 @@
 <?php elseif ( is_category() ) : ?>
 <meta property="og:title" content="<?php single_cat_title(); ?>" />
 <meta property="og:url" content="<?php
-$catID = get_query_var('cat'); 
-$thisCat = get_category($catID);
-echo get_category_link($thisCat->term_id); ?>" />
+$current_cat = get_queried_object();
+if ($current_cat && !is_wp_error($current_cat)) {
+	echo esc_url(get_category_link($current_cat->term_id));
+}
+?>" />
 <meta property="og:description" content="<?php echo $description; ?>" />
 <?php elseif ( is_page() ) : ?>
 <meta property="og:title" content="<?php the_title(); ?>" />

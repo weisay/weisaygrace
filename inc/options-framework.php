@@ -95,19 +95,56 @@ endif;
 
 add_action( 'optionsframework_custom_scripts', 'optionsframework_custom_scripts' );
 function optionsframework_custom_scripts() { ?>
+<script>
+var wei_send_test_mail_nonce = '<?php echo wp_create_nonce("wei_send_test_mail_nonce"); ?>';
+</script>
 <script type="text/javascript">
 jQuery(document).ready(function($) {
 	function toggleLayoutColumns() {
 		var selectedLayout = $('input[name="weisaygrace[wei_layout]"]:checked').val();
 		if (selectedLayout === 'card') {
-			$('#card_distinguish,#section-wei_layout_card_sidebar,#section-wei_layout_card_col,#section-wei_layout_card_excerpt').fadeIn(100);
+			$('#wei_about_card,#section-wei_layout_card_sidebar,#section-wei_layout_card_col,#section-wei_layout_card_excerpt').fadeIn(100);
 		} else {
-			$('#card_distinguish,#section-wei_layout_card_sidebar,#section-wei_layout_card_col,#section-wei_layout_card_excerpt').fadeOut(100);
+			$('#wei_about_card,#section-wei_layout_card_sidebar,#section-wei_layout_card_col,#section-wei_layout_card_excerpt').fadeOut(100);
 		}
 	}
 	toggleLayoutColumns();
 	$('input[name="weisaygrace[wei_layout]"]').change(function() {
 		toggleLayoutColumns();
+	});
+});
+jQuery(document).ready(function($) {
+	function toggleCustomGravatar() {
+		var selectedGravatar = $('input[name="weisaygrace[wei_gravatar]"]:checked').val();
+		if (selectedGravatar === 'five') {
+			$('#section-wei_gravatar_custom').fadeIn(100);
+		} else {
+			$('#section-wei_gravatar_custom').fadeOut(100);
+		}
+	}
+	toggleCustomGravatar();
+	$('input[name="weisaygrace[wei_gravatar]"]').change(function() {
+		toggleCustomGravatar();
+	});
+});
+jQuery(document).ready(function($){
+	$('#wei_send_test_mail').on('click', function(e){
+		e.preventDefault();
+		var $btn = $(this);
+		var $result = $('#wei_test_mail_result');
+		$btn.prop('disabled', true);
+		$result.css('color','blue').text('发送中...');
+		$.post(ajaxurl, { 
+			action: 'wei_send_test_mail',
+			nonce: wei_send_test_mail_nonce
+		}, function(response){
+			if(response.success){
+				$result.css('color', 'green').text(response.data);
+			} else {
+				$result.css('color', 'red').text(response.data);
+			}
+			$btn.prop('disabled', false);
+		});
 	});
 });
 </script>

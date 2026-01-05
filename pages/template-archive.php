@@ -78,10 +78,10 @@ if ($comment_stats === false) {
 	);
 	$comment_stats = [
 		'visitor' => (int) $visitor_comments,
-		'author'  => (int) $author_comments,
-		'total'   => (int) $total_comments,
+		'author' => (int) $author_comments,
+		'total' => (int) $total_comments,
 	];
-	set_transient('archives_comment_stats', $comment_stats, 10 * MINUTE_IN_SECONDS);
+	set_transient('archives_comment_stats', $comment_stats, 6 * HOUR_IN_SECONDS);
 }
 ?>
 	<li title="访客<?php echo $comment_stats['visitor']; ?>条，博主<?php echo $comment_stats['author']; ?>条">

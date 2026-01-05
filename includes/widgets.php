@@ -5,15 +5,15 @@ class Latest_Comments_Widget extends WP_Widget {
 	public function __construct() {
 		parent::__construct(
 			'latest_comments',
-			__('weisay最新评论', 'weisaygrace_theme'),
+			__('weisay最新评论', 'weisaygrace'),
 			array(
-				'description' => __('显示过滤管理员的最新评论列表', 'weisaygrace_theme'),
+				'description' => __('显示过滤管理员的最新评论列表', 'weisaygrace'),
 			)
 		);
 	}
 
 	public function widget($args, $instance) {
-		$title = apply_filters('widget_title', empty($instance['title']) ? __('最新评论', 'weisaygrace_theme') : $instance['title']);
+		$title = apply_filters('widget_title', empty($instance['title']) ? __('最新评论', 'weisaygrace') : $instance['title']);
 		$number = empty($instance['number']) ? 8 : absint($instance['number']);
 
 		echo $args['before_widget'];
@@ -61,7 +61,7 @@ if ($comments) {
 	}
 	echo '</ul>';
 } else {
-	echo '<p class="no-comments">' . __('暂无评论', 'weisaygrace_theme') . '</p>';
+	echo '<p class="no-comments">' . __('暂无评论', 'weisaygrace') . '</p>';
 }
 
 		echo $args['after_widget'];
@@ -72,11 +72,11 @@ if ($comments) {
 		$number = isset($instance['number']) ? absint($instance['number']) : 8;
 		?>
 		<p>
-			<label for="<?php echo $this->get_field_id('title'); ?>"><strong><?php _e('标题', 'weisaygrace_theme'); ?></strong></label>
+			<label for="<?php echo $this->get_field_id('title'); ?>"><strong><?php _e('标题', 'weisaygrace'); ?></strong></label>
 			<input class="widefat" id="<?php echo $this->get_field_id('title'); ?>" name="<?php echo $this->get_field_name('title'); ?>" type="text" value="<?php echo $title; ?>" />
 		</p>
 		<p>
-			<label for="<?php echo $this->get_field_id('number'); ?>"><strong><?php _e('显示数量', 'weisaygrace_theme'); ?></strong></label>
+			<label for="<?php echo $this->get_field_id('number'); ?>"><strong><?php _e('显示数量', 'weisaygrace'); ?></strong></label>
 			<input class="small-text" id="<?php echo $this->get_field_id('number'); ?>" name="<?php echo $this->get_field_name('number'); ?>" type="number" value="<?php echo $number; ?>" size="5" min="1" />
 		</p>
 		<?php
@@ -102,8 +102,8 @@ class Popular_Posts_Widget extends WP_Widget {
 	public function __construct() {
 		parent::__construct(
 			'popular_posts',
-			__('weisay热门日志', 'weisaygrace_theme'),
-			array('description' => __('需安装 WP-PostViews 插件，可显示热门文章列表，可配置展示数量和天数', 'weisaygrace_theme'))
+			__('weisay热门日志', 'weisaygrace'),
+			array('description' => __('需安装 WP-PostViews 插件，可显示热门文章列表，可配置展示数量和天数', 'weisaygrace'))
 		);
 	}
 
@@ -114,7 +114,7 @@ class Popular_Posts_Widget extends WP_Widget {
 			echo $args['before_title'] . apply_filters('widget_title', $instance['title']) . $args['after_title'];
 		}
 		if (function_exists('the_views')) {
-			echo '<ul>';
+			echo '<ul class="popular-posts">';
 			if (is_single() || is_category()) {
 				// 显示分类热门日志
 				$days = !empty($instance['category_days']) ? $instance['category_days'] : 2000;
@@ -133,28 +133,28 @@ class Popular_Posts_Widget extends WP_Widget {
 
 	// 后台表单
 	public function form($instance) {
-		$title = !empty($instance['title']) ? $instance['title'] : __('热门日志', 'weisaygrace_theme');
+		$title = !empty($instance['title']) ? $instance['title'] : __('热门日志', 'weisaygrace');
 		$number = !empty($instance['number']) ? absint($instance['number']) : 10;
 		$global_days = !empty($instance['global_days']) ? absint($instance['global_days']) : 500;
 		$category_days = !empty($instance['category_days']) ? absint($instance['category_days']) : 2000;
 		?>
 		<p>
-			<label for="<?php echo $this->get_field_id('title'); ?>"><strong><?php _e('标题', 'weisaygrace_theme'); ?></strong></label>
+			<label for="<?php echo $this->get_field_id('title'); ?>"><strong><?php _e('标题', 'weisaygrace'); ?></strong></label>
 			<input class="widefat" id="<?php echo $this->get_field_id('title'); ?>" name="<?php echo $this->get_field_name('title'); ?>" type="text" value="<?php echo esc_attr($title); ?>">
 		</p>
 		<p>
-			<label for="<?php echo $this->get_field_id('number'); ?>"><strong><?php _e('显示数量', 'weisaygrace_theme'); ?></strong></label>
+			<label for="<?php echo $this->get_field_id('number'); ?>"><strong><?php _e('显示数量', 'weisaygrace'); ?></strong></label>
 			<input class="small-text" id="<?php echo $this->get_field_id('number'); ?>" name="<?php echo $this->get_field_name('number'); ?>" type="number" step="1" min="1" value="<?php echo $number; ?>" size="5">
 		</p>
 		<p>
-			<label for="<?php echo $this->get_field_id('global_days'); ?>"><strong><?php _e('全局热门天数', 'weisaygrace_theme'); ?></strong></label>
+			<label for="<?php echo $this->get_field_id('global_days'); ?>"><strong><?php _e('全局热门天数', 'weisaygrace'); ?></strong></label>
 			<input class="small-text" id="<?php echo $this->get_field_id('global_days'); ?>" name="<?php echo $this->get_field_name('global_days'); ?>" type="number" step="1" min="1" value="<?php echo $global_days; ?>" size="5">
-			<small><?php _e('默认500天，只统计指定天数内发布的文章', 'weisaygrace_theme'); ?></small>
+			<small><?php _e('默认500天，只统计指定天数内发布的文章', 'weisaygrace'); ?></small>
 		</p>
 		<p>
-			<label for="<?php echo $this->get_field_id('category_days'); ?>"><strong><?php _e('分类热门天数', 'weisaygrace_theme'); ?></strong></label>
+			<label for="<?php echo $this->get_field_id('category_days'); ?>"><strong><?php _e('分类热门天数', 'weisaygrace'); ?></strong></label>
 			<input class="small-text" id="<?php echo $this->get_field_id('category_days'); ?>" name="<?php echo $this->get_field_name('category_days'); ?>" type="number" step="1" min="1" value="<?php echo $category_days; ?>" size="5">
-			<small><?php _e('默认2000天，只统计指定天数内发布的文章', 'weisaygrace_theme'); ?></small>
+			<small><?php _e('默认2000天，只统计指定天数内发布的文章', 'weisaygrace'); ?></small>
 		</p>
 		<?php
 	}
@@ -180,8 +180,8 @@ class Tabbed_Posts_Widget extends WP_Widget {
 	public function __construct() {
 		parent::__construct(
 			'tabbed_posts',
-			__('weisay选项卡日志', 'weisaygrace_theme'),
-			array('description' => __('显示最新、热评和随机日志的Tab式列表', 'weisaygrace_theme'))
+			__('weisay选项卡日志', 'weisaygrace'),
+			array('description' => __('显示最新、热评和随机日志的Tab式列表', 'weisaygrace'))
 		);
 	}
 
@@ -194,9 +194,9 @@ class Tabbed_Posts_Widget extends WP_Widget {
 		?>
 		<div class="tab">
 			<ul class="tabnav">
-				<li><?php _e('最新日志', 'weisaygrace_theme'); ?></li>
-				<li class="selected"><?php _e('热评日志', 'weisaygrace_theme'); ?></li>
-				<li><?php _e('随机日志', 'weisaygrace_theme'); ?></li>
+				<li><?php _e('最新日志', 'weisaygrace'); ?></li>
+				<li class="selected"><?php _e('热评日志', 'weisaygrace'); ?></li>
+				<li><?php _e('随机日志', 'weisaygrace'); ?></li>
 			</ul>
 		</div>
 		<div class="clear"></div>
@@ -215,7 +215,7 @@ class Tabbed_Posts_Widget extends WP_Widget {
 						<li><a href="<?php the_permalink(); ?>" rel="bookmark" title="<?php the_title_attribute(); ?>"><?php the_title(); ?></a></li>
 					<?php endwhile;
 				else :
-					echo '<li>'.__('暂无最新日志', 'weisaygrace_theme').'</li>';
+					echo '<li>'.__('暂无最新日志', 'weisaygrace').'</li>';
 				endif;
 				wp_reset_postdata();
 				?>
@@ -227,7 +227,7 @@ class Tabbed_Posts_Widget extends WP_Widget {
 				if(function_exists('get_hot_reviews')) {
 					echo get_hot_reviews($popular_posts_num, $popular_days);
 				} else {
-					echo '<li>'.__('暂无热评日志', 'weisaygrace_theme').'</li>';
+					echo '<li>'.__('暂无热评日志', 'weisaygrace').'</li>';
 				}
 				?>
 			</ul>
@@ -245,7 +245,7 @@ class Tabbed_Posts_Widget extends WP_Widget {
 						<li><a href="<?php the_permalink(); ?>" rel="bookmark" title="<?php the_title_attribute(); ?>"><?php the_title(); ?></a></li>
 					<?php endwhile;
 				else :
-					echo '<li>'.__('暂无随机日志', 'weisaygrace_theme').'</li>';
+					echo '<li>'.__('暂无随机日志', 'weisaygrace').'</li>';
 				endif;
 				wp_reset_postdata();
 				?>
@@ -261,13 +261,13 @@ class Tabbed_Posts_Widget extends WP_Widget {
 		$popular_days = !empty($instance['popular_days']) ? $instance['popular_days'] : 365;
 		?>
 		<p>
-			<label for="<?php echo $this->get_field_id('popular_posts_num'); ?>"><strong><?php _e('显示文章数量', 'weisaygrace_theme'); ?></strong></label>
+			<label for="<?php echo $this->get_field_id('popular_posts_num'); ?>"><strong><?php _e('显示文章数量', 'weisaygrace'); ?></strong></label>
 			<input class="small-text" id="<?php echo $this->get_field_id('popular_posts_num'); ?>"name="<?php echo $this->get_field_name('popular_posts_num'); ?>" type="number" step="1" min="1" value="<?php echo esc_attr($popular_posts_num); ?>" size="5" />
 		</p>
 		<p>
-			<label for="<?php echo $this->get_field_id('popular_days'); ?>"><strong><?php _e('热评日志天数范围', 'weisaygrace_theme'); ?></strong></label>
+			<label for="<?php echo $this->get_field_id('popular_days'); ?>"><strong><?php _e('热评日志天数范围', 'weisaygrace'); ?></strong></label>
 			<input class="small-text" id="<?php echo $this->get_field_id('popular_days'); ?>" name="<?php echo $this->get_field_name('popular_days'); ?>" type="number" step="1" min="1" value="<?php echo esc_attr($popular_days); ?>" size="5" />
-			<small><?php _e('只统计指定天数内发布文章的评论数量', 'weisaygrace_theme'); ?></small>
+			<small><?php _e('只统计指定天数内发布文章的评论数量', 'weisaygrace'); ?></small>
 		</p>
 		<?php
 	}
@@ -291,15 +291,15 @@ class Friend_Links_Widget extends WP_Widget {
 	public function __construct() {
 		parent::__construct(
 			'friend_links',
-			__('weisay友情链接', 'weisaygrace_theme'),
-			array('description' => __('显示友情链接列表', 'weisaygrace_theme'))
+			__('weisay友情链接', 'weisaygrace'),
+			array('description' => __('显示友情链接列表', 'weisaygrace'))
 		);
 	}
 
 	public function widget($args, $instance) {
 		echo $args['before_widget'];
 
-		$title = !empty($instance['title']) ? $instance['title'] : __('友情链接', 'weisaygrace_theme');
+		$title = !empty($instance['title']) ? $instance['title'] : __('友情链接', 'weisaygrace');
 		echo $args['before_title'] . apply_filters('widget_title', $title) . $args['after_title'];
 		
 		$category_id = !empty($instance['link_category']) ? $instance['link_category'] : 0;
@@ -319,20 +319,20 @@ class Friend_Links_Widget extends WP_Widget {
 
 	// 后台表单
 	public function form($instance) {
-		$title = !empty($instance['title']) ? $instance['title'] : __('友情链接', 'weisaygrace_theme');
+		$title = !empty($instance['title']) ? $instance['title'] : __('友情链接', 'weisaygrace');
 		$link_category = !empty($instance['link_category']) ? $instance['link_category'] : '';
 
 		// 获取所有链接分类
 		$link_categories = get_terms('link_category', array('hide_empty' => false));
 		?>
 		<p>
-			<label for="<?php echo $this->get_field_id('title'); ?>"><strong><?php _e('标题', 'weisaygrace_theme'); ?></strong></label>
+			<label for="<?php echo $this->get_field_id('title'); ?>"><strong><?php _e('标题', 'weisaygrace'); ?></strong></label>
 			<input class="widefat" id="<?php echo $this->get_field_id('title'); ?>" name="<?php echo $this->get_field_name('title'); ?>" type="text" value="<?php echo esc_attr($title); ?>">
 		</p>
 		<p>
-			<label for="<?php echo $this->get_field_id('link_category'); ?>"><strong><?php _e('链接分类', 'weisaygrace_theme'); ?></strong></label>
+			<label for="<?php echo $this->get_field_id('link_category'); ?>"><strong><?php _e('链接分类', 'weisaygrace'); ?></strong></label>
 			<select class="widefat" id="<?php echo $this->get_field_id('link_category'); ?>" name="<?php echo $this->get_field_name('link_category'); ?>">
-				<option value=""><?php _e('所有链接', 'weisaygrace_theme'); ?></option>
+				<option value=""><?php _e('所有链接', 'weisaygrace'); ?></option>
 				<?php foreach ($link_categories as $category) : ?>
 					<option value="<?php echo $category->term_id; ?>" 
 							<?php selected($link_category, $category->term_id); ?>>
@@ -363,14 +363,14 @@ class Colourful_Tag_Cloud_Widget extends WP_Widget {
 	public function __construct() {
 		parent::__construct(
 			'colourful_tag_cloud',
-			__('weisay彩色标签云', 'weisaygrace_theme'),
-			array('description' => __('可配置的彩色标签云', 'weisaygrace_theme'))
+			__('weisay彩色标签云', 'weisaygrace'),
+			array('description' => __('可配置的彩色标签云', 'weisaygrace'))
 		);
 	}
 
 	public function form($instance) {
 		$instance = wp_parse_args((array)$instance, array(
-			'title' => __('标签云', 'weisaygrace_theme'),
+			'title' => __('标签云', 'weisaygrace'),
 			'number' => 26,
 			'orderby' => 'name',
 			'order' => 'ASC',
@@ -378,31 +378,31 @@ class Colourful_Tag_Cloud_Widget extends WP_Widget {
 		));
 		?>
 		<p>
-			<label for="<?php echo esc_attr($this->get_field_id('title')); ?>"><strong><?php _e('标题', 'weisaygrace_theme'); ?></strong></label>
+			<label for="<?php echo esc_attr($this->get_field_id('title')); ?>"><strong><?php _e('标题', 'weisaygrace'); ?></strong></label>
 			<input class="widefat" id="<?php echo esc_attr($this->get_field_id('title')); ?>" name="<?php echo esc_attr($this->get_field_name('title')); ?>" type="text" value="<?php echo esc_attr($instance['title']); ?>">
 		</p>
 		<p>
-			<label for="<?php echo esc_attr($this->get_field_id('number')); ?>"><strong><?php _e('显示数量', 'weisaygrace_theme'); ?></strong></label>
+			<label for="<?php echo esc_attr($this->get_field_id('number')); ?>"><strong><?php _e('显示数量', 'weisaygrace'); ?></strong></label>
 			<input class="small-text" id="<?php echo esc_attr($this->get_field_id('number')); ?>" name="<?php echo esc_attr($this->get_field_name('number')); ?>" type="number" value="<?php echo absint($instance['number']); ?>" min="1" max="100">
 		</p>
 		<p>
-			<label for="<?php echo esc_attr($this->get_field_id('orderby')); ?>"><strong><?php _e('排序依据', 'weisaygrace_theme'); ?></strong></label>
+			<label for="<?php echo esc_attr($this->get_field_id('orderby')); ?>"><strong><?php _e('排序依据', 'weisaygrace'); ?></strong></label>
 			<select class="widefat" id="<?php echo esc_attr($this->get_field_id('orderby')); ?>" name="<?php echo esc_attr($this->get_field_name('orderby')); ?>">
 				<option value="name" <?php selected($instance['orderby'], 'name'); ?>><?php _e('按名称'); ?></option>
 				<option value="count" <?php selected($instance['orderby'], 'count'); ?>><?php _e('按使用次数'); ?></option>
 			</select>
 		</p>
 		<p>
-			<label for="<?php echo esc_attr($this->get_field_id('order')); ?>"><strong><?php _e('排序方式', 'weisaygrace_theme'); ?></strong></label>
+			<label for="<?php echo esc_attr($this->get_field_id('order')); ?>"><strong><?php _e('排序方式', 'weisaygrace'); ?></strong></label>
 			<select class="widefat" id="<?php echo esc_attr($this->get_field_id('order')); ?>" name="<?php echo esc_attr($this->get_field_name('order')); ?>">
-				<option value="ASC" <?php selected($instance['order'], 'ASC'); ?>><?php _e('升序 (A→Z)', 'weisaygrace_theme'); ?></option>
-				<option value="DESC" <?php selected($instance['order'], 'DESC'); ?>><?php _e('降序 (Z→A)', 'weisaygrace_theme'); ?></option>
-				<option value="RAND" <?php selected($instance['order'], 'RAND'); ?>><?php _e('随机排序', 'weisaygrace_theme'); ?></option>
+				<option value="ASC" <?php selected($instance['order'], 'ASC'); ?>><?php _e('升序 (A→Z)', 'weisaygrace'); ?></option>
+				<option value="DESC" <?php selected($instance['order'], 'DESC'); ?>><?php _e('降序 (Z→A)', 'weisaygrace'); ?></option>
+				<option value="RAND" <?php selected($instance['order'], 'RAND'); ?>><?php _e('随机排序', 'weisaygrace'); ?></option>
 			</select>
 		</p>
 		<p>
 			<input type="checkbox" id="<?php echo esc_attr($this->get_field_id('show_count')); ?>" name="<?php echo esc_attr($this->get_field_name('show_count')); ?>" value="1" <?php checked($instance['show_count'], 1); ?>>
-			<label for="<?php echo esc_attr($this->get_field_id('show_count')); ?>"><strong><?php _e('显示标签计数', 'weisaygrace_theme'); ?></strong></label>
+			<label for="<?php echo esc_attr($this->get_field_id('show_count')); ?>"><strong><?php _e('显示标签计数', 'weisaygrace'); ?></strong></label>
 		</p>
 		<?php
 	}
@@ -453,8 +453,8 @@ class Blog_Stats_Widget extends WP_Widget {
 	public function __construct() {
 		parent::__construct(
 			'blog_stats',
-			__('weisay博客统计', 'weisaygrace_theme'),
-			array('description' => __('显示博客的各种统计数据', 'weisaygrace_theme'))
+			__('weisay博客统计', 'weisaygrace'),
+			array('description' => __('显示博客的各种统计数据', 'weisaygrace'))
 		);
 	}
 
@@ -513,11 +513,11 @@ class Blog_Stats_Widget extends WP_Widget {
 		$site_launch_date = isset($instance['site_launch_date']) ? $instance['site_launch_date'] : '2007-04-22';
 		?>
 		<p>
-			<label for="<?php echo $this->get_field_id('title'); ?>"><strong><?php _e('标题', 'weisaygrace_theme'); ?></strong></label>
+			<label for="<?php echo $this->get_field_id('title'); ?>"><strong><?php _e('标题', 'weisaygrace'); ?></strong></label>
 			<input class="widefat" id="<?php echo $this->get_field_id('title'); ?>" name="<?php echo $this->get_field_name('title'); ?>" type="text" value="<?php echo esc_attr($title); ?>" />
 		</p>
 		<p>
-			<label for="<?php echo $this->get_field_id('site_launch_date'); ?>"><strong><?php _e('建站日期 (YYYY-MM-DD)', 'weisaygrace_theme'); ?></strong></label>
+			<label for="<?php echo $this->get_field_id('site_launch_date'); ?>"><strong><?php _e('建站日期 (YYYY-MM-DD)', 'weisaygrace'); ?></strong></label>
 			<input class="widefat" id="<?php echo $this->get_field_id('site_launch_date'); ?>" name="<?php echo $this->get_field_name('site_launch_date'); ?>" type="text" value="<?php echo esc_attr($site_launch_date); ?>" />
 		</p>
 		<?php
@@ -537,14 +537,14 @@ function register_blog_stats_widget() {
 add_action('widgets_init', 'register_blog_stats_widget');
 
 
-//关于博主小工具
+//关于博主/评论者小工具
 class About_Author_Widget extends WP_Widget {
 
 	public function __construct() {
 		parent::__construct(
 			'about_author',
-			__('weisay关于博主', 'weisaygrace_theme'),
-			array('description' => __('显示博主信息和统计', 'weisaygrace_theme'))
+			__('weisay关于博主/评论者', 'weisaygrace'),
+			array('description' => __('显示博主/评论者的信息和统计', 'weisaygrace'))
 		);
 	}
 
@@ -565,10 +565,107 @@ class About_Author_Widget extends WP_Widget {
 	public function widget($args, $instance) {
 		$instance = wp_parse_args($instance, $this->get_defaults());
 		echo $args['before_widget'];
+		
+		$commenter = wp_get_current_commenter();
+		$commenter_email = $commenter['comment_author_email'] ?? '';
 
-		// 获取各种统计信息
-		$stats = array();
+		if ($commenter_email && !is_user_logged_in()) {
+			$this->render_commenter($commenter, $instance);
+		} else {
+			$this->render_author($instance);
+		}
+
+		echo $args['after_widget'];
+	}
+
+	// 关于评论者
+	private function render_commenter($commenter, $instance) {
 		global $wpdb;
+		$email = $commenter['comment_author_email'];
+		$name  = $commenter['comment_author'];
+
+		if (empty($email) || !is_email($email)) {
+			return;
+		}
+		
+		$fake_comment = (object) [
+			'comment_author_email' => $email,
+			'user_id' => 0, // 评论者默认不是管理员
+		];
+
+		$cache_key = 'commenter_' . md5(strtolower($email));
+
+		// 先读缓存
+		$stats = get_transient($cache_key);
+		
+		// 查询数据
+		if ($stats === false) {
+			$stats = $wpdb->get_row($wpdb->prepare("
+				SELECT 
+					COUNT(*) AS approved,
+					MIN(comment_date) AS first_date,
+					MAX(comment_date) AS last_date
+				FROM {$wpdb->comments}
+				WHERE comment_author_email = %s
+				AND comment_approved = '1'
+				AND (comment_type = '' OR comment_type = 'comment')
+				", $email));
+			if ($stats && isset($stats->approved)) {
+			set_transient($cache_key, $stats, 6 * HOUR_IN_SECONDS);
+			}
+		}
+		if (!is_object($stats)) {
+			return;
+		}
+		// 处理数据
+		$approved = (int) ($stats->approved ?? 0);
+		if ($approved === 0) {
+			return;
+		}
+		$first	= $stats->first_date ?? null;
+		$last	 = $stats->last_date ?? null;
+		?>
+		<div class="about-author">
+		<?php if (!empty($instance['cover'])) : ?>
+			<div class="author-cover commenter-cover" style="background-image:url('<?php echo esc_url($instance['cover']); ?>')"></div>
+		<?php endif; ?>
+			<div class="author-avatar">
+				<?php echo get_avatar($email, 96, '', $name); ?>
+			</div>
+			<div class="author-info">
+				<h3 class="author-name"><?php echo esc_html($name ?: __('热心读者', 'weisaygrace')); ?><?php if ( is_active_sidebar( 'sidebar-7' ) ) : ?><?php echo display_comment_level_commenter($fake_comment); ?><?php endif; ?></h3>
+					<div class="author-description">
+						<?php echo get_random_verse(); ?>
+					</div>
+					<div class="author-stats commenter-stats">
+							<div class="stat-item">
+								<span class="stat-number"><?php echo esc_html(number_format_i18n($approved)); ?></span>
+								<span class="stat-label"><?php _e('评论', 'weisaygrace'); ?></span>
+							</div>
+							<div class="stat-item">
+								<span class="stat-number"><?php echo esc_html(date_i18n('Y-m-d', strtotime($last))); ?></span>
+								<span class="stat-label"><?php _e('最新评论日期', 'weisaygrace'); ?></span>
+							</div>
+							<div class="stat-item">
+								<span class="stat-number"><?php echo esc_html(date_i18n('Y-m-d', strtotime($first))); ?></span>
+								<span class="stat-label"><?php _e('首次评论日期', 'weisaygrace'); ?></span>
+							</div>
+					</div>
+			</div>
+		</div>
+		<?php
+	}
+
+	// 关于博主
+	private function render_author($instance) {
+		global $wpdb;
+		
+		$cache_key = 'about_author';
+		$stats = get_transient($cache_key);
+		
+		if (!is_array($stats)) {
+	
+		$stats = array();
 
 		// 文章数
 		if (in_array('posts', $instance['show_stats'])) {
@@ -576,7 +673,7 @@ class About_Author_Widget extends WP_Widget {
 			$published_posts = $post_count->publish;
 			$stats['posts'] = array(
 				'number' => number_format($published_posts),
-				'label' => __('文章', 'weisaygrace_theme')
+				'label' => __('文章', 'weisaygrace')
 			);
 		}
 
@@ -587,7 +684,7 @@ class About_Author_Widget extends WP_Widget {
 			if ($approved_comments > 0) {
 				$stats['comments'] = array(
 					'number' => number_format($approved_comments),
-					'label' => __('评论', 'weisaygrace_theme')
+					'label' => __('评论', 'weisaygrace')
 				);
 			}
 		}
@@ -597,7 +694,7 @@ class About_Author_Widget extends WP_Widget {
 			$categories_count = wp_count_terms('category');
 			$stats['categories'] = array(
 				'number' => number_format($categories_count),
-				'label' => __('分类', 'weisaygrace_theme')
+				'label' => __('分类', 'weisaygrace')
 			);
 		}
 
@@ -608,7 +705,7 @@ class About_Author_Widget extends WP_Widget {
 			if ($published_pages > 0) {
 				$stats['pages'] = array(
 					'number' => number_format($published_pages),
-					'label' => __('页面', 'weisaygrace_theme')
+					'label' => __('页面', 'weisaygrace')
 				);
 			}
 		}
@@ -619,7 +716,7 @@ class About_Author_Widget extends WP_Widget {
 			if ($links_count > 0) {
 				$stats['links'] = array(
 					'number' => number_format($links_count),
-					'label' => __('友链', 'weisaygrace_theme')
+					'label' => __('友链', 'weisaygrace')
 				);
 			}
 		}
@@ -630,7 +727,7 @@ class About_Author_Widget extends WP_Widget {
 			if ($tags_count > 0) {
 				$stats['tags'] = array(
 					'number' => number_format($tags_count),
-					'label' => __('标签', 'weisaygrace_theme')
+					'label' => __('标签', 'weisaygrace')
 				);
 			}
 		}
@@ -640,15 +737,18 @@ class About_Author_Widget extends WP_Widget {
 			$post_count = wp_count_posts();
 			$stats['posts'] = array(
 				'number' => number_format($post_count->publish),
-				'label' => __('文章', 'weisaygrace_theme')
+				'label' => __('文章', 'weisaygrace')
 			);
 			
 			$categories_count = wp_count_terms('category');
 			$stats['categories'] = array(
 				'number' => number_format($categories_count),
-				'label' => __('分类', 'weisaygrace_theme')
+				'label' => __('分类', 'weisaygrace')
 			);
 		}
+		
+		set_transient($cache_key, $stats, 2 * HOUR_IN_SECONDS);
+	}
 		?>
 		<div class="about-author">
 			<?php if (!empty($instance['cover'])) : ?>
@@ -682,7 +782,6 @@ class About_Author_Widget extends WP_Widget {
 		</div>
 		
 		<?php
-		echo $args['after_widget'];
 	}
 
 	// 后台表单
@@ -693,42 +792,43 @@ class About_Author_Widget extends WP_Widget {
 		}
 		?>
 		<p>
-			<label for="<?php echo $this->get_field_id('name'); ?>"><strong><?php _e('博主名字', 'weisaygrace_theme'); ?></strong></label>
+			<label for="<?php echo $this->get_field_id('name'); ?>"><strong><?php _e('博主名字', 'weisaygrace'); ?></strong></label>
 			<input class="widefat" id="<?php echo $this->get_field_id('name'); ?>" name="<?php echo $this->get_field_name('name'); ?>" type="text" value="<?php echo esc_attr($instance['name']); ?>">
 		</p>
 		<p>
-			<label for="<?php echo $this->get_field_id('description'); ?>"><strong><?php _e('自我介绍', 'weisaygrace_theme'); ?></strong></label>
+			<label for="<?php echo $this->get_field_id('description'); ?>"><strong><?php _e('自我介绍', 'weisaygrace'); ?></strong></label>
 			<textarea class="widefat" id="<?php echo $this->get_field_id('description'); ?>" name="<?php echo $this->get_field_name('description'); ?>" rows="3"><?php echo esc_textarea($instance['description']); ?></textarea>
 		</p>
 		<p>
-			<label for="<?php echo $this->get_field_id('email'); ?>"><strong><?php _e('邮箱（仅用于获取头像）', 'weisaygrace_theme'); ?></strong></label>
+			<label for="<?php echo $this->get_field_id('email'); ?>"><strong><?php _e('邮箱（仅用于获取头像）', 'weisaygrace'); ?></strong></label>
 			<input class="widefat" id="<?php echo $this->get_field_id('email'); ?>" name="<?php echo $this->get_field_name('email'); ?>" type="email" value="<?php echo esc_attr($instance['email']); ?>">
 		</p>
 		<p>
-			<label for="<?php echo $this->get_field_id('cover'); ?>"><strong><?php _e('顶部背景图url', 'weisaygrace_theme'); ?></strong></label>
+			<label for="<?php echo $this->get_field_id('cover'); ?>"><strong><?php _e('顶部背景图url', 'weisaygrace'); ?></strong></label>
 			<input class="widefat" id="<?php echo $this->get_field_id('cover'); ?>"  name="<?php echo $this->get_field_name('cover'); ?>" type="text" value="<?php echo esc_url($instance['cover']); ?>">
-			<small><?php _e('可以替换图片地址更换背景图片', 'weisaygrace_theme'); ?></small>
+			<small><?php _e('可以替换图片地址更换背景图片', 'weisaygrace'); ?></small>
 		</p>
 		<p>
-			<label><strong><?php _e('显示统计', 'weisaygrace_theme'); ?></strong></label><br>
+			<label><strong><?php _e('显示统计', 'weisaygrace'); ?></strong></label><br>
 			<input type="checkbox" id="<?php echo $this->get_field_id('show_stats_posts'); ?>" name="<?php echo $this->get_field_name('show_stats'); ?>[]" value="posts" <?php checked(in_array('posts', $instance['show_stats'])); ?>>
-			<label for="<?php echo $this->get_field_id('show_stats_posts'); ?>"><?php _e('文章数', 'weisaygrace_theme'); ?></label><br>
+			<label for="<?php echo $this->get_field_id('show_stats_posts'); ?>"><?php _e('文章数', 'weisaygrace'); ?></label><br>
 			
 			<input type="checkbox" id="<?php echo $this->get_field_id('show_stats_comments'); ?>" name="<?php echo $this->get_field_name('show_stats'); ?>[]" value="comments" <?php checked(in_array('comments', $instance['show_stats'])); ?>>
-			<label for="<?php echo $this->get_field_id('show_stats_comments'); ?>"><?php _e('评论数', 'weisaygrace_theme'); ?></label><br>
+			<label for="<?php echo $this->get_field_id('show_stats_comments'); ?>"><?php _e('评论数', 'weisaygrace'); ?></label><br>
 			
 			<input type="checkbox" id="<?php echo $this->get_field_id('show_stats_categories'); ?>" name="<?php echo $this->get_field_name('show_stats'); ?>[]" value="categories" <?php checked(in_array('categories', $instance['show_stats'])); ?>>
-			<label for="<?php echo $this->get_field_id('show_stats_categories'); ?>"><?php _e('分类数', 'weisaygrace_theme'); ?></label><br>
+			<label for="<?php echo $this->get_field_id('show_stats_categories'); ?>"><?php _e('分类数', 'weisaygrace'); ?></label><br>
 			
 			<input type="checkbox" id="<?php echo $this->get_field_id('show_stats_pages'); ?>" name="<?php echo $this->get_field_name('show_stats'); ?>[]" value="pages" <?php checked(in_array('pages', $instance['show_stats'])); ?>>
-			<label for="<?php echo $this->get_field_id('show_stats_pages'); ?>"><?php _e('页面数', 'weisaygrace_theme'); ?></label><br>
+			<label for="<?php echo $this->get_field_id('show_stats_pages'); ?>"><?php _e('页面数', 'weisaygrace'); ?></label><br>
 			
 			<input type="checkbox" id="<?php echo $this->get_field_id('show_stats_links'); ?>" name="<?php echo $this->get_field_name('show_stats'); ?>[]" value="links" <?php checked(in_array('links', $instance['show_stats'])); ?>>
-			<label for="<?php echo $this->get_field_id('show_stats_links'); ?>"><?php _e('友链数', 'weisaygrace_theme'); ?></label><br>
+			<label for="<?php echo $this->get_field_id('show_stats_links'); ?>"><?php _e('友链数', 'weisaygrace'); ?></label><br>
 			
 			<input type="checkbox" id="<?php echo $this->get_field_id('show_stats_tags'); ?>" name="<?php echo $this->get_field_name('show_stats'); ?>[]" value="tags" <?php checked(in_array('tags', $instance['show_stats'])); ?>>
-			<label for="<?php echo $this->get_field_id('show_stats_tags'); ?>"><?php _e('标签数', 'weisaygrace_theme'); ?></label>
+			<label for="<?php echo $this->get_field_id('show_stats_tags'); ?>"><?php _e('标签数', 'weisaygrace'); ?></label>
 		</p>
+		<p><label>若用户发表了评论，则获取cookie来展示评论者的信息。</label></p>
 		<?php
 	}
 
@@ -749,7 +849,7 @@ class About_Author_Widget extends WP_Widget {
 				}
 			}
 		}
-		
+		delete_transient('about_author');
 		return $instance;
 	}
 }
@@ -765,8 +865,8 @@ class Reader_Wall_Widget extends WP_Widget {
 	public function __construct() {
 		parent::__construct(
 			'reader_wall',
-			__('weisay读者墙', 'weisaygrace_theme'),
-			array('description' => __('显示近期活跃评论者的头像墙', 'weisaygrace_theme'))
+			__('weisay读者墙', 'weisaygrace'),
+			array('description' => __('显示近期活跃评论者的头像墙', 'weisaygrace'))
 		);
 	}
 
@@ -831,26 +931,26 @@ class Reader_Wall_Widget extends WP_Widget {
 
 	// 小工具后台表单
 	public function form($instance) {
-		$title = isset($instance['title']) ? esc_attr($instance['title']) : __('读者墙', 'weisaygrace_theme');
+		$title = isset($instance['title']) ? esc_attr($instance['title']) : __('读者墙', 'weisaygrace');
 		$days = isset($instance['days']) ? absint($instance['days']) : 365;
 		$limit = isset($instance['limit']) ? absint($instance['limit']) : 15;
 		$show_count = isset($instance['show_count']) ? (bool)$instance['show_count'] : true;
 		?>
 		<p>
-			<label for="<?php echo $this->get_field_id('title'); ?>"><strong><?php _e('标题', 'weisaygrace_theme'); ?></strong></label>
+			<label for="<?php echo $this->get_field_id('title'); ?>"><strong><?php _e('标题', 'weisaygrace'); ?></strong></label>
 			<input class="widefat" id="<?php echo $this->get_field_id('title'); ?>" name="<?php echo $this->get_field_name('title'); ?>" type="text" value="<?php echo $title; ?>" />
 		</p>
 		<p>
-			<label for="<?php echo $this->get_field_id('days'); ?>"><strong><?php _e('统计多少天内的评论', 'weisaygrace_theme'); ?></strong></label>
+			<label for="<?php echo $this->get_field_id('days'); ?>"><strong><?php _e('统计多少天内的评论', 'weisaygrace'); ?></strong></label>
 			<input class="small-text" id="<?php echo $this->get_field_id('days'); ?>" name="<?php echo $this->get_field_name('days'); ?>" type="number" min="1" value="<?php echo $days; ?>" />
 		</p>
 		<p>
-			<label for="<?php echo $this->get_field_id('limit'); ?>"><strong><?php _e('显示数量', 'weisaygrace_theme'); ?></strong></label>
+			<label for="<?php echo $this->get_field_id('limit'); ?>"><strong><?php _e('显示数量', 'weisaygrace'); ?></strong></label>
 			<input class="small-text" id="<?php echo $this->get_field_id('limit'); ?>" name="<?php echo $this->get_field_name('limit'); ?>" type="number" min="1" value="<?php echo $limit; ?>" />
 		</p>
 		<p>
 			<input class="checkbox" type="checkbox" id="<?php echo $this->get_field_id('show_count'); ?>" name="<?php echo $this->get_field_name('show_count'); ?>" <?php checked($show_count); ?> />
-			<label for="<?php echo $this->get_field_id('show_count'); ?>"><strong><?php _e('title中显示用户的评论数量', 'weisaygrace_theme'); ?></strong></label>
+			<label for="<?php echo $this->get_field_id('show_count'); ?>"><strong><?php _e('title中显示用户的评论数量', 'weisaygrace'); ?></strong></label>
 		</p>
 		<?php
 	}
@@ -1013,26 +1113,26 @@ class Article_Index_Widget extends WP_Widget {
 		$depth_level = isset($instance['depth_level']) ? absint($instance['depth_level']) : 0;
 		?>
 		<p>
-			<label for="<?php echo $this->get_field_id('title'); ?>"><strong><?php _e('标题', 'weisaygrace_theme'); ?></strong></label>
+			<label for="<?php echo $this->get_field_id('title'); ?>"><strong><?php _e('标题', 'weisaygrace'); ?></strong></label>
 			<input class="widefat" id="<?php echo $this->get_field_id('title'); ?>" name="<?php echo $this->get_field_name('title'); ?>" type="text" value="<?php echo esc_attr($title); ?>" />
 		</p>
 		<p>
-			<label for="<?php echo $this->get_field_id('min_headers'); ?>"><strong><?php _e('需要几个h标签才显示目录', 'weisaygrace_theme'); ?></strong></label>
+			<label for="<?php echo $this->get_field_id('min_headers'); ?>"><strong><?php _e('需要几个h标签才显示目录', 'weisaygrace'); ?></strong></label>
 			<select class="widefat" id="<?php echo $this->get_field_id('min_headers'); ?>" name="<?php echo $this->get_field_name('min_headers'); ?>">
-				<option value="2" <?php selected($min_headers, 2); ?>><?php _e('2个及以上', 'weisaygrace_theme'); ?></option>
-				<option value="3" <?php selected($min_headers, 3); ?>><?php _e('3个及以上', 'weisaygrace_theme'); ?></option>
-				<option value="4" <?php selected($min_headers, 4); ?>><?php _e('4个及以上', 'weisaygrace_theme'); ?></option>
-				<option value="5" <?php selected($min_headers, 5); ?>><?php _e('5个及以上', 'weisaygrace_theme'); ?></option>
+				<option value="2" <?php selected($min_headers, 2); ?>><?php _e('2个及以上', 'weisaygrace'); ?></option>
+				<option value="3" <?php selected($min_headers, 3); ?>><?php _e('3个及以上', 'weisaygrace'); ?></option>
+				<option value="4" <?php selected($min_headers, 4); ?>><?php _e('4个及以上', 'weisaygrace'); ?></option>
+				<option value="5" <?php selected($min_headers, 5); ?>><?php _e('5个及以上', 'weisaygrace'); ?></option>
 			</select>
 		</p>
 		<p>
-			<label for="<?php echo $this->get_field_id('depth_level'); ?>"><strong><?php _e('目录显示深度', 'weisaygrace_theme'); ?></strong></label>
+			<label for="<?php echo $this->get_field_id('depth_level'); ?>"><strong><?php _e('目录显示深度', 'weisaygrace'); ?></strong></label>
 			<select class="widefat" id="<?php echo $this->get_field_id('depth_level'); ?>" name="<?php echo $this->get_field_name('depth_level'); ?>">
-				<option value="0" <?php selected($depth_level, 0); ?>><?php _e('不限制深度', 'weisaygrace_theme'); ?></option>
-				<option value="1" <?php selected($depth_level, 1); ?>><?php _e('1层深度', 'weisaygrace_theme'); ?></option>
-				<option value="2" <?php selected($depth_level, 2); ?>><?php _e('2层深度', 'weisaygrace_theme'); ?></option>
-				<option value="3" <?php selected($depth_level, 3); ?>><?php _e('3层深度', 'weisaygrace_theme'); ?></option>
-				<option value="4" <?php selected($depth_level, 4); ?>><?php _e('4层深度', 'weisaygrace_theme'); ?></option>
+				<option value="0" <?php selected($depth_level, 0); ?>><?php _e('不限制深度', 'weisaygrace'); ?></option>
+				<option value="1" <?php selected($depth_level, 1); ?>><?php _e('1层深度', 'weisaygrace'); ?></option>
+				<option value="2" <?php selected($depth_level, 2); ?>><?php _e('2层深度', 'weisaygrace'); ?></option>
+				<option value="3" <?php selected($depth_level, 3); ?>><?php _e('3层深度', 'weisaygrace'); ?></option>
+				<option value="4" <?php selected($depth_level, 4); ?>><?php _e('4层深度', 'weisaygrace'); ?></option>
 			</select>
 		</p>
 		<?php
@@ -1264,11 +1364,52 @@ class Comment_Level_Widget extends WP_Widget {
 				)
 			);
 			$comment_counts[$email] = $count;
-			set_transient($cache_key, $comment_counts, 2 * HOUR_IN_SECONDS);
+			set_transient($cache_key, $comment_counts, 6 * HOUR_IN_SECONDS);
 		}
 		return $comment_counts[$email];
 	}
 }
+
+// 清理某邮箱的缓存
+function clear_comment_count_cache($comment_id) {
+	$comment = get_comment($comment_id);
+	if (!$comment || empty($comment->comment_author_email)) return;
+	$email = sanitize_email($comment->comment_author_email);
+	if (empty($email)) return;
+	$first = strtolower($email[0]);
+	$group = ctype_alnum($first) ? $first : 'other';
+	$cache_key = 'comment_level_counts_' . $group;
+	$comment_counts = get_transient($cache_key);
+	if ($comment_counts !== false && isset($comment_counts[$email])) {
+		unset($comment_counts[$email]); // 移除该邮箱缓存
+		set_transient($cache_key, $comment_counts, 6 * HOUR_IN_SECONDS);
+	}
+	// 顺带清理归档页评论数统计的缓存
+	delete_transient('archives_comment_stats');
+	// 再顺带清理侧边栏的关于评论者的缓存
+	$commenter = wp_get_current_commenter();
+	$commenter_email = trim($commenter['comment_author_email']);
+	if ($commenter_email && is_email($commenter_email)) {
+		delete_transient( 'commenter_' . md5( strtolower( $commenter_email ) ) );
+	}
+}
+// 评论新增/编辑/删除/状态变更时清理缓存
+add_action('comment_post', function($comment_id, $comment_approved) {
+	if ($comment_approved == 1) {
+		clear_comment_count_cache($comment_id);
+	}
+}, 10, 2);
+add_action('wp_set_comment_status', function($comment_id, $status) {
+	clear_comment_count_cache($comment_id);
+}, 10, 2);
+add_action('edit_comment', function($comment_id) {
+	clear_comment_count_cache($comment_id);
+}, 10, 1);
+add_action('delete_comment', function($comment_id) {
+	clear_comment_count_cache($comment_id);
+}, 10, 1);
+
+// 注册评论者等级小工具
 function register_comment_level_widget() {
 	register_widget('Comment_Level_Widget');
 }
@@ -1310,11 +1451,26 @@ function display_comment_level($comment = null) {
 	// 输出等级 HTML
 	return Comment_Level_Widget::get_comment_level_html($comment->user_id, $comment->comment_author_email);
 }
+
 // 将等级显示在作者链接后面
 add_filter('get_comment_author_link', function($author_link, $author, $comment_id) {
+	if (is_admin()) {
+		return $author_link;
+	}
 	$comment = get_comment($comment_id);
 	$level_html = display_comment_level($comment);
 	return $author_link . $level_html;
 }, 10, 3);
+
+//关于评论者中显示等级
+function display_comment_level_commenter($comment) {
+	if (empty($comment) || empty($comment->comment_author_email)) {
+		return '';
+	}
+	return Comment_Level_Widget::get_comment_level_html(
+		$comment->user_id ?? 0,
+		$comment->comment_author_email
+	);
+}
 
 ?>

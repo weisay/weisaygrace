@@ -5,6 +5,11 @@ add_filter( 'gutenberg_use_widgets_block_editor', '__return_false' );
 add_filter( 'use_widgets_block_editor', '__return_false' );
 }
 
+//禁用古腾堡编辑器，对所有文章类型启用经典编辑器
+if (weisay_option('wei_editor') == 'open') {
+add_filter('use_block_editor_for_post_type', '__return_false', 100);
+}
+
 //加载后台友情链接管理
 add_filter( 'pre_option_link_manager_enabled', '__return_true' );
 
@@ -29,13 +34,21 @@ remove_action( 'wp_head', 'wp_oembed_add_discovery_links', 10 );//移除wp-json�
 //增加网站及评论Feed
 add_theme_support( 'automatic-feed-links' );
 
-//移出头部古腾堡编辑器相关css
-//function remove_wp_gutenberg_css() {
-//	wp_dequeue_style( 'wp-block-library' );
-//	wp_dequeue_style( 'classic-theme-styles' );
-//	wp_dequeue_style( 'global-styles' );
-//}
-//add_action( 'wp_enqueue_scripts', 'remove_wp_gutenberg_css', 100 );
+if (weisay_option('wei_gutenberg_css') == 'close') {
+//移除WP核心的global-styles的输出
+add_action( 'wp_loaded', function() {
+	remove_action( 'wp_enqueue_scripts', 'wp_enqueue_global_styles' );
+	remove_action( 'wp_footer', 'wp_enqueue_global_styles', 1 );
+}, 20 );
+//移出头部古腾堡编辑器css
+function remove_wp_gutenberg_css() {
+	wp_dequeue_style( 'wp-img-auto-sizes-contain' );
+	wp_dequeue_style( 'wp-block-library' );
+	wp_dequeue_style( 'classic-theme-styles' );
+	wp_dequeue_style( 'global-styles' ); // 有时移除外部样式表也有用
+}
+add_action( 'wp_enqueue_scripts', 'remove_wp_gutenberg_css', 100 );
+}
 
 //屏蔽谷歌文字
 function coolwp_remove_open_sans_from_wp_core() {
@@ -72,7 +85,7 @@ function disable_embeds_flush_rewrite_rules() { remove_filter( 'rewrite_rules_ar
 register_deactivation_hook( __FILE__, 'disable_embeds_flush_rewrite_rules' );
 
 function remove_footer_admin () {
-echo '<span id="footer-thankyou">感谢使用<a href="https://wordpress.org/">WordPress</a>和<a href="https://www.weisay.com" target="_blank">WeisayGrace主题</a>进行创作。</span>';
+echo '<span id="footer-thankyou">感谢使用<a href="https://wordpress.org/">WordPress</a>和<a href="https://www.weisay.com/blog/wordpress-theme-weisay-grace.html?theme" target="_blank">WeisayGrace主题</a>进行创作。</span>';
 }
 add_filter('admin_footer_text', 'remove_footer_admin');
 ?>

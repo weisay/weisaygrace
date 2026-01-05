@@ -5,15 +5,15 @@
 	Author: Weisay
 	Author URI: http://www.weisay.com
 	Tags: 响应式,深色模式,小工具,IP归属地,SEO,两栏,优雅,代码高亮,特色图片,自定义菜单,走心评论,ajax评论,威言威语
-	Version: 2.2.0
+	Version: 2.3.0
 */
 @font-face {
 font-family: 'iconfont';
-src: url('assets/iconfont/iconfont.eot?t=1763515930000'); /* IE9 */
-src: url('assets/iconfont/iconfont.eot?t=1763515930000#iefix') format('embedded-opentype'), /* IE6-IE8 */
-	 url('assets/iconfont/iconfont.woff2?t=1763515930000') format('woff2'),
-	 url('assets/iconfont/iconfont.woff?t=1763515930000') format('woff'),
-	 url('assets/iconfont/iconfont.ttf?t=1763515930000') format('truetype');
+src: url('assets/iconfont/iconfont.eot?t=1767398100000'); /* IE9 */
+src: url('assets/iconfont/iconfont.eot?t=1767398100000#iefix') format('embedded-opentype'), /* IE6-IE8 */
+	 url('assets/iconfont/iconfont.woff2?t=1767398100000') format('woff2'),
+	 url('assets/iconfont/iconfont.woff?t=1767398100000') format('woff'),
+	 url('assets/iconfont/iconfont.ttf?t=1767398100000') format('truetype');
 }
 .iconfont{font-family:"iconfont" !important;font-size:14px;font-style:normal;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;padding-right:3px;display:inline-block;}
 *{border:0;margin:0;padding:0;}
@@ -271,10 +271,14 @@ input,textarea{appearance:none;-moz-appearance:none;-webkit-appearance:none;}
 .roll-toggle .moonicon{opacity:1;transform:scale(1) rotate(0deg);}
 .roll-top .rollicon{font-size:1.25rem;color:#fefefe;padding-right:0;}
 /* 赞助 */
-.shang{margin:0 auto;position:relative;width:4.25rem;padding:0.625rem;}
-.zanzhu{display:block;text-align:center;}
-.zanzhu a:link,.zanzhu a:visited{background:#fefefe;border-radius:50%;font-weight:normal;height:4rem;width:4rem;border:2px solid #eee;display:block;line-height:4rem;font-size:2rem;color:#ff8140;text-decoration:none;box-shadow:1px 2px 3px rgba(0,0,0,.2);}
-.zanzhu a:hover{background:#ff8140;border:2px solid #ff8140;color:#fff;}
+.article-author{display:flex;justify-content:space-between;align-items:center;border-top:1px solid #ededed;}
+.article-author-item{display:flex;justify-content:flex-start;align-items:center;padding:1rem;}
+.article-author-item .article-author-avatar img{border-radius:50%;width:2rem;height:2rem;}
+.article-author-info{margin-left:0.75rem;}
+.article-author-info p{line-height:1.625rem;font-size:0.875rem;color:#888}
+.shang{margin-right:1rem;}
+.shang a{background:#ed5565;padding:0.25rem 0.625rem;color:#fff;border-radius:0.25rem;display:inline-block;min-width:2rem;}
+.shang a:hover{background:#da4453;text-decoration:none;}
 .shang-bg{display:none;position:fixed;width:100%;height:100%;background:#000;z-index:97;top:0;left:0;opacity:0.7;}
 .shang-content{width:580px;height:340px;border-radius:0.375rem;position:fixed;top:50%;margin-top:-170px;background:#fff;z-index:98;left:50%;margin-left:-290px;}
 .shang-title{height:2.25rem;line-height:2.25rem;padding:0.325rem 0 0 1rem;font-size:1.125rem;font-weight:bold;}
@@ -359,7 +363,7 @@ figure.wp-block-image{width:fit-content;}
 .comment-list .comment-box .comment-content code[class*=language-]{background:transparent;}
 .comment-list .comment-box .comment-info{font-size:0.75rem;color:#999;line-height:1.25rem;}
 .comment-list .comment-box .ip-location{padding-left:0.625rem;}
-.comment-list .comment-box .reply,.comment-list .comment-box .comment-edit{padding-left:1rem;}
+.comment-list .comment-box .reply,.comment-list .comment-box .comment-edit-link{margin-left:1rem;}
 .comment-list .comment-box .reply .replyicon,.comment-list .comment-box .comment-edit .editicon{font-size:1rem;}
 .comment-list .comment-box .post-author{font-size:0.75rem;margin-left:0.1875rem;padding:0.05rem 0.2rem 0.1rem 0.2rem;background:#434a54;border-radius:0.25rem;color:#fff;}
 #edita{padding:0.625rem 0 0 2.5rem;}
@@ -439,7 +443,7 @@ figure.wp-block-image{width:fit-content;}
 .comment-frame .comment-post .comment-author-info .comment-input input::-moz-placeholder{color:#aaa;}
 .comment-frame .comment-post .comment-author-info .comment-input input:focus{border:2px solid #aaa;outline:none;}
 .comment-frame .comment-post .comment-tips{margin-bottom:0.75rem;}
-.comment-frame .comment-post textarea{background:#fff;color:#535353;width:100%;height:8rem;font-size:0.875rem;padding:0.375rem;box-sizing:border-box;margin-bottom:0.75rem;border:2px solid #d8dae2;border-radius:0.25rem;font-family:Microsoft YaHei,Helvetica,Arial,sans-serif;display:block}
+.comment-frame .comment-post textarea{background:#fff;color:#535353;width:100%;height:8rem;font-size:0.875rem;line-height:1.625rem;padding:0.375rem;box-sizing:border-box;margin-bottom:0.75rem;border:2px solid #d8dae2;border-radius:0.25rem;font-family:Microsoft YaHei,Helvetica,Arial,sans-serif;display:block}
 .comment-frame .comment-post textarea::-webkit-input-placeholder{color:#aaa;}
 .comment-frame .comment-post textarea::-moz-placeholder{color:#aaa;}
 .comment-frame .comment-post textarea:focus{border:2px solid #aaa;outline:none;}
@@ -550,6 +554,7 @@ select#archive-selector:focus{border:2px solid #aaa;outline:none;}
 .sidebar .widget .wp-block-heading{font-size:1.125rem;}
 .sidebar .widget ul{padding:1rem;}
 .sidebar .widget ul li{line-height:2rem;}
+.sidebar .widget ul.popular-posts li{height:2rem;line-height:2rem;overflow:hidden;}
 .sidebar .widget em{font-style:normal;}
 .sidebar .widget a:link,.sidebar .widget a:visited{color:#555;}
 .sidebar .widget a:hover{color:#da4453;text-decoration:underline;}
@@ -585,10 +590,13 @@ select#archive-selector:focus{border:2px solid #aaa;outline:none;}
 .sidebar .about-author .author-avatar img{width:100%;height:auto;}
 .sidebar .about-author .author-info{padding:0 1.25rem 1rem 1.25rem;}
 .sidebar .about-author .author-name{margin-bottom:0.625rem;color:#333;font-weight:bold;}
+.sidebar .about-author .author-name:has(.com-level){margin-left:1rem;}
 .sidebar .about-author .author-description{margin-bottom:1rem;font-size:0.875rem;color:#666;line-height:1.5rem;}
 .sidebar .about-author .author-stats{display:flex;justify-content:center;flex-wrap:wrap;gap:0.25rem;}
-.sidebar .about-author .stat-item{display:flex;flex-direction:column;min-width:3.875rem;}
-.sidebar .about-author .stat-number{font-size:1.0625rem;font-weight:bold;color:#333;}
+.sidebar .about-author .commenter-stats{gap:1rem;}
+.sidebar .about-author .author-stats .stat-item{display:flex;flex-direction:column;min-width:3.875rem;}
+.sidebar .about-author .author-stats .stat-number{font-size:1.0625rem;font-weight:bold;color:#333;}
+.sidebar .about-author .commenter-stats .stat-number{font-size:0.925rem;}
 .sidebar .about-author .stat-label{font-size:0.75rem;color:#999;text-transform:uppercase;}
 /* 侧边栏读者墙 */
 .sidebar .reader-wall-list{display:grid;grid-template-columns:repeat(5, 1fr);justify-items:center;grid-row-gap:0.75rem;}
@@ -625,6 +633,7 @@ div.code-toolbar{position:relative}div.code-toolbar>.toolbar{position:absolute;z
 .footer{background:#dee1e6;height:5rem;}
 .footer-vertical{height:5rem;display:flex;flex-direction:column;justify-content:center;align-items:center;}
 .footer-horizontal{height:5rem;display:flex;justify-content:space-between;align-items:center;}
+.footer-horizontal .footer-right{text-align:right;}
 .footer p{line-height:1.625rem;font-size:0.85rem;color:#777;}
 .footer a:link, .footer a:visited{color:#777}
 @media screen and (max-width:991px)
@@ -632,7 +641,7 @@ div.code-toolbar{position:relative}div.code-toolbar>.toolbar{position:absolute;z
 h1{font-size:1.375rem;font-weight:normal;}
 h2{font-size:1.25rem;font-weight:normal;}
 h3{font-size:1.125rem;font-weight:normal;}
-.header,.header-navigation .mainmenu,.expand,.sidebar,.post-info .author,.post-info .views,.date-hi,.post-info .tags,.article-info .author,.article-info .category,.post-meta .author,.read-more,.footer .footer-hide,.article .comments-title,.comment-title,.article-subtitle,.article-mostactive,.article-shang,.shang-content,.article-404,.comment-respond .quick-key,.comment-respond .set-gravatar{display:none;}
+.header,.header-navigation .mainmenu,.expand,.sidebar,.post-info .author,.post-info .views,.date-hi,.post-info .tags,.article-info .author,.article-info .category,.post-meta .author,.read-more,.article-subtitle,.article-mostactive,.article-404,.comment-respond .quick-key,.comment-respond .set-gravatar,.mobile-hide{display:none;}
 /* 左侧展开补充 */
 nav:not(.mm-menu){display:none;}
 .headermenu{text-align:center;background:#434a54;font-size:1.625rem;color:#fff;line-height:3.5rem;-moz-box-sizing:border-box;box-sizing:border-box;width:100%;height:3.5rem;}

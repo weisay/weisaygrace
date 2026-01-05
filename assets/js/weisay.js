@@ -47,7 +47,7 @@ jQuery(document).ready( function () {
 
 //图片懒加载和渐隐
 jQuery(document).ready(function(){
-	jQuery('.thumbnail img,.related-img img,.link-image img,.tl-archive-img img,.reader-wall-list img').lazyload({
+	jQuery('.thumbnail img,.related-img img,.link-image img,.tl-archive-img img').lazyload({
 		placeholder:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQImWNgYGBgAAAABQABh6FO1AAAAABJRU5ErkJggg==",
 		effect:"fadeIn"
 	});
@@ -175,7 +175,7 @@ jQuery(".mainmenu ul li,.top-page ul li").hoverDelay(".mainmenu ul li,.top-page 
 });
 
 //文章目录
-jQuery(document).ready(function() {
+jQuery(document).ready(function($) {
 	const $sidebar = $('.fixed-index');
 	const $articleWidget = $('.article-index-area');
 	const $indexLinks = $('.article-index-widget a');

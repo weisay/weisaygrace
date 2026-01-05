@@ -72,9 +72,9 @@ $raw_url = isset($_POST['url']) ? trim($_POST['url']) : null;
 $raw_comment = isset($_POST['comment']) ? trim($_POST['comment']) : null;
 $edit_id = isset($_POST['edit_id']) ? absint($_POST['edit_id']) : null;
 
-$comment_author = sanitize_text_field($raw_author);
-$comment_author_email = sanitize_email($raw_email);
-$comment_author_url = esc_url_raw($raw_url);
+$comment_author = sanitize_text_field($raw_author ?? '');
+$comment_author_email = sanitize_email($raw_email ?? '');
+$comment_author_url = esc_url_raw($raw_url ?? '');
 $comment_content = wp_kses_post($raw_comment);
 
 // 用户登录处理
@@ -164,6 +164,13 @@ if (!is_user_logged_in()) { // 登录用户跳过检查
 		$_SERVER['HTTP_USER_AGENT']
 	)) {
 		err(__('禁止发表评论！'));
+	}
+}
+
+// 中文检查
+if (weisay_option('wei_chinese') == 'open') {
+	if (!preg_match('/\p{Han}/u', $raw_comment)) {
+		err(__('评论必须包含中文！'));
 	}
 }
 

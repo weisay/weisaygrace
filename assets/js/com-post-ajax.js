@@ -58,9 +58,19 @@ $('#commentform').submit(function() {
 			var t = addComment, cancel = t.I('cancel-comment-reply-link'), temp = t.I('wp-temp-form-div'), respond = t.I(t.respondId), post = t.I('comment_post_ID').value, parent = t.I('comment_parent').value;
 
 		// comments
-		if ( ! edit && $comments.length ) {
-			n = parseInt($comments.text().match(/\d+/));
-			$comments.text($comments.text().replace( n, n + 1 ));
+		if (!edit && $comments.length) {
+			var text = $comments.text().trim();
+			// 只匹配最后一个数字
+			var m = text.match(/(\d{1,3}(?:,\d{3})*|\d+)(?!.*\d)/);
+			if (!m) return;
+			var raw = m[1];
+			var number = parseInt(raw.replace(/,/g, ''), 10);
+			var next = number + 1;
+			var formatted = raw.includes(',')
+				? next.toLocaleString('en-US')
+				: String(next);
+			text = text.replace(raw, formatted);
+			$comments.text(text);
 		}
 
 		// show comment
@@ -191,6 +201,11 @@ function countdown() {
 // ajax评论翻页
 jQuery(document).ready(function comment_page_ajax(){
 	jQuery(document).on('click', '#commentpager a', function(e){
+		// 如果是朴素型链接则不使用ajax翻页
+		var compageUrl = jQuery(this).attr('href');
+		if (compageUrl.indexOf('?cpage=') !== -1 || compageUrl.indexOf('&cpage=') !== -1) {
+			return;
+		}
 		e.preventDefault();
 		// 先取消任何已激活的“回复”状态，确保表单回到原始位置
 		var $cancelReply = jQuery("#cancel-comment-reply-link");
@@ -198,23 +213,12 @@ jQuery(document).ready(function comment_page_ajax(){
 			$cancelReply.trigger("click");
 		}
 		var post_id = jQuery('#comment_post_ID').val();
-		var compageUrl = jQuery(this).attr('href');
-		// 评论页码提取
 		var page_id = 1;
-		var urlObj = new URL(compageUrl, window.location.origin);
-		// 优先从查询参数获取
-		if (urlObj.searchParams.get('cpage')) {
-			page_id = urlObj.searchParams.get('cpage');
+		var pathMatch = compageUrl.match(/(comment-page-|page\/)(\d+)/);
+		if (pathMatch && pathMatch[2]) {
+			page_id = pathMatch[2];
 		}
-		// 其次从路径获取
-		else {
-			var pathMatch = urlObj.pathname.match(/(comment-page-|page\/)(\d+)/);
-			if (pathMatch && pathMatch[2]) {
-				page_id = pathMatch[2];
-			}
-		}
-		// 确保使用原始URL（去除可能添加的斜杠）
-		var cleanUrl = urlObj.pathname.replace(/\/$/, '') + urlObj.search;
+		var cleanUrl = compageUrl.replace(/\/$/, '');
 		jQuery.ajax({
 			url: cleanUrl,
 			type: "POST",

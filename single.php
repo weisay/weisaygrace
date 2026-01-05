@@ -27,16 +27,30 @@ echo implode( ',', $category_names );
 <?php echo get_post_tags(true); ?>
 <?php endif; ?>
 <div class="clear"></div>
+<?php if (weisay_option('wei_author_info') != 'hide') : ?>
+<div class="article-author">
+<div class="article-author-item">
+<div class="article-author-avatar">
+<?php echo get_avatar( get_the_author_meta('user_email'), '48', '', get_the_author() ); ?>
+</div>
+<div class="article-author-info">
+<p><?php the_author_posts_link(); ?>：<?php
+$author_desc = trim( get_the_author_meta('description') );
+if ( $author_desc !== '' ) {
+	echo esc_html( $author_desc );
+} else {
+	echo esc_html( get_bloginfo('description') );
+}
+?></p>
+</div>
 </div>
 <?php if (weisay_option('wei_reward') == 'display') : ?>
-<div class="article article-shang">
 <div class="shang">
-	<span class="zanzhu"><a title="赞助本站" href="javascript:;" onfocus="this.blur()">赏</a></span>
-</div>
+<span class="zanzhu"><a title="赞助本站" href="javascript:;" onfocus="this.blur()">打赏</a></span>
 </div>
 <div class="shang-bg"></div>
 <div class="shang-content" style="display:none;">
-<button class="shang-close" title="关闭">×</button><div class="shang-title">打赏支持</div>
+<button class="shang-close" title="关闭">×</button><div class="shang-title">打赏作者</div>
 	<div class="shang-body">
 	<div class="shang-zfb shang-qrcode"><img alt="支付宝打赏" src="<?php echo weisay_option('wei_alipay'); ?>" width="170" height="170"><span>支付宝打赏</span></div>
 	<div class="shang-wx shang-qrcode"><img alt="微信打赏" src="<?php echo weisay_option('wei_wxpay'); ?>" width="170" height="170"><span>微信打赏</span></div>
@@ -45,6 +59,9 @@ echo implode( ',', $category_names );
 </div>
 </div>
 <?php endif; ?>
+</div>
+<?php endif; ?>
+</div>
 <div class="article article-navigation">
 <?php
 $prev_post = get_previous_post();
@@ -79,9 +96,9 @@ if ($next_post) {
 </div>
 <div class="article article-related">
 <?php if (weisay_option('wei_related') == 'two') : ?>
-<?php require get_template_directory() . '/includes/related.php'; ?>
+<?php require_once get_template_directory() . '/includes/related.php'; ?>
 <?php else: ?>
-<?php require get_template_directory() . '/includes/related-img.php'; ?>
+<?php require_once get_template_directory() . '/includes/related-img.php'; ?>
 <?php endif; ?>
 </div>
 <div class="article">

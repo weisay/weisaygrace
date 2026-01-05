@@ -14,7 +14,7 @@ $comment_paging_nonce = wp_create_nonce('comment_paging_nonce');
 ?>
 <div id="comments" class="comments-area">
 <?php if ( have_comments() ) : ?>
-<h3 class="article-title"><span class="comment-title"><?php the_title(); ?>：</span>目前有 <?php comments_number('', '1 条', '% 条' );?>评论</h3>
+<h3 id="comments-title" class="article-title"><span class="mobile-hide">《<?php the_title(); ?>》有 </span><?php comments_number('', '1 条', '% 条' );?>评论</h3>
 <div id="comment-ajax">
 <ol class="comment-list">
 <?php wp_list_comments('type=comment&callback=weisay_comment&end-callback=weisay_end_comment&max_depth=' .get_option('thread_comments_depth'). ' '); ?>
@@ -24,13 +24,18 @@ $comment_paging_nonce = wp_create_nonce('comment_paging_nonce');
 <script type="text/javascript">var commentPagingNonce = '<?php echo esc_js( $comment_paging_nonce ); ?>';</script>
 <?php endif; // if ( have_comments() ) ?>
 <?php if ( ('0' == $post->comment_count) && comments_open() ) : ?>
-<h3 class="article-title"><span class="comment-title"><?php the_title(); ?>：</span>等您坐沙发呢！</h3>
+<h3 class="article-title"><span class="mobile-hide">《<?php the_title(); ?>》</span>等您坐沙发呢！</h3>
 <?php endif; // if ( ('0' == $post->comment_count) && comments_open() ) ?>
 <?php if ( comments_open() ) : ?>
 <div id="respond" class="comment-respond">
 <h3 id="reply-title" class="comment-reply-title">发表评论</h3><small><?php cancel_comment_reply_link('[点击取消回复]'); ?></small>
 <?php
-switch (weisay_option('wei_gravatar')) {
+$wei_gravatar = weisay_option('wei_gravatar');
+$custom_gravatar = trim(weisay_option('wei_gravatar_custom'));
+switch ($wei_gravatar) {
+	case 'zero':
+		$gravatarurl = 'https://secure.gravatar.com/avatar/';
+		break;
 	case 'two':
 		$gravatarurl = 'https://cravatar.cn/avatar/';
 		break;
@@ -39,6 +44,9 @@ switch (weisay_option('wei_gravatar')) {
 		break;
 	case 'four':
 		$gravatarurl = 'https://cdn.sep.cc/avatar/';
+		break;
+	case 'five':
+		$gravatarurl = $custom_gravatar ? 'https://' . $custom_gravatar . '/avatar/' : 'https://weavatar.com/avatar/';
 		break;
 	default:
 		$gravatarurl = 'https://weavatar.com/avatar/';
@@ -62,34 +70,45 @@ jQuery(document).ready(function ($) {
 <?php else : ?>
 <form action="<?php echo esc_url( get_template_directory_uri() . '/com-post-ajax.php' ); ?>" method="post" id="commentform" class="comment-form">
 <p class="comment-notes"><span id="email-notes">电子邮件地址不会被公开。</span> 必填项已用 <span class="required">*</span> 标注</p>
-<div class="comment-frame">  
+<div class="comment-frame">
+<?php
+$is_logged_in = is_user_logged_in();
+$avatar_email = '';
+$display_name = '';
+$comment_author = '';
+if ( $is_logged_in ) {
+	$user = wp_get_current_user();
+	$avatar_email = $user->user_email;
+	$display_name = $user->display_name;
+} else {
+	$commenter = wp_get_current_commenter();
+	$avatar_email = $commenter['comment_author_email'] ?? '';
+	$comment_author = trim( $commenter['comment_author'] ?? '' );
+	$display_name = $comment_author ?: 'Gravatar';
+}
+?>
 <div id="real-avatar" class="comment-author-avatar">
-<?php if ( is_user_logged_in() ) : ?>
-<?php $current_user = wp_get_current_user(); echo get_avatar( $current_user->user_email, 48, '', $current_user->display_name ); ?>
-<?php elseif ( isset($_COOKIE['comment_author_email_'.COOKIEHASH]) ) : ?>
-<?php echo get_avatar( $comment_author_email, 48, '', 'gravatar' );?>
-<?php else : ?>
-<?php global $user_email;?><?php echo get_avatar( $user_email, 48, '', 'gravatar' ); ?>
-<?php endif; // if ( is_user_logged_in() ) ?>
+<?php echo get_avatar( $avatar_email, 56, '', $display_name ); ?>
 </div>
 <div class="comment-post">
-<?php if ( is_user_logged_in() ) : ?>
-<div class="comment-author"><?php print '登录者：'; ?> <a href="<?php bloginfo('url'); ?>/wp-admin/profile.php"><?php echo $user_identity; ?></a>&nbsp;&nbsp;<a href="<?php echo esc_url( wp_logout_url(get_permalink()) ); ?>" title="退出" class="comment-change">[ 退出 ]</a></div>
-<?php elseif ( '' != $comment_author ) : ?>
+<?php if ( $is_logged_in ) : ?>
+<div class="comment-author"><?php print '登录者：'; ?> <a href="<?php bloginfo('url'); ?>/wp-admin/profile.php"><?php echo esc_html( $user_identity ); ?></a>
+<a href="<?php echo esc_url( wp_logout_url(get_permalink()) ); ?>" class="comment-change">[ 退出 ]</a></div>
+<?php else : ?>
+<?php if ( $comment_author !== '' ) : ?>
 <div class="comment-author"><?php printf(__('<strong>%s</strong> 您好，欢迎回来！'), esc_html( $comment_author ) ); ?>
 <a href="javascript:toggleCommentAuthorInfo();" id="toggle-comment-author-info" class="comment-change">[ 更改 ]</a></div>
 <script type="text/javascript">
-const changeMsg="[更改]",closeMsg="[隐藏]";function toggleCommentAuthorInfo(){$('#comment-author-info').slideToggle('slow',function(){$(this).is(':visible')?$('#toggle-comment-author-info').text(closeMsg):$('#toggle-comment-author-info').text(changeMsg);});}$(function(){$('#comment-author-info').hide();});
+const changeMsg="[ 更改 ]",closeMsg="[ 隐藏 ]";function toggleCommentAuthorInfo(){jQuery('#comment-author-info').slideToggle('slow',function(){jQuery(this).is(':visible')?jQuery('#toggle-comment-author-info').text(closeMsg):jQuery('#toggle-comment-author-info').text(changeMsg);});}jQuery(function(){jQuery('#comment-author-info').hide();});
 </script>
-<?php endif; // if ( is_user_logged_in() ) ?>
-<?php if ( !is_user_logged_in() ) : ?>
+<?php endif; // if ( $comment_author !== '' ) ?>
 <div id="comment-author-info" class="comment-author-info">
 <p class="comment-input">
 <label for="author" class="required"><i class="iconfont icon-aria-username"></i></label>
 <input placeholder="昵称 *" type="text" name="author" id="author" class="text" value="<?php echo $comment_author; ?>" />
 </p>
 <p class="comment-input">
-<label for="email"  class="required"><i class="iconfont icon-aria-email"></i></label>
+<label for="email" class="required"><i class="iconfont icon-aria-email"></i></label>
 <input placeholder="邮箱 *" type="email" name="email" id="email" class="text" value="<?php echo $comment_author_email; ?>" />
 </p>
 <p class="comment-input">
@@ -97,12 +116,12 @@ const changeMsg="[更改]",closeMsg="[隐藏]";function toggleCommentAuthorInfo(
 <input placeholder="网站" type="url" name="url" id="url" class="text" value="<?php echo $comment_author_url; ?>" />
 </p>
 </div>
-<?php endif; // if ( !is_user_logged_in() ) ?>
+<?php endif; // if ( $is_logged_in ) ?>
 <div class="comment-emoji">
 <p class="emoji-post"><a class="emoji" href="javascript:void(0)" title="插入表情"><i class="iconfont emojiicon">&#xe681;</i></a></p>
-<p class="emoji-smilies"><?php require get_template_directory() . '/includes/smilies.php'; ?></p>
+<p class="emoji-smilies"><?php require_once get_template_directory() . '/includes/smilies.php'; ?></p>
 </div>
-<textarea name="comment" id="comment" placeholder="互动可以先从评论开始…" ></textarea>
+<textarea name="comment" id="comment" placeholder="<?php echo get_random_verse(); ?>" ></textarea>
 <p class="form-submit">
 <input id="submit" class="submit" name="submit" type="submit" value="提交评论" />
 <?php wp_nonce_field('comment_nonce', '_wpnonce', false); // 在评论表单中添加 nonce ?>

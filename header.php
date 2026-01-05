@@ -4,10 +4,10 @@
 <meta charset="<?php bloginfo('charset'); ?>" />
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,maximum-scale=2.0,shrink-to-fit=no" />
 <meta name="color-scheme" content="light dark" />
-<?php require get_template_directory() . '/includes/seo.php'; ?>
+<?php require_once get_template_directory() . '/includes/seo.php'; ?>
 <?php
 	if (weisay_option('wei_opengraph') != 'close') {
-		require get_template_directory() . '/includes/og.php';
+		require_once get_template_directory() . '/includes/og.php';
 	}
 	?>
 <link rel="profile" href="http://gmpg.org/xfn/11">

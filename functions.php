@@ -6,18 +6,22 @@ if (!function_exists('optionsframework_init')) {
 	load_template( $optionsfile );
 }
 
-require get_template_directory() . '/includes/patch.php';
-require get_template_directory() . '/includes/patch-emoji.php';
-require get_template_directory() . '/includes/theme-updater.php';
-require get_template_directory() . '/includes/tags.php'; //标签tag
-require get_template_directory() . '/includes/widgets.php'; //小工具
-require get_template_directory() . '/com-functions.php'; //评论相关
+require_once get_template_directory() . '/includes/patch.php';
+require_once get_template_directory() . '/includes/patch-emoji.php';
+require_once get_template_directory() . '/includes/theme-updater.php';
+require_once get_template_directory() . '/includes/tags.php'; //标签tag
+require_once get_template_directory() . '/includes/widgets.php'; //小工具
+require_once get_template_directory() . '/com-functions.php'; //评论相关
+
+if (weisay_option('wei_smtp') == 'open') {
+require_once get_template_directory() . '/includes/mail-smtp.php'; //邮件通知
+}
 
 //IP归属地数据库切换
 if (weisay_option('wei_ipv6') == 'open') {
-	require get_template_directory() . '/includes/ip2region-full.php';
+	require_once get_template_directory() . '/includes/ip2region-full.php';
 } else {
-	require get_template_directory() . '/includes/ip2region.php';	
+	require_once get_template_directory() . '/includes/ip2region.php';	
 }
 
 if (function_exists('register_sidebar'))
@@ -204,24 +208,37 @@ $gravatar_urls = array('www.gravatar.com', '0.gravatar.com', '1.gravatar.com', '
 $gravatar_mirrors = array(
 	'weavatar' => 'weavatar.com',
 	'cravatar' => 'cravatar.cn',
-	'loli' => 'gravatar.loli.net',
+	'loli_net' => 'gravatar.loli.net',
 	'sep_cc' => 'cdn.sep.cc',
+	'official' => false
 );
-if (weisay_option('wei_gravatar') == 'two') {
+$wei_gravatar = weisay_option('wei_gravatar');
+$custom_gravatar = trim(weisay_option('wei_gravatar_custom'));
+if ($wei_gravatar == 'zero') {
+	$gravatar_mirror = 'official';
+} elseif ($wei_gravatar == 'two') {
 	$gravatar_mirror = 'cravatar';
-} elseif (weisay_option('wei_gravatar') == 'three') {
-	$gravatar_mirror = 'loli';
-} elseif (weisay_option('wei_gravatar') == 'four') {
+} elseif ($wei_gravatar == 'three') {
+	$gravatar_mirror = 'loli_net';
+} elseif ($wei_gravatar == 'four') {
 	$gravatar_mirror = 'sep_cc';
+} elseif ($wei_gravatar == 'five' && $custom_gravatar) {
+	$gravatar_mirror = $custom_gravatar;
 } else {
-	$gravatar_mirror = 'weavatar'; // 选项: weavatar, cravatar, loli, sep_cc
+	$gravatar_mirror = 'weavatar';
 }
 function custom_gravatar($avatar) {
 	global $gravatar_urls, $gravatar_mirror, $gravatar_mirrors;
-	if (isset($gravatar_mirrors[$gravatar_mirror])) {
+	if ($gravatar_mirror === 'official') {
+		return $avatar;
+	}
+	if (!empty($gravatar_mirror) && !isset($gravatar_mirrors[$gravatar_mirror])) {
+		return str_replace($gravatar_urls, $gravatar_mirror, $avatar);
+	}
+	if (isset($gravatar_mirrors[$gravatar_mirror]) && $gravatar_mirrors[$gravatar_mirror]) {
 		return str_replace($gravatar_urls, $gravatar_mirrors[$gravatar_mirror], $avatar);
 	}
-	return $avatar; // 如果设置的镜像不存在，则原样返回
+	return $avatar;
 }
 add_filter('get_avatar', 'custom_gravatar');
 add_filter('get_avatar_url', 'custom_gravatar');
@@ -241,19 +258,23 @@ add_filter( 'request', 'weisay_redirect_blank_search' );
 //列表页分页
 function paging_nav() {
 	global $wp_query;
-	if ( $wp_query->max_num_pages <= 1 ) {
-		return; // 只有一页，不显示分页
+	if ($wp_query->max_num_pages <= 1) {
+		return;
 	}
-	$big = 999999999; // 需要一个不太可能的整数
-	$pagination_links = paginate_links( array(
-		'base' => str_replace( $big, '%#%', esc_url( get_pagenum_link( $big ) ) ),
-		'format' => get_option('permalink_structure') ? 'page/%#%/' : '?paged=%#%',
-		'current' => max( 1, get_query_var('paged') ),
-		'total' => $wp_query->max_num_pages
-	) );
-	echo '<div class="pagination">';
-	echo $pagination_links;
-	echo '</div>';
+	$big = 99999999; // 需要一个不太可能的整数
+	$pagination_links = paginate_links(array(
+		'base' => str_replace($big, '%#%', esc_url(get_pagenum_link($big))),
+		'format' => get_option('permalink_structure') ? 'page/%#%/' : '&paged=%#%',
+		'current' => max(1, get_query_var('paged')),
+		'total' => $wp_query->max_num_pages,
+		'mid_size' => 2,
+		'end_size' => 1
+	));
+	if ($pagination_links) {
+		$pagination_links = preg_replace('#(/page/1)/(?=\?|&|["\']|$)#', '/', $pagination_links);
+		$pagination_links = preg_replace('#(/page/1)(?=\?|&|["\']|$)#', '', $pagination_links);
+	}
+	echo '<div class="pagination">' . $pagination_links . '</div>';
 }
 
 //文章内容分页
@@ -316,7 +337,7 @@ function get_hot_reviews($posts_num = 10, $days = 365) {
 	global $wpdb;
 	$posts_num = absint($posts_num);
 	$days = absint($days);
-	$cache_key = "hot_reviews_{$days}_{$posts_num}";
+	$cache_key = "hot_reviews_{$posts_num}_{$days}";
 	$hot_reviews = get_transient($cache_key);
 	if ($hot_reviews === false) {
 		$sql = $wpdb->prepare(
@@ -345,7 +366,7 @@ function get_hot_reviews($posts_num = 10, $days = 365) {
 			);
 		}
 	} else {
-		$output = '<li>' . esc_html__('暂无热评日志', 'weisaygrace_theme') . '</li>' . "\n";
+		$output = '<li>' . esc_html__('暂无热评日志', 'weisaygrace') . '</li>' . "\n";
 	}
 	return $output;
 }
@@ -357,7 +378,7 @@ function get_timespan_most_viewed($mode = '', $limit = 10, $days = 500, $display
 	$limit = absint($limit);
 	$days = absint($days);
 	$limit_date = gmdate("Y-m-d H:i:s", current_time('timestamp') - ($days * DAY_IN_SECONDS));
-	$cache_key = "most_viewed_{$days}_{$limit}";
+	$cache_key = "most_viewed_{$limit}_{$days}";
 	$most_viewed = get_transient($cache_key);
 	if ($most_viewed === false) {
 		$where = ($mode && $mode !== 'both') ? $wpdb->prepare("p.post_type = %s", $mode) : '1=1';
@@ -394,7 +415,7 @@ function get_timespan_most_viewed($mode = '', $limit = 10, $days = 500, $display
 			);
 		}
 	} else {
-		$result_html = '<li>' . esc_html__('暂无热门日志', 'weisaygrace_theme') . '</li>' . "\n";
+		$result_html = '<li>' . esc_html__('暂无热门日志', 'weisaygrace') . '</li>' . "\n";
 	}
 	if ($display) {
 		echo $result_html;
@@ -408,8 +429,7 @@ function get_timespan_most_viewed_category($type, $mode = '', $limit = 10, $days
 	global $wpdb, $post, $id;
 	$category_id = array();
 	if (is_category()) {
-		$current_category = get_queried_object();
-		$category_id = array($current_category->term_id);
+		$category_id = array(get_queried_object_id());
 	} else {
 		if ($type == 'single') {
 			$categories = get_the_category($id);
@@ -425,7 +445,7 @@ function get_timespan_most_viewed_category($type, $mode = '', $limit = 10, $days
 	$mode = sanitize_key($mode);
 	$limit_date = date("Y-m-d H:i:s", current_time('timestamp') - ($days * DAY_IN_SECONDS));
 	$category_key = implode('_', $category_id);
-	$cache_key = "most_viewed_category_{$category_key}_{$days}_{$limit}";
+	$cache_key = "most_viewed_category_{$category_key}_{$limit}_{$days}";
 	$most_viewed_category = get_transient($cache_key);
 	if ($most_viewed_category === false) {
 		$category_sql = "$wpdb->term_taxonomy.term_id IN (".implode(',', array_map('absint', $category_id)).')';
@@ -469,7 +489,7 @@ function get_timespan_most_viewed_category($type, $mode = '', $limit = 10, $days
 			);
 		}
 	} else {
-		$result_html = '<li>' . esc_html__('暂无热门日志', 'weisaygrace_theme') . '</li>' . "\n";
+		$result_html = '<li>' . esc_html__('暂无热门日志', 'weisaygrace') . '</li>' . "\n";
 	}
 	if ($display) {
 		echo $result_html;
@@ -815,6 +835,46 @@ get_comments_number()
 	$html .= '</div>';
 	$html .= timeline_paged_nav($the_query, $paged, 2);
 	return $html;
+}
+
+//获取随机邀评诗句
+function get_random_verse() {
+	static $verses;
+	if (!isset($verses)) {
+		$verses = [
+			'此端我执笔，彼端待君声。',
+			'众议尚在途，君言或为岸。',
+			'字里藏余味，评中见慧光。',
+			'莫道隔屏远，一言即比邻。',
+			'拙篇作引玉，愿听琳琅音。',
+			'屏间千字落，静待一评来。',
+			'高谈盈满室，静候点睛人。',
+			'心有所寄处，君语即归途。',
+			'纸上言未满，盼君添一行。',
+			'墨停意未尽，静候金石声。',
+			'云上无远近，君语即归音。',
+			'诸说各有据，尚待一言衡。',
+			'落笔暂停歇，评区待共鸣。',
+			'漫笔书心迹，回音话短长。',
+			'一纸浮光过，千言待君沉。',
+			'书成非终章，评语乃续篇。',
+			'心语随风寄，回音靠君传。',
+			'拙句如微火，望君添薪来。',
+			'此间话未尽，留白待君书。',
+			'敲字成篇章，留评续雅篇。',
+			'言至此暂歇，后语待君添。',
+			'人间多喧语，此处待君声。',
+			'笔墨至此尽，余意待君诠。',
+			'素笺无锁钥，任君添新言。',
+			'一屏分两地，片语抵春风。',
+			'众论未成典，仍候补阙言。',
+			'墨淡思犹热，虚席待君温。',
+			'拙笔留余白，待君添远山。',
+			'纸短情难尽，君言可补天。',
+			'字如春种浅，赖君雨润深。',
+		];
+	}
+	return esc_html($verses[array_rand($verses)]);
 }
 
 //检查是否使用小工具

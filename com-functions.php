@@ -109,7 +109,11 @@ if ($touchingUrl) {
 <span class="reply">
 <?php 
 $replyButton = get_comment_reply_link(array_merge( $args, array('reply_text' => '<i class="iconfont replyicon">&#xe6ec;</i>回复', 'add_below' => $add_below, 'depth' => $depth, 'max_depth' => $args['max_depth'])));
-$replyButton = str_replace( 'data-belowelement', 'onclick="return addComment.moveForm( \'div-comment-'.get_comment_ID().'\', \''.get_comment_ID().'\', \'respond\', \''.get_the_ID().'\', false, this.getAttribute(\'data-replyto\') )" data-belowelement', $replyButton);
+$replyButton = is_string($replyButton) ? str_replace(
+	'data-belowelement',
+	'onclick="return addComment.moveForm( \'div-comment-'.get_comment_ID().'\', \''.get_comment_ID().'\', \'respond\', \''.get_the_ID().'\', false, this.getAttribute(\'data-replyto\') )" data-belowelement',
+	$replyButton
+) : $replyButton;
 echo $replyButton;
 ?>
 </span>
@@ -180,8 +184,9 @@ function weisay_touching_comments_karma_request() {
 	);
 
 	if (!is_user_logged_in() || !current_user_can('manage_options')) {
+		// 未认证的用户拒绝继续执行请求
 		header("HTTP/1.1 403 Forbidden");
-		die(json_encode($result));
+		wp_die(json_encode($result));
 	}
 
 	if (empty($_SERVER['REQUEST_METHOD']) ||
@@ -190,33 +195,25 @@ function weisay_touching_comments_karma_request() {
 		strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) !== 'xmlhttprequest') {
 		$result['message'] = 'Request method not allowed';
 		header("HTTP/1.1 403 Forbidden");
-		die( json_encode($result) );
+		wp_die(json_encode($result));
 	}
 
-	$nonce = filter_input(INPUT_GET, '_wpnonce', FILTER_SANITIZE_STRING);
-	if ( $nonce===false || ! wp_verify_nonce( $nonce,  'KARMA_NONCE')) {
+	// Check if it's a valid request.
+	$nonce = $_REQUEST['_wpnonce'] ?? '';
+	if (empty($nonce) || ! wp_verify_nonce($nonce, 'KARMA_NONCE')) {
 		$result['message'] = 'Security Check';
-		header("HTTP/1.1 403 Forbidden");
-		die( json_encode($result) );
+		header('HTTP/1.1 403 Forbidden');
+		wp_die(json_encode($result));
 	}
 
-	if (empty($_POST['comment_id'])) {
+	// Do your stuff here
+	$comment_id = isset($_POST['comment_id']) ? intval($_POST['comment_id']) : 0;
+	$comment_karma = isset($_POST['comment_karma']) ? intval($_POST['comment_karma']) : 0;
+	if ($comment_id <= 0) {
 		$result['code'] = 501;
 		$result['message'] = 'Incorrect parameter';
-		header("HTTP/1.1 500 Internal Server Error");
-		die( json_encode($result) );
-	}
-
-	$comment_karma = empty( $_POST['comment_karma'] ) ? '0' : filter_input(INPUT_POST, 'comment_karma', FILTER_SANITIZE_NUMBER_INT);
-	$comment_id = filter_input(INPUT_POST, 'comment_id', FILTER_SANITIZE_NUMBER_INT);
-	if ($comment_karma === false ||
-		$comment_id === false ||
-		!is_numeric($comment_karma) ||
-		!is_numeric($comment_id)) {
-		$result['code'] = 501;
-		$result['message'] = 'Incorrect parameter';
-		header("HTTP/1.1 500 Internal Server Error");
-		die( json_encode($result) );
+		header('HTTP/1.1 500 Internal Server Error');
+		wp_die(json_encode($result));
 	}
 
 	// 更新数据库
@@ -328,101 +325,3 @@ function AjaxCommentsPage() {
 	}
 }
 add_action( 'template_redirect', 'AjaxCommentsPage' );
-
-//评论邮件通知
-function comment_mail_notify($comment_id) {
-	$admin_email = get_bloginfo ('admin_email'); // $admin_email 可改為你指定的 e-mail.
-	$comment = get_comment($comment_id);
-	$comment_author_email = trim($comment->comment_author_email);
-	$parent_id = $comment->comment_parent ? $comment->comment_parent : '';
-	$to = $parent_id ? trim(get_comment($parent_id)->comment_author_email) : '';
-	$spam_confirmed = $comment->comment_approved;
-	if (($parent_id != '') && ($spam_confirmed != 'spam') && ($to != $admin_email) && ($comment_author_email == $admin_email)) {
-	$wp_email = 'no-reply@' . preg_replace('#^www\.#', '', strtolower($_SERVER['SERVER_NAME'])); // e-mail 發出點, no-reply 可改為可用的 e-mail.
-	$subject = '✨您在 [' . esc_html(get_option('blogname')) . '] 的评论有了新的回复';
-	$message = '
-	<table style="font-family:Arial,sans-serif;color:#333;margin:0;padding:0;max-width:820px;margin:0 auto;border-radius:0;" border="0" cellpadding="0" cellspacing="0">
-<tbody><tr>
-	<td>
-		<table style="padding:10px 0 30px;" border="0" cellpadding="0" cellspacing="0" width="100%">
-			<tbody><tr>
-				<td style="font-size:20px;text-align:left;vertical-align:middle;">' . esc_html(trim(get_comment($parent_id)->comment_author)) . ', 您好!</td>
-			</tr>
-		</tbody></table>
-	<table style="margin-bottom:20px;" border="0" cellpadding="0" cellspacing="0" width="100%">
-		<tbody><tr>
-			<td style="font-size:16px;">您在 [ <strong><a style="text-decoration:none;color:#333;" href="' . esc_url(get_option('home')) . '" target="_blank">' . esc_html(get_option('blogname')) . '</a></strong> ] 文章《<strong><a style="text-decoration:none;color:#da4453;" href="' . esc_url(get_permalink($comment->comment_post_ID)) . '" target="_blank">' . esc_html(get_the_title($comment->comment_post_ID)) . '</a></strong>》 中的评论有了新回复：</td>
-		</tr>
-	</tbody></table>
-		<table style="margin-bottom:20px;" border="0" cellpadding="0" cellspacing="0" width="100%">
-			<tbody><tr>
-				<td width="100%">
-					<table border="0" cellpadding="0" cellspacing="0" width="100%">
-						<tbody><tr>
-							<td style="padding:10px;border-radius:8px;overflow:hidden;color:#333;background-color:#eef1f4;" >
-								<div style="display:flex;align-items:center;justify-content:flex-start;">
-									<div style="flex-shrink:0;margin-right:10px;">
-										<img style="width:48px;height:48px;border-radius:50%;" alt="' . esc_attr(trim(get_comment($parent_id)->comment_author)) . '" src="' . esc_url(get_avatar_url(get_comment($parent_id)->comment_author_email, array('size' => 96))) . '">
-									</div>
-									<div>
-										<strong style="font-size:16px;">' . esc_html(trim(get_comment($parent_id)->comment_author)) . '</strong>
-									</div>
-								</div>
-								<p style="margin-top:10px;margin-right:60px;line-height:26px;">' . nl2br(esc_html(get_comment($parent_id)->comment_content)) . '</p>
-							</td>
-						</tr>
-					</tbody></table>
-				</td>
-			</tr>
-		</tbody></table>
-		<div style="margin-bottom:20px;"></div>
-		<table style="margin-bottom:0px;" border="0" cellpadding="0" cellspacing="0" width="100%">
-			<tbody><tr>
-				<td width="100%">
-					<table border="0" cellpadding="0" cellspacing="0" width="100%">
-						<tbody><tr>
-							<td style="padding:10px;text-align:right;border-radius:8px;overflow:hidden;color:#333;background-color:#fff1f3;" >
-								<div style="display:flex;align-items:center;justify-content:flex-end;">
-									<div>
-										<strong style="font-size:16px;">' . esc_html(trim($comment->comment_author)) . '</strong>
-									</div>
-									<div style="flex-shrink:0;margin-left:10px;">
-									<img style="width:48px;height:48px;border-radius:50%;" alt="' . esc_attr(trim($comment->comment_author)) . '" src="' . esc_url(get_avatar_url($comment->comment_author_email, array('size' => 96))) . '">
-									</div>
-								</div>
-								<p style="margin-top:10px;margin-left:60px;line-height:26px;">' . nl2br(esc_html($comment->comment_content)) . '</p>
-							</td>
-						</tr>
-					</tbody></table>
-				</td>
-			</tr>
-		</tbody></table>
-		<table border="0" cellpadding="0" cellspacing="0" width="100%">
-			<tbody><tr>
-				<td style="padding:20px 0 30px;" align="center">
-					<a style="display:inline-block;padding:10px 20px;background-color:#ed5565;color:#fff;text-decoration:none;border-radius:5px;text-align:center;font-weight:bold;" href="' . esc_url(get_comment_link($parent_id)) . '" target="_blank">查看完整内容</a>
-				</td>
-			</tr>
-		</tbody></table>
-	<table style="background-color:#f8f8f8;" border="0" cellpadding="0" cellspacing="0" width="100%">
-		<tbody><tr>
-			<td style="color:#666;text-align:center;font-size:12px;padding:15px 0;" width="100%">
-				(此邮件由系统自动发送，请勿回复！)
-				<span style="display:block;padding-top:8px;border-bottom:1px solid #ccc"></span>
-				<a style="display:inline-block;padding-top:8px;text-decoration:none;color:#333;font-size:14px;" href="' . esc_url(get_option('home')) . '" target="_blank">© ' . esc_html(get_option('blogname')) . '</a>
-			</td>
-		</tr>
-	</tbody></table>
-	</td>
-</tr></tbody>
-</table>';
-	$message = convert_smilies($message);
-	$from = "From: \"" . esc_html(get_option('blogname')) . "\" <$wp_email>";
-	$headers = "$from\nContent-Type: text/html; charset=" . get_option('blog_charset') . "\n";
-	wp_mail( $to, $subject, $message, $headers );
-	//echo 'mail to ', $to, '<br/> ' , $subject, $message; // for testing
-	}
-}
-add_action('comment_post', 'comment_mail_notify');
-
-?>
