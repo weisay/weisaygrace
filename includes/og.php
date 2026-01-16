@@ -13,7 +13,7 @@
 <meta property="og:locale" content="zh_CN" />
 <?php if ( is_home() ) : ?>
 <meta property="og:title" content="<?php bloginfo('name'); ?>" />
-<meta property="og:url" content="<?php bloginfo('url'); ?>/" />
+<meta property="og:url" content="<?php echo home_url('/'); ?>" />
 <meta property="og:description" content="<?php echo weisay_option('wei_description'); ?>"/>
 <?php $site_icon_url = get_site_icon_url(); if ( !empty( $site_icon_url )) : ?>
 <meta property="og:image" content="<?php echo esc_url($site_icon_url); ?>" />
@@ -37,15 +37,15 @@ if ($current_cat && !is_wp_error($current_cat)) {
 <meta property="og:description" content="<?php echo $description; ?>" />
 <?php elseif ( is_year() ) : ?>
 <meta property="og:title" content="<?php the_time('Y年'); ?>文章归档" />
-<meta property="og:url" content="<?php bloginfo('url'); ?>/<?php the_time('Y'); ?>/" />
+<meta property="og:url" content="<?php echo get_year_link( get_the_time('Y') ); ?>" />
 <meta property="og:description" content="<?php bloginfo('name'); ?>博客上<?php the_time('Y年'); ?>发布的所有日志聚合。" />
 <?php elseif ( is_month() ) : ?>
 <meta property="og:title" content="<?php the_time('Y年n月'); ?>文章归档" />
-<meta property="og:url" content="<?php bloginfo('url'); ?>/<?php the_time('Y'); ?>/<?php the_time('n'); ?>/" />
+<meta property="og:url" content="<?php echo get_month_link( get_the_time('Y'), get_the_time('n') ); ?>" />
 <meta property="og:description" content="<?php bloginfo('name'); ?>博客上<?php the_time('Y年n月'); ?>发布的所有日志聚合。" />
 <?php elseif ( is_day() ) : ?>
 <meta property="og:title" content="<?php the_time('Y年n月j日'); ?>文章归档" />
-<meta property="og:url" content="<?php bloginfo('url'); ?>/<?php the_time('Y'); ?>/<?php the_time('n'); ?>/<?php the_time('j'); ?>/" />
+<meta property="og:url" content="<?php echo get_day_link( get_the_time('Y'), get_the_time('n'), get_the_time('j') ); ?>" />
 <meta property="og:description" content="<?php bloginfo('name'); ?>博客上<?php the_time('Y年n月j日'); ?>发布的所有日志聚合。" />
 <?php elseif ( is_author() ) : ?>
 <meta property="og:title" content="<?php the_author(); ?>发布的所有文章" />

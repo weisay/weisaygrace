@@ -114,26 +114,55 @@ if ( function_exists('register_nav_menus') ) {
 	));
 }
 
-if ( ! function_exists( 'weisaygrace_styles' ) ) {
-	function weisaygrace_styles() {
-		$theme = wp_get_theme();
-		$themeversion = $theme->get('Version');
-		wp_enqueue_style( 'weisaygrace-mmenu', get_template_directory_uri().'/assets/css/jquery.mmenu.css','',$themeversion,'all' );
-		wp_enqueue_style( 'weisaygrace-style', get_stylesheet_uri(),'',$themeversion,'all' );
-		wp_enqueue_style( 'weisaygrace-dark', get_template_directory_uri().'/assets/css/dark.css','',$themeversion,'all' );
+function weisaygrace_css_js() {
+	$theme = wp_get_theme();
+	$themeversion = $theme->get('Version');
+	wp_enqueue_style( 'jquery-mmenu', get_template_directory_uri().'/assets/css/jquery.mmenu.css','',$themeversion,'all' );
+	wp_enqueue_style( 'style', get_stylesheet_uri(),'',$themeversion,'all' );
+	wp_enqueue_style( 'dark', get_template_directory_uri().'/assets/css/dark.css','',$themeversion,'all' );
+	wp_enqueue_script( 'jquery' );
+	wp_enqueue_script( 'dark', get_template_directory_uri().'/assets/js/dark.min.js', array('jquery'), $themeversion, true);
+	if ( is_singular() ) {
+		if (weisay_option('wei_prismjs') == 'open') {
+			wp_enqueue_script( 'prism', get_template_directory_uri().'/assets/js/prism.min.js', array('jquery'), $themeversion, true);
+		}
+		wp_enqueue_script( 'realgravatar', get_template_directory_uri().'/assets/js/realgravatar.min.js', array('jquery'), $themeversion, true);
+		wp_enqueue_script( 'com-post-ajax', get_template_directory_uri().'/assets/js/com-post-ajax.js', array('jquery'), $themeversion, true);
 	}
-}
-add_action( 'wp_enqueue_scripts', 'weisaygrace_styles', '1' );
+	if ( is_single() ) {
+		if (weisay_option('wei_qrcode') == 'display') {
+			wp_enqueue_script( 'qrcode', get_template_directory_uri().'/assets/js/qrcode.min.js', array('jquery'), $themeversion, true);
+		}
+		wp_enqueue_style( 'jquery-fancybox', get_template_directory_uri().'/assets/css/jquery.fancybox.min.css','',$themeversion,'all' );
+		wp_enqueue_script( 'jquery-fancybox', get_template_directory_uri().'/assets/js/jquery.fancybox.min.js', array('jquery'), $themeversion, true);
+	}
+	wp_enqueue_script( 'lazyload', get_template_directory_uri().'/assets/js/lazyload.min.js', array('jquery'), $themeversion, false);
+	wp_enqueue_script( 'jquery-mmenu', get_template_directory_uri().'/assets/js/jquery.mmenu.min.js', array('jquery'), $themeversion, true);
+	wp_enqueue_script( 'weisay', get_template_directory_uri().'/assets/js/weisay.min.js', array('jquery'), $themeversion, false);
 
-//获取主题版本
-function get_weisaygrace_version() {
-	static $version = null;
-	if (is_null($version)) {
-		$theme = wp_get_theme();
-		$version = $theme->get('Version');
+	// ===== 自定义链接颜色 =====
+	$color_hover = weisay_option('wei_link_color');
+	if ( $color_hover ) {
+		$color_hover = trim($color_hover);
+		list($r, $g, $b) = hex_to_rgb($color_hover);
+		$bg_light = [255, 255, 255];
+		$color_link_alpha = "rgba($r, $g, $b, 0.8)";
+		$color_link = rgba_to_hex_on_bg($r, $g, $b, 0.9, $bg_light);
+		$color_border = rgba_to_hex_on_bg($r, $g, $b, 0.25, $bg_light);
+		$color_bg = rgba_to_hex_on_bg($r, $g, $b, 0.06, $bg_light);
+		$color_comment = rgba_to_hex_on_bg($r, $g, $b, 0.35, $bg_light);
+		$bg_dark = [18, 18, 18];
+		$color_link_dark = rgba_to_hex_on_bg($r, $g, $b, 0.8, $bg_dark);
+		$color_hover_dark = rgba_to_hex_on_bg($r, $g, $b, 0.9, $bg_dark);
+		$color_border_dark = rgba_to_hex_on_bg($r, $g, $b, 0.35, $bg_dark);
+		$color_bg_dark = rgba_to_hex_on_bg($r, $g, $b, 0.06, $bg_dark);
+		$color_comment_dark = rgba_to_hex_on_bg($r, $g, $b, 0.55, $bg_dark);
+$css = ":root {--color_link:{$color_link};--color_hover:{$color_hover};--color_border:{$color_border};--color_bg:{$color_bg};--color_comment:{$color_comment};--color_comment_dark:{$color_comment_dark};--color_link_alpha:{$color_link_alpha};}
+.dark{--color_link_dark:{$color_link_dark};--color_hover_dark:{$color_hover_dark};--color_border_dark:{$color_border_dark};--color_bg_dark:{$color_bg_dark};--color_comment:{$color_comment};--color_comment_dark:{$color_comment_dark};--color_link_alpha:{$color_link_alpha};}";
+		wp_add_inline_style( 'dark', $css );
 	}
-	return $version;
 }
+add_action( 'wp_enqueue_scripts', 'weisaygrace_css_js', '1' );
 
 //独立页面增加摘要功能
 add_action('init', 'page_excerpt');
@@ -173,22 +202,22 @@ function output_my_comments_columns(){
 add_action( 'manage_comments_custom_column', 'output_my_comments_columns', 10, 2 );
 
 //替换文章img和a标签加载fancybox灯箱
-add_filter('the_content', 'replace_content');
+add_filter('the_content', 'replace_content', 99);
 function replace_content($content) {
-	$pattern = '/<a\s([^>]*?)href=([\'"])([^>]*?\.(?:bmp|gif|jpe?g|png|webp)(?:\?[^\'" >]*)?)\2([^>]*?)>(<img\s[^>]*>)<\/a>/is';
+	$pattern = '/<a\s+([^>]*?)href=([\'"])([^>]*?\.(?:bmp|gif|jpe?g|png|webp)(?:\?[^\'" >]*)?)\2([^>]*?)>\s*(<img\s+[^>]*>)\s*<\/a>/is';
 	$content = preg_replace_callback($pattern, function($matches) {
 		$before_href = $matches[1];
 		$href_content = $matches[3];
 		$after_href = $matches[4];
 		$img_tag = $matches[5];
 		$caption = '';
-		if (preg_match('/alt=([\'"])(.*?)\1/', $img_tag, $alt_matches)) {
+		if (preg_match('/alt=([\'"])(.*?)\1/i', $img_tag, $alt_matches)) {
 			$alt_value = trim($alt_matches[2]);
 			if (!empty($alt_value)) {
 				$caption = $alt_value;
 			}
 		}
-		if (empty($caption) && preg_match('/title=([\'"])(.*?)\1/', $img_tag, $title_matches)) {
+		if (empty($caption) && preg_match('/title=([\'"])(.*?)\1/i', $img_tag, $title_matches)) {
 			$title_value = trim($title_matches[2]);
 			if (!empty($title_value)) {
 				$caption = $title_value;
@@ -198,7 +227,7 @@ function replace_content($content) {
 		if (!empty($caption)) {
 			$new_attrs .= ' data-caption="' . esc_attr($caption) . '"';
 		}
-		return '<a ' . $before_href . 'href="' . $href_content . '"' . $after_href . ' ' . $new_attrs . '>' . $img_tag . '</a>';
+		return '<a ' . $before_href . ' href="' . $href_content . '" ' . $after_href . ' ' . $new_attrs . '>' . $img_tag . '</a>';
 	}, $content);
 	return $content;
 }
@@ -835,6 +864,23 @@ get_comments_number()
 	$html .= '</div>';
 	$html .= timeline_paged_nav($the_query, $paged, 2);
 	return $html;
+}
+
+//颜色转换
+function hex_to_rgb($hex) {
+	$hex = ltrim($hex, '#');
+	return [
+		hexdec(substr($hex, 0, 2)),
+		hexdec(substr($hex, 2, 2)),
+		hexdec(substr($hex, 4, 2)),
+	];
+}
+function rgba_to_hex_on_bg($r, $g, $b, $a, $bg = [255, 255, 255]) {
+	$a = max(0, min(1, $a));
+	$r = round($r * $a + $bg[0] * (1 - $a));
+	$g = round($g * $a + $bg[1] * (1 - $a));
+	$b = round($b * $a + $bg[2] * (1 - $a));
+	return sprintf('#%02x%02x%02x', $r, $g, $b);
 }
 
 //获取随机邀评诗句

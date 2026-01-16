@@ -1,4 +1,32 @@
 <?php
+/**
+ * 单独整理评论相关函数.
+ */
+
+//中文评论检查
+if (weisay_option('wei_chinese') == 'open') {
+	add_filter('preprocess_comment', 'verify_chinese_comment');
+	function verify_chinese_comment($commentdata) {
+		$content = $commentdata['comment_content'];
+		if (!preg_match('/\p{Han}/u', $content)) {
+			$is_ajax = wp_doing_ajax()
+				|| (isset($_SERVER['HTTP_X_REQUESTED_WITH'])
+					&& strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
+			if ($is_ajax) {
+				status_header(400);
+				header('Content-Type: text/plain; charset=utf-8');
+				echo '评论必须包含中文内容！';
+				exit;
+			}
+			wp_die(
+				'Invalid comment content.',
+				'Comment Error',
+				array('response' => 400)
+			);
+		}
+		return $commentdata;
+	}
+}
 
 //评论者网站新窗口打开
 add_filter('get_comment_author_link', function ($return, $author, $id) {
@@ -61,7 +89,7 @@ function weisay_comment($comment, $args, $depth) {
 <li <?php comment_class(); ?> id="comment-<?php comment_ID() ?>">
 <div id="div-comment-<?php comment_ID() ?>" class="comment-body">
 <?php $add_below = 'div-comment'; ?>
-<div class="comment-avatar vcard"><?php echo get_avatar( $comment->comment_author_email, 48, '', get_comment_author() ); ?></div>
+<div class="comment-avatar vcard"><?php echo get_avatar( $comment->comment_author_email, 60, '', get_comment_author() ); ?></div>
 <div class="comment-box">
 <?php if ( $comment->comment_approved == '1' ) : ?>
 <span class="floor"><?php
@@ -145,7 +173,7 @@ function weisay_touching_comments_list($comment) {
 <p class="fn comment-name"><?php comment_author_link(); ?></p>
 <p class="comment-datetime"><?php comment_date('Y-m-d'); ?></p>
 </div>
-<div class="comment-avatar vcard"><?php echo get_avatar( $comment->comment_author_email, 48, '', get_comment_author() ); ?></div>
+<div class="comment-avatar vcard"><?php echo get_avatar( $comment->comment_author_email, 60, '', get_comment_author() ); ?></div>
 </div>
 <div class="comment-content"><?php comment_text() ?></div>
 <div class="comment-from">评论于<span class="bullet">•</span><a href="<?php echo get_comment_link($comment->comment_ID, $cpage); ?>" target="_blank"><?php echo get_the_title($comment->comment_post_ID); ?></a></div>

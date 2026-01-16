@@ -206,6 +206,14 @@ function optionsframework_options() {
 	);
 
 	$options[] = array(
+		'name' => __( '自定义颜色', 'theme-textdomain' ),
+		'desc' => __( '选择自己喜欢的颜色作为链接等相关颜色，不使用自定义颜色清除即可', 'theme-textdomain' ),
+		'id' => 'wei_link_color',
+		'std' => '',
+		'type' => 'color'
+	);
+
+	$options[] = array(
 		'name' => __( '首页布局', 'theme-textdomain' ),
 		'id' => 'wei_layout',
 		'std' => 'blog',
@@ -392,12 +400,38 @@ function optionsframework_options() {
 
 	$options[] = array(
 		'name' => __( '启用代码高亮(Prism.js)', 'theme-textdomain' ),
-		'desc' => __( '默认禁用', 'theme-textdomain' ),
+		'desc' => sprintf( __( '默认禁用，若启用可点击查看 <a href="%1$s" target="_blank">Prism.js 代码高亮使用方法</a>', 'theme-textdomain' ), 'https://www.weisay.com/blog/wordpress-theme-weisay-box.html#title-11' ),
 		'id' => 'wei_prismjs',
 		'class' => 'sub-level',
 		'std' => 'close',
 		'type' => 'select',
 		'options' => $on_off
+	);
+
+	$options[] = array(
+		'name' => __( '文章二维码', 'theme-textdomain' ),
+		'id' => 'wei_about_qrcode',
+		'class' => 'separate',
+		'type' => 'info',
+	);
+
+	$options[] = array(
+		'name' => __( '显示文章二维码', 'theme-textdomain' ),
+		'desc' => __( '默认隐藏，启用后会在文章页标题下方展示当前文章链接的二维码', 'theme-textdomain' ),
+		'id' => 'wei_qrcode',
+		'class' => 'sub-level',
+		'std' => 'hide',
+		'type' => 'select',
+		'options' => $show_hide
+	);
+
+	$options[] = array(
+		'name' => __( '二维码中间logo', 'theme-textdomain' ),
+		'desc' => __( '自定义二维码中间logo。可不填写，如填写，请使用完整图片 URL，需包含 http:// 或 https://', 'theme-textdomain' ),
+		'id' => 'wei_qrcodeimg',
+		'class' => 'sub-level',
+		'std' => '',
+		'type' => 'text'
 	);
 
 	$options[] = array(
@@ -528,18 +562,6 @@ function optionsframework_options() {
 		'desc' => '完成下方的 SMTP 配置后，点击右侧按钮发送测试邮件到管理员邮箱（<strong>确保已开启上方的评论邮件通知</strong>）<br><br>
 			<button type="button" id="wei_send_test_mail" class="button button-primary">发送测试邮件</button>
 			<span id="wei_test_mail_result" style="margin-left:10px;"></span>'
-	);
-
-	$options[] = array(
-		'name' => __( '普通用户评论时通知管理员', 'theme-textdomain' ),
-		'desc' => __( '默认不通知，此功能与「后台 → 设置 → 讨论 → 发送邮件通知我」选项功能类似，请保留其中一项，以避免重复发送邮件', 'theme-textdomain' ),
-		'id' => 'wei_notify_admin',
-		'std' => '2',
-		'type' => 'radio',
-		'options' => array(
-			'1' => '通知',
-			'2' => '不通知',
-		)
 	);
 
 	$options[] = array(

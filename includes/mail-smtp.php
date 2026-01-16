@@ -1,11 +1,16 @@
 <?php
+/**
+ * WordPress Weisay-Send-Comment-Email v1.1 by Weisay.
+ * URI: https://www.weisay.com/blog/
+ */
 
-// ==================== 统一 SMTP 发件人 ====================
+if ( ! defined( 'ABSPATH' ) ) { exit; }
+
+// ==================== 1. SMTP 配置 ====================
 add_filter('wp_mail_from', function($from){
 	return weisay_option('wei_smtp_username');
 }, 9999);
 
-// ==================== SMTP 配置 ====================
 add_action('phpmailer_init', 'custom_phpmailer_smtp');
 function custom_phpmailer_smtp($phpmailer) {
 
@@ -34,12 +39,90 @@ function custom_phpmailer_smtp($phpmailer) {
 	$phpmailer->Sender = $username;
 }
 
-// ==================== 评论回复模板 ====================
+// ==================== 2. 发送邮件函数 ====================
+function send_comment_email($to, $subject, $message) {
+	$from_email = weisay_option('wei_smtp_username');
+	$from_name = weisay_option('wei_smtp_from_name') ?: get_bloginfo('name');
+	$headers = array(
+		"From: $from_name <$from_email>",
+		"Reply-To: $from_email",
+		"Content-Type: text/html; charset=" . get_option('blog_charset')
+	);
+	return wp_mail($to, $subject, $message, $headers);
+}
+
+// ==================== 3. 核心逻辑：判断与异步调度 ====================
+
+// 注册异步发送任务
+function schedule_comment_email($comment_id) {
+	$comment = get_comment($comment_id);
+	if (!$comment || $comment->comment_approved !== '1') return;
+	$parent_id = $comment->comment_parent;
+	if (!$parent_id) return;
+	$parent_comment = get_comment($parent_id);
+	if (!$parent_comment) return;
+
+	// 排除逻辑：自回复、回复管理员
+	$reply_to_self = ($comment->comment_author_email === $parent_comment->comment_author_email);
+	$parent_is_admin = (! empty($parent_comment->user_id) && user_can((int) $parent_comment->user_id, 'manage_options'));
+	if ($reply_to_self || $parent_is_admin) return;
+
+	// 开关控制逻辑
+	$is_admin_reply = (! empty($comment->user_id) && user_can((int) $comment->user_id, 'manage_options'));
+	
+	// 如果 [不是管理员在回复] 并且 [开关关闭] -> 不发邮件
+	if (!$is_admin_reply && (weisay_option('wei_notify_user') !== '1')) {
+		return;
+	}
+
+	// 尝试注册异步任务（12秒后）
+	$args = array($comment_id);
+	$scheduled = wp_schedule_single_event(time() + 12, 'async_send_email_event', $args);
+	// 保险逻辑：如果明确注册失败，或者网站禁用了 Cron 功能
+	if ($scheduled === false || (defined('DISABLE_WP_CRON') && DISABLE_WP_CRON)) {
+		wp_clear_scheduled_hook('async_send_email_event', $args);
+		execute_async_send($comment_id);
+	}
+
+}
+
+// 安排异步调用
+add_action('async_send_email_event', 'execute_async_send');
+function execute_async_send($comment_id) {
+	$comment = get_comment($comment_id);
+	if (!$comment || $comment->comment_approved !== '1') return;
+	$parent_comment = get_comment($comment->comment_parent);
+	if (!$parent_comment) return;
+	// 准备邮件内容
+	$subject = '✨您在 [' . esc_html(get_option('blogname')) . '] 的评论有了新回复';
+	$message = generate_comment_email_message($comment, $parent_comment);
+	$message = convert_smilies($message);
+
+	send_comment_email($parent_comment->comment_author_email, $subject, $message);
+}
+
+// ==================== 4. 评论钩子挂载 ====================
+
+// 场景 A: 评论发布时 (直接通过审核)
+add_action('comment_post', function($comment_id, $approved) {
+	if ($approved === 1 || $approved === '1' || $approved === 'approve') {
+		schedule_comment_email($comment_id);
+	}
+}, 10, 2);
+
+// 场景 B: 评论从待审变为通过时
+add_action('wp_set_comment_status', function($comment_id, $status) {
+	if ($status === 'approve') {
+		schedule_comment_email($comment_id);
+	}
+}, 10, 2);
+
+// ==================== 5. 邮件模板 ====================
 function generate_comment_email_message($comment, $parent_comment) {
 	if ( empty($parent_comment) && ! empty($comment->comment_parent) ) {
 		$parent_comment = get_comment( intval($comment->comment_parent) );
 	}
-	$home_url = esc_url( get_option('home') );
+	$home_url = esc_url(home_url('/'));
 	$blog_name = esc_html( get_option('blogname') );
 	$post_link = esc_url( get_permalink($comment->comment_post_ID) );
 	$post_title = esc_html( get_the_title($comment->comment_post_ID) );
@@ -56,20 +139,19 @@ function generate_comment_email_message($comment, $parent_comment) {
 
 	ob_start();
 	?>
-	<table style="font-family:Arial,sans-serif;color:#333;margin:0;padding:0;max-width:820px;margin:0 auto;border-radius:0;" border="0" cellpadding="0" cellspacing="0">
+	<table style="font-family:Microsoft YaHei,Arial,sans-serif;color:#333;margin:0 auto;max-width:820px;" border="0" cellpadding="0" cellspacing="0">
 		<tbody><tr>
 			<td>
 				<table style="margin-bottom:20px;" border="0" cellpadding="0" cellspacing="0" width="100%">
 					<tbody><tr>
-						<td style="padding:10px 0;font-size:20px;text-align:left;vertical-align:middle;"><?php echo $parent_author; ?>, 您好!</td>
+						<td style="padding:10px 0;font-size:20px;text-align:left;"><?php echo $parent_author; ?>, 您好!</td>
 					</tr>
 				</tbody></table>
 
 				<table style="margin-bottom:20px;" border="0" cellpadding="0" cellspacing="0" width="100%">
 					<tbody><tr>
 						<td style="font-size:16px;">
-							您在 [ <strong><a style="text-decoration:none;color:#333;" href="<?php echo $home_url; ?>" target="_blank"><?php echo $blog_name; ?></a></strong> ]
-							文章《<strong><a style="text-decoration:none;color:#da4453;" href="<?php echo $post_link; ?>" target="_blank"><?php echo $post_title; ?></a></strong>》 中的评论有了新回复：
+							您在 [ <strong><a style="text-decoration:none;color:#333;" href="<?php echo $home_url; ?>" target="_blank"><?php echo $blog_name; ?></a></strong> ] 文章《<strong><a style="text-decoration:none;color:#da4453;" href="<?php echo $post_link; ?>" target="_blank"><?php echo $post_title; ?></a></strong>》中的评论有了新回复：
 						</td>
 					</tr>
 				</tbody></table>
@@ -81,15 +163,13 @@ function generate_comment_email_message($comment, $parent_comment) {
 									<td style="padding:10px;border-radius:8px;overflow:hidden;color:#333;background-color:#eef1f4;" >
 										<div style="display:flex;align-items:center;justify-content:flex-start;">
 											<div style="flex-shrink:0;margin-right:10px;">
-												<img style="width:48px;height:48px;border-radius:50%;"
-													alt="<?php echo esc_attr($parent_author); ?>"
-													src="<?php echo $parent_avatar; ?>">
+												<img style="width:48px;height:48px;border-radius:50%;" alt="<?php echo esc_attr($parent_author); ?>" src="<?php echo $parent_avatar; ?>">
 											</div>
 											<div>
 												<strong style="font-size:16px;"><?php echo $parent_author; ?></strong>
 											</div>
 										</div>
-										<p style="margin-top:10px;margin-right:60px;line-height:26px;"><?php echo $parent_content; ?></p>
+										<div style="margin-top:10px;margin-right:60px;line-height:26px;"><?php echo $parent_content; ?></div>
 									</td>
 								</tr>
 							</tbody></table>
@@ -107,12 +187,10 @@ function generate_comment_email_message($comment, $parent_comment) {
 												<strong style="font-size:16px;"><?php echo $comment_author; ?></strong>
 											</div>
 											<div style="flex-shrink:0;margin-left:10px;">
-												<img style="width:48px;height:48px;border-radius:50%;"
-													 alt="<?php echo esc_attr($comment_author); ?>"
-													 src="<?php echo $comment_avatar; ?>">
+												<img style="width:48px;height:48px;border-radius:50%;" alt="<?php echo esc_attr($comment_author); ?>" src="<?php echo $comment_avatar; ?>">
 											</div>
 										</div>
-										<p style="margin-top:10px;margin-left:60px;line-height:26px;"><?php echo $comment_content; ?></p>
+										<div style="margin-top:10px;margin-left:60px;line-height:26px;"><?php echo $comment_content; ?></div>
 									</td>
 								</tr>
 							</tbody></table>
@@ -122,8 +200,7 @@ function generate_comment_email_message($comment, $parent_comment) {
 				<table border="0" cellpadding="0" cellspacing="0" width="100%">
 					<tbody><tr>
 						<td style="padding:20px 0 30px 0;" align="center">
-							<a style="display:inline-block;background-color:#ed5565;color:white;text-decoration:none;padding:10px 20px;border-radius:4px;font-weight:bold;"
-							href="<?php echo $parent_comment_link; ?>" target="_blank">查看完整内容</a>
+							<a style="display:inline-block;background-color:#ed5565;color:white;text-decoration:none;padding:10px 20px;border-radius:4px;font-weight:bold;" href="<?php echo $parent_comment_link; ?>" target="_blank">查看完整内容</a>
 						</td>
 					</tr>
 				</tbody></table>
@@ -142,209 +219,6 @@ function generate_comment_email_message($comment, $parent_comment) {
 	<?php
 	return ob_get_clean();
 }
-
-// ==================== 通知管理员邮件模板 ====================
-function generate_admin_comment_email($comment, $is_approved = true) {
-	$blog_name = esc_html(get_option('blogname'));
-	$post_title = esc_html(get_the_title($comment->comment_post_ID));
-	$comment_url = esc_url(get_comment_link($comment->comment_ID));
-	$post_link = esc_url(get_permalink($comment->comment_post_ID));
-	$parent_comment = !empty($comment->comment_parent) ? get_comment($comment->comment_parent) : null;
-	$comment_author = esc_html($comment->comment_author);
-	$comment_author_email = sanitize_email($comment->comment_author_email);
-	$comment_author_url = esc_url($comment->comment_author_url);
-	$comment_content = wpautop(esc_html($comment->comment_content));
-	$comment_type_text = $comment->comment_parent ? '回复' : '评论';
-	if (!$is_approved) {
-		$comment_type_text .= '等待审核';
-	}
-
-	ob_start();
-	?>
-	<table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width:820px;margin:0 auto;background-color:#ffffff;">
-		<tbody>
-			<tr>
-				<td style="padding:20px;">
-					<table width="100%" style="padding:10px 0;margin-bottom:16px;">
-						<tr>
-							<td style="font-size:16px;color:#5c4c51;font-weight:bold;">您的文章《<a style="text-decoration:none;color:#da4453;" href="<?php echo $post_link; ?>" target="_blank"><?php echo $post_title; ?></a>》收到了一条新<?php echo $comment_type_text; ?></td>
-						</tr>
-					</table>
-					<table width="100%" style="background-color:#f9f9f9;border-radius:5px;padding:12px;margin-bottom:16px;">
-						<tr>
-							<td style="padding:8px 0;">
-								<strong style="color:#555;width:80px;display:inline-block;">评论者：</strong>
-								<span style="color:#333;"><?php echo $comment_author; ?></span>
-							</td>
-						</tr>
-						<?php if ($comment_author_email): ?>
-						<tr>
-							<td style="padding:8px 0;">
-								<strong style="color:#555;width:80px;display:inline-block;">邮箱：</strong>
-								<span style="color:#333;"><?php echo $comment_author_email; ?></span>
-							</td>
-						</tr>
-						<?php endif; ?>
-						<?php if ($comment_author_url): ?>
-						<tr>
-							<td style="padding:8px 0;">
-								<strong style="color:#555;width:80px;display:inline-block;">URL：</strong>
-								<span style="color:#333;">
-									<a href="<?php echo $comment_author_url; ?>" target="_blank"><?php echo $comment_author_url; ?></a>
-								</span>
-							</td>
-						</tr>
-						<?php endif; ?>
-					</table>
-					<?php if ($parent_comment): ?>
-					<table width="100%" style="margin-bottom:8px;">
-						<tr>
-							<td style="font-size:18px;color:#333;">
-								原 <?php echo esc_html($parent_comment->comment_author); ?> 发的评论：
-							</td>
-						</tr>
-					</table>
-					<table width="100%" style="margin-bottom:16px;">
-						<tr>
-							<td style="font-size:16px;line-height:28px;background-color:#f5f5f5;border-left:4px solid #999;padding:15px;color:#444;">
-								<?php echo wpautop(esc_html($parent_comment->comment_content)); ?>
-							</td>
-						</tr>
-					</table>
-					<?php endif; ?>
-					<table width="100%" style="margin-bottom:10px;">
-						<tr>
-							<td style="font-size:18px;color:#333;"><?php echo $comment_author; ?> <?php echo ($comment->comment_parent ? '回复' : '评论'); ?>如下：</td>
-						</tr>
-					</table>
-					<table width="100%" style="margin-bottom:16px;">
-						<tr>
-							<td style="font-size:16px;line-height:30px;background-color:#fffafb;border-left:4px solid #ed5565;padding:15px;color:#333;">
-								<?php echo $comment_content; ?>
-							</td>
-						</tr>
-					</table>
-					<table width="100%">
-						<tr>
-							<td style="padding:16px 0 32px 0;text-align:center;">
-								<a href="<?php echo $post_link . '#comments'; ?>"
-								   style="display:inline-block;background-color:#ed5565;color:white;text-decoration:none;padding:10px 20px;border-radius:4px;font-weight:bold;">
-									查看所有评论
-								</a>
-							</td>
-						</tr>
-					</table>
-				</td>
-			</tr>
-		</tbody>
-	</table>
-	<?php
-	return ob_get_clean();
-}
-
-// ==================== 发送邮件函数 ====================
-function send_comment_email($to, $subject, $message) {
-	$from_email = weisay_option('wei_smtp_username');
-	$from_name = weisay_option('wei_smtp_from_name') ?: get_bloginfo('name');
-	$headers = array(
-		"From: $from_name <$from_email>",
-		"Reply-To: $from_email",
-		"Content-Type: text/html; charset=" . get_option('blog_charset')
-	);
-	return wp_mail($to, $subject, $message, $headers);
-}
-
-// ==================== 评论邮件通知 ====================
-add_action('comment_post', 'handle_comment_email', 10, 2);
-function handle_comment_email($comment_id, $comment_approved) {
-	static $processing = false; // 防无限循环
-	if ($processing) return;
-	$processing = true;
-
-	$comment = get_comment($comment_id);
-	$admin_email = get_bloginfo('admin_email');
-	$parent_id = $comment->comment_parent;
-	$is_admin_commenter = ($comment->user_id && user_can($comment->user_id, 'manage_options'));
-	$is_approved = in_array($comment_approved, [1, '1', 'approve', 'approved'], true);
-
-	// 获取父评论及其管理员状态
-	$parent_comment = $parent_id ? get_comment($parent_id) : null;
-	$parent_is_admin = $parent_comment ? user_can(intval($parent_comment->user_id ?? 0), 'manage_options') : false;
-
-	// 管理员回复逻辑
-	if ($is_admin_commenter) {
-		// 管理员回复普通用户 → 只通知被回复用户
-		if ($parent_comment && !$parent_is_admin) {
-			$email_send_user = generate_comment_email_message($comment, $parent_comment);
-			$email_send_user = convert_smilies($email_send_user);
-			send_comment_email($parent_comment->comment_author_email, '✨您在 [' . esc_html(get_option('blogname')) . '] 的评论有了新回复', $email_send_user);
-		}
-		$processing = false;
-		return;
-	}
-
-	// 普通用户默认已批准评论的回复逻辑
-	$reply_to_self = $parent_comment && ($comment->comment_author_email === $parent_comment->comment_author_email);
-	// 如果不是自己回复自己 → 判断后台开关是否通知被回复用户
-	if ($parent_comment && !$reply_to_self && $is_approved && !$parent_is_admin && weisay_option('wei_notify_user') == '1') {
-		$email_send_user = generate_comment_email_message($comment, $parent_comment);
-		$email_send_user = convert_smilies($email_send_user);
-		send_comment_email($parent_comment->comment_author_email, '✨您在 [' . esc_html(get_option('blogname')) . '] 的评论有了新回复', $email_send_user);
-	}
-
-	// 普通用户评论或回复（包括自己） → 判断后台开关是否通知管理员
-	if (weisay_option('wei_notify_admin') == '1') {
-		$blog_name = esc_html(get_option('blogname'));
-		$post_title = esc_html(get_the_title($comment->comment_post_ID));
-		$comment_type = $comment->comment_parent ? '回复' : '评论';
-		$email_subject_prefix = $is_approved ? '' : '请审核：';
-		$email_subject = $email_subject_prefix . "[{$blog_name}] 的「{$post_title}」有新{$comment_type}";
-		$email_send_admin = generate_admin_comment_email($comment, $is_approved);
-		$email_send_admin = convert_smilies($email_send_admin);
-		send_comment_email($admin_email, $email_subject, $email_send_admin);
-	}
-	$processing = false;
-}
-
-// ==================== 待审核评论通过后邮件 ====================
-add_action('wp_set_comment_status', function($comment_id, $comment_status) {
-	static $processing = false; // 防无限循环
-	if ($processing) return;
-	$processing = true;
-
-	if ($comment_status !== 'approve') {
-		$processing = false;
-		return;
-	}
-
-	$comment = get_comment($comment_id);
-	$parent_id = $comment->comment_parent;
-	if (!$parent_id) {
-		$processing = false;
-		return;
-	}
-
-	$parent_comment = get_comment($parent_id);
-
-	// 用户回复自己的评论 → 不发邮件
-	if ($comment->comment_author_email === $parent_comment->comment_author_email) {
-		$processing = false;
-		return;
-	}
-	// 被回复者是管理员 → 不通知
-	$parent_is_admin = user_can(intval($parent_comment->user_id ?? 0), 'manage_options');
-	if ($parent_is_admin) {
-		$processing = false;
-		return;
-	}
-	// 判断后台开关是否通知被回复用户
-	if (weisay_option('wei_notify_user') == '1') {
-		$email_send_user = generate_comment_email_message($comment, $parent_comment);
-		$email_send_user = convert_smilies($email_send_user);
-		send_comment_email($parent_comment->comment_author_email, '✨您在 [' . esc_html(get_option('blogname')) . '] 的评论有了新回复', $email_send_user);
-	}
-	$processing = false;
-}, 10, 2);
 
 // ==================== 后台测试邮件逻辑 ====================
 add_action('wp_ajax_wei_send_test_mail', function() {

@@ -255,7 +255,7 @@ function post_karma(comment_id, action_url, elem) {
 	var formData = new FormData();
 	formData.append('comment_id', comment_id);
 	formData.append('comment_karma', new_karma);
-	$.ajax({
+	jQuery.ajax({
 		type: 'POST',
 		url: action_url,
 		data: new URLSearchParams(formData).toString(),

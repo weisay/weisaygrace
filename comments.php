@@ -68,7 +68,7 @@ jQuery(document).ready(function ($) {
 <?php if ( get_option('comment_registration') && !is_user_logged_in() ) : ?>
 <div class="must-log-in"><?php print '您必须'; ?> <a href="<?php echo esc_url( wp_login_url(get_permalink()) ); ?>">[ 登录 ]</a> 才能发表评论！</div>
 <?php else : ?>
-<form action="<?php echo esc_url( get_template_directory_uri() . '/com-post-ajax.php' ); ?>" method="post" id="commentform" class="comment-form">
+<form action="<?php echo esc_url( site_url( '/wp-comments-post.php' ) ); ?>" method="post" id="commentform" class="comment-form">
 <p class="comment-notes"><span id="email-notes">电子邮件地址不会被公开。</span> 必填项已用 <span class="required">*</span> 标注</p>
 <div class="comment-frame">
 <?php
@@ -88,11 +88,11 @@ if ( $is_logged_in ) {
 }
 ?>
 <div id="real-avatar" class="comment-author-avatar">
-<?php echo get_avatar( $avatar_email, 56, '', $display_name ); ?>
+<?php echo get_avatar( $avatar_email, 60, '', $display_name ); ?>
 </div>
 <div class="comment-post">
 <?php if ( $is_logged_in ) : ?>
-<div class="comment-author"><?php print '登录者：'; ?> <a href="<?php bloginfo('url'); ?>/wp-admin/profile.php"><?php echo esc_html( $user_identity ); ?></a>
+<div class="comment-author"><?php print '登录者：'; ?> <a href="<?php echo admin_url('profile.php'); ?>"><?php echo esc_html( $user_identity ); ?></a>
 <a href="<?php echo esc_url( wp_logout_url(get_permalink()) ); ?>" class="comment-change">[ 退出 ]</a></div>
 <?php else : ?>
 <?php if ( $comment_author !== '' ) : ?>

@@ -172,6 +172,15 @@ jQuery(".mainmenu ul li,.top-page ul li").hoverDelay(".mainmenu ul li,.top-page 
 	jQuery(this).children("ul").hide();
 }
 });
+//文章二维码图片延迟展示
+jQuery(".qrcode-scan").hoverDelay(".qrcode-scan", {
+	hoverEvent: function(){
+		jQuery(".qrcode-img").show();
+	},
+	outEvent: function(){
+		jQuery(".qrcode-img").hide();
+	}
+});
 });
 
 //文章目录

@@ -45,7 +45,7 @@ if ($comments) {
 		echo '<li class="comment-item">';
 		echo '<section class="widget-comment-top">';
 		echo '<span class="widget-comment-date">' . get_comment_date('Y-m-d', $comment->comment_ID) . '</span>';
-		echo get_avatar($comment->comment_author_email, 46, '', strip_tags($comment->comment_author));
+		echo get_avatar($comment->comment_author_email, 60, '', strip_tags($comment->comment_author));
 		echo '<span class="widget-comment-commentator">' . strip_tags($comment->comment_author) . '</span>';
 		echo '</section>';
 		echo '<section class="widget-comment-content">';
@@ -630,7 +630,7 @@ class About_Author_Widget extends WP_Widget {
 			<div class="author-cover commenter-cover" style="background-image:url('<?php echo esc_url($instance['cover']); ?>')"></div>
 		<?php endif; ?>
 			<div class="author-avatar">
-				<?php echo get_avatar($email, 96, '', $name); ?>
+				<?php echo get_avatar($email, 108, '', $name); ?>
 			</div>
 			<div class="author-info">
 				<h3 class="author-name"><?php echo esc_html($name ?: __('热心读者', 'weisaygrace')); ?><?php if ( is_active_sidebar( 'sidebar-7' ) ) : ?><?php echo display_comment_level_commenter($fake_comment); ?><?php endif; ?></h3>
@@ -756,7 +756,7 @@ class About_Author_Widget extends WP_Widget {
 			<?php endif; ?>
 			
 			<div class="author-avatar">
-				<?php echo get_avatar($instance['email'], 70, '', $instance['name'], array('class' => 'avatar')); ?>
+				<?php echo get_avatar($instance['email'], 108, '', $instance['name'], array('class' => 'avatar')); ?>
 			</div>
 			
 			<div class="author-info">
@@ -920,7 +920,7 @@ class Reader_Wall_Widget extends WP_Widget {
 
 			echo '<li>';
 			echo '<a href="' . $url . '" rel="external nofollow" title="' . $title_text . '">';
-			echo get_avatar($comment->comment_author_email, 60, '', $comment->comment_author);
+			echo get_avatar($comment->comment_author_email, 84, '', $comment->comment_author);
 			echo '</a>';
 			echo '</li>';
 		}
@@ -1242,7 +1242,7 @@ class Comment_Level_Widget extends WP_Widget {
 	public static function get_comment_level_html($user_id, $email) {
 		// 博主标识
 		if ($user_id && user_can($user_id, 'manage_options')) {
-			return '<span class="post-author">博主</span>';
+			return '<span class="iconfont post-author" title="博主">&#xe6c4;</span>';
 		}
 
 		$email = sanitize_email($email);
@@ -1370,44 +1370,60 @@ class Comment_Level_Widget extends WP_Widget {
 	}
 }
 
-// 清理某邮箱的缓存
-function clear_comment_count_cache($comment_id) {
+// 清理评论相关的缓存
+function clear_comment_cache_worker($comment_id = null) {
+	// 1. 清理全局性质的缓存
+	delete_transient('archives_comment_stats');
+	if (!$comment_id) return;
 	$comment = get_comment($comment_id);
 	if (!$comment || empty($comment->comment_author_email)) return;
 	$email = sanitize_email($comment->comment_author_email);
-	if (empty($email)) return;
+	if (!$email) return;
+	// 2. 清理按字母分组的邮箱计数缓存。异步场景下，直接删除整个组性能最优
 	$first = strtolower($email[0]);
 	$group = ctype_alnum($first) ? $first : 'other';
-	$cache_key = 'comment_level_counts_' . $group;
-	$comment_counts = get_transient($cache_key);
-	if ($comment_counts !== false && isset($comment_counts[$email])) {
-		unset($comment_counts[$email]); // 移除该邮箱缓存
-		set_transient($cache_key, $comment_counts, 6 * HOUR_IN_SECONDS);
+	delete_transient('comment_level_counts_' . $group);
+	// 3. 清理侧边栏关于评论者的缓存
+	delete_transient('commenter_' . md5(strtolower($email)));
+}
+// 安排异步清理任务
+function schedule_comment_cache_cleanup($comment_id) {
+	$comment_id = intval($comment_id);
+	if (!$comment_id) return;
+	// 检查是否禁用了 cron，如果禁用就直接同步清理
+	if (defined('DISABLE_WP_CRON') && DISABLE_WP_CRON) {
+		clear_comment_cache_worker($comment_id);
+		return;
 	}
-	// 顺带清理归档页评论数统计的缓存
-	delete_transient('archives_comment_stats');
-	// 再顺带清理侧边栏的关于评论者的缓存
-	$commenter = wp_get_current_commenter();
-	$commenter_email = trim($commenter['comment_author_email']);
-	if ($commenter_email && is_email($commenter_email)) {
-		delete_transient( 'commenter_' . md5( strtolower( $commenter_email ) ) );
+	$hook = 'async_comment_cache_cleanup_hook';
+	$args = array($comment_id);
+	// 防抖处理
+	if (!wp_next_scheduled($hook, $args)) {
+		$scheduled = wp_schedule_single_event(time() + 6, $hook, $args);
+		// 如果调度失败（返回 false），立即同步清理
+		if (false === $scheduled) {
+			clear_comment_cache_worker($comment_id);
+		}
 	}
 }
-// 评论新增/编辑/删除/状态变更时清理缓存
-add_action('comment_post', function($comment_id, $comment_approved) {
-	if ($comment_approved == 1) {
-		clear_comment_count_cache($comment_id);
+add_action('async_comment_cache_cleanup_hook', 'clear_comment_cache_worker', 10, 1);
+// 评论新增/状态变更/编辑/删除时异步清理缓存
+add_action('comment_post', function($comment_id, $approved) {
+	if ($approved == 1) {
+		schedule_comment_cache_cleanup($comment_id);
 	}
 }, 10, 2);
 add_action('wp_set_comment_status', function($comment_id, $status) {
-	clear_comment_count_cache($comment_id);
+	if ($status === 'approve') {
+		schedule_comment_cache_cleanup($comment_id);
+	}
 }, 10, 2);
 add_action('edit_comment', function($comment_id) {
-	clear_comment_count_cache($comment_id);
-}, 10, 1);
+	schedule_comment_cache_cleanup($comment_id);
+}, 10);
 add_action('delete_comment', function($comment_id) {
-	clear_comment_count_cache($comment_id);
-}, 10, 1);
+	schedule_comment_cache_cleanup($comment_id);
+}, 10);
 
 // 注册评论者等级小工具
 function register_comment_level_widget() {

@@ -1,7 +1,7 @@
 <?php get_header(); ?>
 <div class="container">
 <div class="main">
-<div class="crumb"><div class="expand"><span class="close-sidebar" title="隐藏侧边栏" ><i class="iconfont expandicon">&#xe60b;</i></span><span class="show-sidebar" style= "display:none;" title="显示侧边栏"><i class="iconfont expandicon">&#xe606;</i></span></div>当前位置： <a title="返回首页" href="<?php bloginfo('url'); ?>/">首页</a> &gt; <?php the_category(', ') ?> &gt; 正文</div>
+<div class="crumb"><div class="expand"><span class="close-sidebar" title="隐藏侧边栏" ><i class="iconfont expandicon">&#xe60b;</i></span><span class="show-sidebar" style= "display:none;" title="显示侧边栏"><i class="iconfont expandicon">&#xe606;</i></span></div>当前位置： <a title="返回首页" href="<?php echo home_url('/'); ?>">首页</a> &gt; <?php the_category(', ') ?> &gt; 正文</div>
 <?php if (have_posts()) : while (have_posts()) : the_post(); ?>
 <div id="post-<?php the_ID(); ?>" class="article" itemscope itemtype="http://schema.org/Article">
 <h1 class="post-title" itemprop="headline"><?php the_title(); ?></h1>
@@ -13,6 +13,23 @@ $category_names = array();
 foreach( $categories as $category ) { $category_names[] = esc_html( $category->name ); }
 echo implode( ',', $category_names );
 ?>"><i class="iconfont posticon">&#xe658;</i><?php the_category(', ') ?></span><?php if(function_exists('the_views')) { echo '<span class="views info-icon"><i class="iconfont posticon">&#xefb8;</i>'; the_views(); echo '</span>'; } ?><span class="comments info-icon"><i class="iconfont posticon">&#xe673;</i><?php comments_popup_link ('抢沙发','1条评论','<span itemprop="interactionCount" content="UserComments:%">%</span>条评论'); ?></span></div>
+<?php if (weisay_option('wei_qrcode') == 'display'): ?>
+<div class="qrcode">
+<div class="qrcode-scan">
+<ul>
+<li class="qrcode-scanimg">
+<span><i class="iconfont qrcodeicon">&#xe642;</i>扫一扫手机看<i class="iconfont qrcodeicon">&#xe61b;</i></span>
+<div class="qrcode-img">
+<div id="qr-output"></div>
+</div>
+<script>
+jQuery(function($){$('#qr-output').qrcode({render:"canvas",text:'<?php echo esc_url( add_query_arg( 'qrcode', '', get_permalink() ) ); ?>',width:100,height:100,<?php $qrcodeUrl = weisay_option('wei_qrcodeimg');if ($qrcodeUrl) {echo "src:'" . esc_js(esc_url($qrcodeUrl)) . "',";} ?>});})
+</script>
+</li>
+</ul>
+</div>
+</div>
+<?php endif; ?>
 </div>
 <?php if ( is_active_sidebar( 'sidebar-0' ) ) : ?>
 <?php dynamic_sidebar( 'sidebar-0' ); ?>
@@ -31,7 +48,7 @@ echo implode( ',', $category_names );
 <div class="article-author">
 <div class="article-author-item">
 <div class="article-author-avatar">
-<?php echo get_avatar( get_the_author_meta('user_email'), '48', '', get_the_author() ); ?>
+<?php echo get_avatar( get_the_author_meta('user_email'), 60, '', get_the_author() ); ?>
 </div>
 <div class="article-author-info">
 <p><?php the_author_posts_link(); ?>：<?php

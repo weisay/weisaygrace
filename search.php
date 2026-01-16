@@ -1,7 +1,8 @@
+<?php if (weisay_option('wei_layout') !== 'card') : ?>
 <?php get_header(); ?>
 <div class="container">
 <div class="main">
-<div class="crumb">当前位置： <a title="返回首页" href="<?php bloginfo('url'); ?>/">首页</a> &gt; 搜索 &gt; <?php echo wp_trim_words(get_search_query(), 36, '...' ); ?></div>
+<div class="crumb">当前位置： <a title="返回首页" href="<?php echo home_url('/'); ?>">首页</a> &gt; 搜索 &gt; <?php echo wp_trim_words(get_search_query(), 36, '...' ); ?></div>
 <?php if (have_posts()) : ?>
 <?php while (have_posts()) : the_post(); ?>
 <div <?php post_class(); ?> id="post-<?php the_ID(); ?>" itemscope itemtype="http://schema.org/Article">
@@ -46,3 +47,6 @@ echo implode( ',', $category_names );
 <?php get_sidebar(); ?>
 </div>
 <?php get_footer(); ?>
+<?php else : ?>
+<?php require_once get_template_directory() . '/search-card.php'; ?>
+<?php endif; ?>

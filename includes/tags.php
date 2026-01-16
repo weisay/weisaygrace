@@ -47,7 +47,9 @@ if (!function_exists('tag_index_groups')) {
 			}
 			ksort($groups);
 			foreach ($groups as &$tag_list) {
-				usort($tag_list, fn($a,$b)=>intval($b->count)-intval($a->count));
+				usort($tag_list, function($a, $b) {
+					return intval($b->count) - intval($a->count);
+				});
 			}
 			unset($tag_list);
 			set_transient($cache_key, $groups, 12*HOUR_IN_SECONDS);
@@ -95,10 +97,10 @@ function tag_cloud_list() {
 	$tags = get_transient($cache_key);
 	if ($tags === false) {
 		$terms = get_terms([
-			'taxonomy'   => 'post_tag',
+			'taxonomy' => 'post_tag',
 			'hide_empty' => true,
-			'orderby'    => 'count',
-			'order'      => 'DESC',
+			'orderby' => 'count',
+			'order' => 'DESC',
 		]);
 		if (empty($terms) || is_wp_error($terms)) {
 			return '<p class="article-title">暂无标签</p>';
@@ -106,10 +108,10 @@ function tag_cloud_list() {
 		$tags = [];
 		foreach ($terms as $tag) {
 			$tags[] = [
-				'id'    => $tag->term_id,
-				'name'  => $tag->name,
+				'id' => $tag->term_id,
+				'name' => $tag->name,
 				'count' => intval($tag->count),
-				'link'  => get_tag_link($tag->term_id),
+				'link' => get_tag_link($tag->term_id),
 			];
 		}
 		set_transient($cache_key, $tags, 12 * HOUR_IN_SECONDS);

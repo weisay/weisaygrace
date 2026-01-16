@@ -1,7 +1,7 @@
 <?php get_header(); ?>
 <div class="container">
 <div class="main">
-<div class="crumb">当前位置： <a title="返回首页" href="<?php bloginfo('url'); ?>/">首页</a> &gt; <h1><?php the_title(); ?></h1></div>
+<div class="crumb">当前位置： <a title="返回首页" href="<?php echo home_url('/'); ?>">首页</a> &gt; <h1><?php the_title(); ?></h1></div>
 <div class="article">
 <h2 class="article-title"><?php the_title(); ?></h2>
 <?php if ( is_active_sidebar( 'sidebar-0' ) ) : ?>

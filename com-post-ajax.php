@@ -66,7 +66,7 @@ if ( !comments_open($comment_post_ID) ) {
 }
 
 // 清理输入数据
-$raw_author  = isset($_POST['author']) ? trim($_POST['author']) : null;
+$raw_author = isset($_POST['author']) ? trim($_POST['author']) : null;
 $raw_email = isset($_POST['email']) ? trim($_POST['email']) : null;
 $raw_url = isset($_POST['url']) ? trim($_POST['url']) : null;
 $raw_comment = isset($_POST['comment']) ? trim($_POST['comment']) : null;
@@ -167,13 +167,6 @@ if (!is_user_logged_in()) { // 登录用户跳过检查
 	}
 }
 
-// 中文检查
-if (weisay_option('wei_chinese') == 'open') {
-	if (!preg_match('/\p{Han}/u', $raw_comment)) {
-		err(__('评论必须包含中文！'));
-	}
-}
-
 // 评论编辑/新建处理
 if ($edit_id) {
 	if (!isset($_SESSION['comment_id']) || $_SESSION['comment_id'] != $edit_id) {
@@ -209,7 +202,7 @@ while ($tmp_c->comment_parent != 0) {
 ?>
 <li <?php comment_class(); ?> id="li-comment-<?php comment_ID(); ?>">
 <div id="div-comment-<?php comment_ID() ?>" class="comment-body">
-	<div class="comment-avatar vcard"><?php echo get_avatar( $comment->comment_author_email, 48, '', get_comment_author() ); ?></div>
+	<div class="comment-avatar vcard"><?php echo get_avatar( $comment->comment_author_email, 60, '', get_comment_author() ); ?></div>
 	<div class="comment-box">
 		<div class="fn comment-name"><?php printf( __( '<cite class="fn">%s</cite>'), get_comment_author_link() ); ?><?php edit_comment_link('编辑','&nbsp;&nbsp;',''); ?></div>
 		<div class="comment-content">

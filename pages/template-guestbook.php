@@ -6,7 +6,7 @@ Template Name: 留言页面
 <?php get_header(); ?>
 <div class="container">
 <div class="main main-all">
-<div class="crumb">当前位置： <a title="返回首页" href="<?php bloginfo('url'); ?>/">首页</a> &gt; <h1><?php the_title(); ?></h1></div>
+<div class="crumb">当前位置： <a title="返回首页" href="<?php echo home_url('/'); ?>">首页</a> &gt; <h1><?php the_title(); ?></h1></div>
 <?php if (weisay_option('wei_hotreviewer') != 'hide') : ?>
 <div class="article article-mostactive">
 <h3 class="article-title">评论排行 TOP30<span class="article-subtitle">感谢小伙伴们的驻足</span></h3>
@@ -42,7 +42,7 @@ if ($counts && is_array($counts)) {
 	foreach ($counts as $count) {
 		$author = esc_attr($count->comment_author);
 		$url = esc_url($count->comment_author_url);
-		$avatar = get_avatar($count->comment_author_email, 80, '', $author);
+		$avatar = get_avatar($count->comment_author_email, 84, '', $author);
 		$mostactive .= sprintf(
 			'<li><a href="%s" title="%s" rel="external nofollow">%s</a><span class="cnt">%d</span></li>%s',
 			$url,
