@@ -2,7 +2,7 @@
 
 这是一款优雅的WordPress响应式博客主题，自适应PC端和手机端，设计优雅、使用便捷！
 
-Tags: 响应式,深色模式,小工具,IP归属地,SEO,两栏,优雅,代码高亮,特色图片,自定义菜单,走心评论,ajax评论,威言威语
+Tags: 响应式,深色模式,走心评论,ajax评论,IP归属地,自定义颜色,邮件通知,代码高亮,特色图片,自定义菜单,SEO,两栏,小工具
 
 主题发布页：https://www.weisay.com/blog/wordpress-theme-weisay-grace.html
 
