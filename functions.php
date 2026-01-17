@@ -204,7 +204,7 @@ add_action( 'manage_comments_custom_column', 'output_my_comments_columns', 10, 2
 //替换文章img和a标签加载fancybox灯箱
 add_filter('the_content', 'replace_content', 99);
 function replace_content($content) {
-	$pattern = '/<a\s+([^>]*?)href=([\'"])([^>]*?\.(?:bmp|gif|jpe?g|png|webp)(?:\?[^\'" >]*)?)\2([^>]*?)>\s*(<img\s+[^>]*>)\s*<\/a>/is';
+	$pattern = '/<a\s+([^>]*?)href=([\'"])([^>]*?\.(?:bmp|gif|jpe?g|png|webp)(?:\?[^\'" >]*)?)\2([^>]*?)>([\s\S]*?<img\s+[^>]*>[\s\S]*?)<\/a>/is';
 	$content = preg_replace_callback($pattern, function($matches) {
 		$before_href = $matches[1];
 		$href_content = $matches[3];
