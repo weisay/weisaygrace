@@ -37,10 +37,10 @@
 .dark .mainmenu li li a:hover{background:#3a3f45;border-left-color:var(--color_hover_dark);}
 .dark .mainmenu li.current-cat a:link,.dark .mainmenu li.current-cat a:visited,.dark .mainmenu li.current-menu-item > a:link,.dark .mainmenu li.current-menu-item > a:visited{color:#bbb;}
 .dark .mainmenu li a.hasmenu:hover:after{color:#c1c4c9;}
-.dark .search{background:#21252c;border:2px solid #3a3f45;}
-.dark .search .search-input{color:#9da1a7;}
-.dark .search .search-submit{color:#767a80;}
-.dark .search .search-submit:hover{color:#9da1a7;}
+.dark .mainmenu .search{background:#21252c;border:2px solid #3a3f45;}
+.dark .mainmenu .search .search-input{color:#9da1a7;}
+.dark .mainmenu .search .search-submit{color:#767a80;}
+.dark .mainmenu .search .search-submit:hover{color:#9da1a7;}
 .dark .newicon{color:var(--color_link_dark);}
 .dark .main .post,.dark .main .type-page{background:#21252c;border-bottom-color:#161a20;box-shadow:0 0 4px #070b10;}
 .dark .main .post-title a:link,.dark .main .post-title a:visited,.dark .main .sticky-title a:link,.dark .main .sticky-title a:visited{color:#e8eaed;}
