@@ -5,7 +5,7 @@ Template Name: 走心评论
 ?>
 <?php get_header(); ?>
 <div class="container">
-<div class="main main-all">
+<div class="main main-all" role="main">
 <div id="comments" class="touching-header">
 <?php
 global $wpdb;

@@ -144,7 +144,7 @@ function generate_comment_email_message($comment, $parent_comment) {
 			<td>
 				<table style="margin-bottom:20px;" border="0" cellpadding="0" cellspacing="0" width="100%">
 					<tbody><tr>
-						<td style="padding:10px 0;font-size:20px;text-align:left;"><?php echo $parent_author; ?>, 您好!</td>
+						<td style="padding:10px 0;font-size:20px;text-align:left;"><?php echo $parent_author; ?>，您好！</td>
 					</tr>
 				</tbody></table>
 
@@ -220,7 +220,7 @@ function generate_comment_email_message($comment, $parent_comment) {
 	return ob_get_clean();
 }
 
-// ==================== 后台测试邮件逻辑 ====================
+// ==================== 6. 后台测试邮件逻辑 ====================
 add_action('wp_ajax_wei_send_test_mail', function() {
 	check_ajax_referer('wei_send_test_mail_nonce', 'nonce'); // AJAX nonce 检查
 	if (!current_user_can('manage_options')) {

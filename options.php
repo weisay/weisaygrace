@@ -465,9 +465,32 @@ function optionsframework_options() {
 	);
 
 	$options[] = array(
+		'name' => __( '评论框位置', 'theme-textdomain' ),
+		'desc' => __( '默认在评论列表下方', 'theme-textdomain' ),
+		'id' => 'wei_abovecomments',
+		'class' => 'sub-level',
+		'std' => '1',
+		'type' => 'select',
+		'options' => array(
+			'1' => '评论列表下方',
+			'2' => '评论列表上方',
+		)
+	);
+
+	$options[] = array(
 		'name' => __( '屏蔽非中文评论', 'theme-textdomain' ),
 		'desc' => __( '默认禁用，开启后，评论内容必须包含中文，否则无法提交', 'theme-textdomain' ),
 		'id' => 'wei_chinese',
+		'class' => 'sub-level',
+		'std' => 'close',
+		'type' => 'select',
+		'options' => $on_off
+	);
+
+	$options[] = array(
+		'name' => __( '启用评论打字特效', 'theme-textdomain' ),
+		'desc' => __( '默认禁用，开启后，输入评论内容时有礼花特效', 'theme-textdomain' ),
+		'id' => 'wei_typing',
 		'class' => 'sub-level',
 		'std' => 'close',
 		'type' => 'select',

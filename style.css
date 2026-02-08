@@ -1,11 +1,17 @@
 /* 
-	Theme Name: Weisay Grace
-	Theme URL: http://www.weisay.com/blog/wordpress-theme-weisay-grace.html
-	Description: WordPress响应式博客主题，自适应PC端和手机端，设计优雅、使用便捷！点击获得 <a href="https://www.weisay.com/blog/wordpress-theme-weisay-grace.html">Weisay Grace</a> 主题使用帮助。
-	Author: Weisay
-	Author URI: http://www.weisay.com
-	Tags: 响应式,深色模式,走心评论,ajax评论,IP归属地,自定义颜色,邮件通知,代码高亮,特色图片,自定义菜单,SEO,两栏,小工具
-	Version: 2.4.0
+Theme Name: Weisay Grace
+Theme URI: https://www.weisay.com/blog/wordpress-theme-weisay-grace.html
+Description: WordPress响应式博客主题，自适应PC端和手机端，设计优雅、使用便捷！点击获得 <a href="https://www.weisay.com/blog/wordpress-theme-weisay-grace.html">Weisay Grace</a> 主题使用帮助。
+Author: Weisay
+Author URI: https://www.weisay.com
+Tags: 响应式,深色模式,走心评论,ajax评论,IP归属地,自定义颜色,邮件通知,代码高亮,特色图片,自定义菜单,SEO,两栏,小工具
+Version: 2.4.1
+Requires at least: 6.0
+Requires PHP: 7.3
+Tested up to: 6.9
+Text Domain: weisaygrace
+License: GNU General Public License v2 or later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
 */
 @font-face {
 font-family: 'iconfont';
@@ -293,23 +299,22 @@ input,textarea{appearance:none;-moz-appearance:none;-webkit-appearance:none;}
 .article-author-info{margin-left:0.75rem;}
 .article-author-info p{line-height:1.625rem;font-size:0.875rem;color:#888}
 .shang{margin-right:1rem;}
-.shang a{background:var(--color_link);padding:0.25rem 0.625rem;color:#fff;border-radius:0.25rem;display:inline-block;min-width:2rem;}
+.shang a{background:var(--color_link);padding:0.25rem 0.625rem;color:#fff;border-radius:0.25rem;white-space:nowrap;display:inline-block;min-width:2rem;}
 .shang a:hover{background:var(--color_hover);text-decoration:none;}
 .shang-bg{display:none;position:fixed;width:100%;height:100%;background:#000;z-index:97;top:0;left:0;opacity:0.7;}
-.shang-content{width:580px;height:340px;border-radius:0.375rem;position:fixed;top:50%;margin-top:-170px;background:#fff;z-index:98;left:50%;margin-left:-290px;}
+.shang-content{width:36rem;min-height:20rem;border-radius:0.375rem;position:fixed;top:50%;margin-top:-10rem;background:#fff;z-index:98;left:50%;margin-left:-18rem;}
 .shang-title{height:2.25rem;line-height:2.25rem;padding:0.325rem 0 0 1rem;font-size:1.125rem;font-weight:bold;}
 .shang-close{font-size:2rem;margin:0.325rem 0.65rem 0 0;font-weight:normal;cursor:pointer;display:inline-block;float:right;background:#fff;}
 .shang-close:hover{color:var(--color_hover);}
-.shang-body{padding:1rem;}
-.shang-body img{border-radius:0.75rem;padding:0.65rem;margin:0.325rem 1.5rem 0.325rem 1.5rem;}
-.shang-body .shang-zfb{float:left;}
-.shang-body .shang-wx{float:right;}
+.shang-body{margin:2rem 1rem;height:200px;display:flex;justify-content:space-between;}
+.shang-body .shang-qrcode{margin:0 auto;}
+.shang-body img{border-radius:0.75rem;padding:0.65rem;}
 .shang-body .shang-zfb img{border:0.325rem solid #1677ff;}
 .shang-body .shang-wx img{border:0.325rem solid #22ac38;}
-.shang-body .shang-qrcode span{text-align:center;display:block;margin:-20px auto;background:#fff;font-size:14px;width:90px;font-weight:bold;position:relative;}
+.shang-body .shang-qrcode span{text-align:center;display:block;margin:-1rem auto;background:#fff;font-size:0.875rem;width:5.5rem;font-weight:bold;position:relative;}
 .shang-body .shang-zfb span{color:#1677ff;}
 .shang-body .shang-wx span{color:#22ac38;}
-.shang-body .shang-tips{margin-top:2.5rem;text-align:center;display:inherit;}
+.shang-content .shang-tips{margin:1.5rem;text-align:center;}
 /* 图文混排 */
 .article .article-content img{max-width:100%;height:auto;}
 .alignleft,img.alignleft{display:inline;float:left;margin-right:1rem;margin-top:0.325rem;}
@@ -410,7 +415,7 @@ figure.wp-block-image{width:fit-content;}
 .touching-waterfall .touching-columns-4::before{content:'';display:block;--cols:4;--gap:16px;}
 .touching-waterfall .touching-list .comment-info{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;}
 .touching-waterfall .touching-list .comment-name{font-size:0.875rem;padding-bottom:0.375rem;}
-.touching-waterfall .touching-list .comment-avatar img{border-radius:50%}
+.touching-waterfall .touching-list .comment-avatar img{border-radius:50%;width:3rem;height:3rem;}
 .touching-waterfall .touching-list .comment-datetime{font-size:0.75rem;color:#999;}
 .touching-waterfall .touching-list .comment-content p{font-size:1rem;line-height:1.75rem;color:#444;}
 .touching-waterfall .touching-list .comment-content .comment_at{display:none;}
@@ -709,6 +714,9 @@ html.mm-right .mm-menu .mm-listview{font-size:1rem;}
 .thumbnail img{width:7.7rem;height:5.5rem;}
 .main .post-content{-webkit-line-clamp:3;}
 .main .post-content p{font-size:1rem;line-height:1.875rem;}
+.shang-content{width:18rem;min-height:30rem;top:50%;margin-top:-16rem;left:50%;margin-left:-9rem;}
+.shang-body{margin:1rem;height:430px;display:flex;flex-direction:column;}
+.shang-content .shang-tips{margin:2rem 1rem 1rem 1rem;}
 .pagination{margin-right:0.5rem;}
 .comment-list li.comment :is(ul.children, ul.children ul.children, ul.children ul.children ul.children, ul.children ul.children ul.children ul.children){margin:0.625rem 0 0 1.5rem;}
 .comment-list li.comment ul.children ul.children ul.children ul.children ul.children{margin:0.625rem 0 0 0;}

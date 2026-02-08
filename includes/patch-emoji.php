@@ -163,7 +163,7 @@ function translate_smiley_diy( $matches ) {
 	 * @param string $site_url   Site URL, as returned by site_url().
 	 */
 	 //请注意！已将表情路径定义到主题目录下的 images/smilies 文件夹
-	$src_url = apply_filters( 'smilies_src', esc_url(get_template_directory_uri() . '/assets/images/smilies/' . $img), $img, site_url() );
+	$src_url = apply_filters( 'smilies_src', esc_url(get_template_directory_uri() . '/assets/images/smilies/' . $img), $img, home_url() );
 	return sprintf( '<img src="%s" alt="%s" class="wp-smiley" style="/*height: 1em; max-height: 1em;*/" />', esc_url( $src_url ), esc_attr( $smiley ) );
 	}
 ?>

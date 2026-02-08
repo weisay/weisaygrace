@@ -15,7 +15,8 @@
 <link rel="pingback" href="<?php bloginfo('pingback_url'); ?>" />
 <?php echo weisay_option('wei_headcustom'); ?>
 </head>
-<body>
+<body <?php body_class(); ?>>
+<?php wp_body_open(); ?>
 <div class="header">
 <div class="top-bar">
 <div class="container">
@@ -32,23 +33,23 @@
 <div class="website container">
 <div class="headline">
 <?php if( is_home() ) : ?>
-	<h1><a href="<?php echo home_url('/'); ?>"><?php bloginfo('name'); ?></a></h1>
+	<h1><a href="<?php echo esc_url( home_url('/') ); ?>"><?php bloginfo('name'); ?></a></h1>
 <?php else: ?>
-	<a href="<?php echo home_url('/'); ?>"><?php bloginfo('name'); ?></a>
+	<a href="<?php echo esc_url( home_url('/') ); ?>"><?php bloginfo('name'); ?></a>
 <?php endif; ?>
 	<div class="blogdescription"><?php bloginfo('description'); ?></div>
 </div>
 </div>
 </div>
 <div class="headermenu">
-<a id="hamburger" onfocus="this.blur()" href="#menu" rel="nofollow"><span></span></a><a class="mblogurl" href="<?php echo home_url('/'); ?>"><?php bloginfo('name'); ?></a><a class="icon-right" href="#menu-right" rel="nofollow"><i class="iconfont righticon"></i></a>
+<a id="hamburger" onfocus="this.blur()" href="#menu" rel="nofollow" aria-label="菜单"><span></span></a><a class="mblogurl" href="<?php echo esc_url( home_url('/') ); ?>"><span class="blogname"><?php bloginfo('name'); ?></span></a><a class="icon-right" href="#menu-right" rel="nofollow" aria-label="侧边栏"><i class="iconfont righticon"></i></a>
 </div>
 <div class="header-navigation">
 <div class="container mainmenu">
 <?php wp_nav_menu( array( 'theme_location' => 'menunav' ) ); ?>
 <?php if (weisay_option('wei_search') != 'hide') : ?>
 <div class="search">
-<form class="search-form" method="get" action="<?php echo home_url('/'); ?>">
+<form class="search-form" method="get" action="<?php echo esc_url( home_url('/') ); ?>">
 <input class="search-input" required="" value="" type="text" name="s" placeholder="搜索" />
 <button aria-label="搜索" class="search-submit iconfont" type="submit">&#xe652;</button></form>
 </div>

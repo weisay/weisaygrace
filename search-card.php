@@ -1,7 +1,7 @@
 <?php get_header(); ?>
 <div class="container">
-<div class="main <?php echo (weisay_option('wei_layout_card_sidebar') == '1') ? 'main-aside' : 'main-all'; ?>">
-<div class="crumb">当前位置： <a title="返回首页" href="<?php echo home_url('/'); ?>">首页</a> &gt; 搜索 &gt; <?php echo wp_trim_words(get_search_query(), 36, '...' ); ?></div>
+<div class="main <?php echo (weisay_option('wei_layout_card_sidebar') == '1') ? 'main-aside' : 'main-all'; ?>" role="main">
+<div class="crumb">当前位置： <a title="返回首页" href="<?php echo esc_url( home_url('/') ); ?>">首页</a> &gt; 搜索 &gt; <?php echo wp_trim_words(get_search_query(), 36, '...' ); ?></div>
 <div class="post-card <?php echo (weisay_option('wei_layout_card_col') == '4') ? 'card-4' : ((weisay_option('wei_layout_card_col') == '2') ? 'card-2' : 'card-3'); ?>">
 <?php if (have_posts()) : ?>
 <?php while (have_posts()) : the_post(); ?>

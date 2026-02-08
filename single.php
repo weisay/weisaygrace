@@ -1,7 +1,7 @@
 <?php get_header(); ?>
 <div class="container">
-<div class="main">
-<div class="crumb"><div class="expand"><span class="close-sidebar" title="隐藏侧边栏" ><i class="iconfont expandicon">&#xe60b;</i></span><span class="show-sidebar" style= "display:none;" title="显示侧边栏"><i class="iconfont expandicon">&#xe606;</i></span></div>当前位置： <a title="返回首页" href="<?php echo home_url('/'); ?>">首页</a> &gt; <?php the_category(', ') ?> &gt; 正文</div>
+<div class="main" role="main">
+<div class="crumb"><div class="expand"><span class="close-sidebar" title="隐藏侧边栏" ><i class="iconfont expandicon">&#xe60b;</i></span><span class="show-sidebar" style= "display:none;" title="显示侧边栏"><i class="iconfont expandicon">&#xe606;</i></span></div>当前位置： <a title="返回首页" href="<?php echo esc_url( home_url('/') ); ?>">首页</a> &gt; <?php the_category(', ') ?> &gt; 正文</div>
 <?php if (have_posts()) : while (have_posts()) : the_post(); ?>
 <div id="post-<?php the_ID(); ?>" class="article" itemscope itemtype="http://schema.org/Article">
 <h1 class="post-title" itemprop="headline"><?php the_title(); ?></h1>
@@ -68,12 +68,11 @@ if ( $author_desc !== '' ) {
 <div class="shang-bg"></div>
 <div class="shang-content" style="display:none;">
 <button class="shang-close" title="关闭">×</button><div class="shang-title">打赏作者</div>
-	<div class="shang-body">
+<div class="shang-body">
 	<div class="shang-zfb shang-qrcode"><img alt="支付宝打赏" src="<?php echo weisay_option('wei_alipay'); ?>" width="170" height="170"><span>支付宝打赏</span></div>
 	<div class="shang-wx shang-qrcode"><img alt="微信打赏" src="<?php echo weisay_option('wei_wxpay'); ?>" width="170" height="170"><span>微信打赏</span></div>
-	<div class="clear"></div>
-	<p class="shang-tips">扫描二维码，打赏一下作者吧~</p>
 </div>
+	<p class="shang-tips">扫描二维码，打赏一下作者吧~</p>
 </div>
 <?php endif; ?>
 </div>

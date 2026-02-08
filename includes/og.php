@@ -13,7 +13,7 @@
 <meta property="og:locale" content="zh_CN" />
 <?php if ( is_home() ) : ?>
 <meta property="og:title" content="<?php bloginfo('name'); ?>" />
-<meta property="og:url" content="<?php echo home_url('/'); ?>" />
+<meta property="og:url" content="<?php echo esc_url( home_url('/') ); ?>" />
 <meta property="og:description" content="<?php echo weisay_option('wei_description'); ?>"/>
 <?php $site_icon_url = get_site_icon_url(); if ( !empty( $site_icon_url )) : ?>
 <meta property="og:image" content="<?php echo esc_url($site_icon_url); ?>" />

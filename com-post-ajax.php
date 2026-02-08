@@ -200,7 +200,7 @@ while ($tmp_c->comment_parent != 0) {
 
 //以下是評論式樣, 不含 "回覆". 要用你模板的式樣 copy 覆蓋.
 ?>
-<li <?php comment_class(); ?> id="li-comment-<?php comment_ID(); ?>">
+<li <?php comment_class(); ?> id="comment-<?php comment_ID(); ?>">
 <div id="div-comment-<?php comment_ID() ?>" class="comment-body">
 	<div class="comment-avatar vcard"><?php echo get_avatar( $comment->comment_author_email, 60, '', get_comment_author() ); ?></div>
 	<div class="comment-box">

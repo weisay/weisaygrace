@@ -17,8 +17,6 @@ var edit_mode = '1', // 再編輯模式 ( '1'=開; '0'=不開 )
 	txt1 = '<div id="loading" class="comment-tips"><img src="' + pic_sb + '" style="vertical-align:middle;" alt=""/> 正在提交, 请稍候...</div>',
 	txt2 = '<div id="error" class="comment-tips">#</div>',
 	txt3 = '"> <div id="edita"><img src="' + pic_ys + '" style="vertical-align:middle;" alt=""/> 提交成功',
-	edt1 = '，刷新页面之前你可以 <a rel="nofollow" class="comment-reply-link comment-reply-link-edit" href="#edit" onclick=\'return addComment.moveForm("',
-	edt2 = ')\'>再次编辑</a></div> ',
 	cancel_edit = '取消编辑',
 	edit, num = 1, comm_array=[]; comm_array.push('');
 
@@ -28,6 +26,16 @@ jQuery(document).ready(function($) {
 	$submit = $('#commentform #submit'); $submit.prop('disabled', false);
 	$('#comment').after( txt1 + txt2 ); $('#loading').hide(); $('#error').hide();
 	$body = (window.opera) ? (document.compatMode == "CSS1Compat" ? $('html') : $('body')) : $('html,body');
+
+
+var formAboveComments = false; // 默认评论表单在下方
+jQuery(function($){
+	var $respond = $('#respond');
+	var $commentList = $('.comment-list').first();
+	if ($respond.length && $commentList.length) {
+		formAboveComments = $respond.offset().top < $commentList.offset().top;
+	}
+});
 
 /** submit */
 $('#commentform').submit(function() {
@@ -53,51 +61,61 @@ $('#commentform').submit(function() {
 
 		success: function(data) {
 			$('#loading').hide();
+			// 获取提交成功时的标题文字，用于后续“再次编辑”时找回状态
+			var current_reply_text = $('#reply-title').html();
+
 			comm_array.push($('#comment').val());
 			$('textarea').each(function() {this.value = ''});
 			var t = addComment, cancel = t.I('cancel-comment-reply-link'), temp = t.I('wp-temp-form-div'), respond = t.I(t.respondId), post = t.I('comment_post_ID').value, parent = t.I('comment_parent').value;
 
-		// comments
-		if (!edit && $comments.length) {
-			var text = $comments.text().trim();
-			// 只匹配最后一个数字
-			var m = text.match(/(\d{1,3}(?:,\d{3})*|\d+)(?!.*\d)/);
-			if (!m) return;
-			var raw = m[1];
-			var number = parseInt(raw.replace(/,/g, ''), 10);
-			var next = number + 1;
-			var formatted = raw.includes(',')
-				? next.toLocaleString('en-US')
-				: String(next);
-			text = text.replace(raw, formatted);
-			$comments.text(text);
-		}
+			// 更新评论计数逻辑
+			if (!edit && $comments.length) {
+				var text = $comments.text().trim();
+				var m = text.match(/(\d{1,3}(?:,\d{3})*|\d+)(?!.*\d)/);
+				if (m) {
+					var raw = m[1];
+					var number = parseInt(raw.replace(/,/g, ''), 10);
+					var next = number + 1;
+					var formatted = raw.includes(',') ? next.toLocaleString('en-US') : String(next);
+					text = text.replace(raw, formatted);
+					$comments.text(text);
+				}
+			}
 
-		// show comment
-		new_htm = '" id="new_comm_' + num + '"></';
-		new_htm = ( parent == '0' ) ? ('\n<ol style="clear:both;" class="comment-list' + new_htm + 'ol>') : ('\n<ul class="children' + new_htm + 'ul>');
+			// show comment
+			new_htm = '" id="new_comm_' + num + '"></';
+			new_htm = ( parent == '0' ) ? ('\n<ol style="clear:both;" class="comment-list' + new_htm + 'ol>') : ('\n<ul class="children' + new_htm + 'ul>');
 
-		ok_htm = '\n<span id="success_' + num + txt3;
-		if ( edit_mode == '1' ) {
-			div_ = (document.body.innerHTML.indexOf('div-comment-') == -1) ? '' : ((document.body.innerHTML.indexOf('li-comment-') == -1) ? 'div-' : '');
-			ok_htm = ok_htm.concat(edt1, div_, 'comment-', parent, '", "', parent, '", "respond", "', post, '", ', num, edt2);
-		}
-		ok_htm += '</span><span></span>\n';
+			ok_htm = '\n<span id="success_' + num + txt3;
+			if ( edit_mode == '1' ) {
+				div_ = (document.body.innerHTML.indexOf('div-comment-') == -1) ? '' : ((document.body.innerHTML.indexOf('li-comment-') == -1) ? 'div-' : '');
+				ok_htm += '，刷新页面之前你可以 <a rel="nofollow" class="comment-reply-link comment-reply-link-edit" ' + 
+						  'data-replyto="' + current_reply_text + '" href="#edit" ' + 
+						  'onclick=\'return addComment.moveForm("' + div_ + 'comment-' + parent + '", "' + parent + '", "respond", "' + post + '", ' + num + ', this)\'>再次编辑</a></div> ';
+			}
+			ok_htm += '</span><span></span>\n';
 
-		$('#respond').before(new_htm);
-		$('#new_comm_' + num).hide().append(data);
-		$('#new_comm_' + num + ' li').append(ok_htm);
-		$('#new_comm_' + num).fadeIn(4000);
+			$('#respond').before(new_htm);
+			$('#new_comm_' + num).hide().append(data);
+			$('#new_comm_' + num + ' li').append(ok_htm);
+			$('#new_comm_' + num).fadeIn(4000);
 
-		$body.animate( { scrollTop: $('#new_comm_' + num).offset().top - 200 }, 900);
-		countdown(); num++ ; edit = ''; $('*').remove('#edit_id');
-		cancel.style.display = 'none';
-		cancel.onclick = null;
-		t.I('comment_parent').value = '0';
-		if ( temp && respond ) {
-			temp.parentNode.insertBefore(respond, temp);
-			temp.parentNode.removeChild(temp)
-		}
+			var $newComm = $('#new_comm_' + num);
+			var isReply = parent !== '0';
+			var offset = (formAboveComments && isReply) ? -100 : 180;
+			$body.animate({ scrollTop: $newComm.offset().top - offset }, 900);
+			countdown(); num++ ; edit = ''; $('*').remove('#edit_id');
+			cancel.style.display = 'none';
+			cancel.onclick = null;
+			t.I('comment_parent').value = '0';
+			var $replyTitle = $("#respond #reply-title");
+			if ($replyTitle.data("original-title")) {
+				$replyTitle.html($replyTitle.data("original-title"));
+			}
+			if ( temp && respond ) {
+				temp.parentNode.insertBefore(respond, temp);
+				temp.parentNode.removeChild(temp)
+			}
 		}
 	}); // end Ajax
 	return false;
@@ -105,17 +123,25 @@ $('#commentform').submit(function() {
 
 /** comment-reply.dev.js */
 addComment = {
-	moveForm : function(commId, parentId, respondId, postId, num, replyTo) {
+	moveForm : function(commId, parentId, respondId, postId, num, element) {
 		var t = this, div, comm = t.I(commId), respond = t.I(respondId), cancel = t.I('cancel-comment-reply-link'), parent = t.I('comment_parent'), post = t.I('comment_post_ID');
+		var $replyTitle = $("#respond #reply-title");
+		var replyToText = false;
 		if ( edit ) exit_prev_edit();
-		num ? (
-			t.I('comment').value = comm_array[num],
-			edit = t.I('new_comm_' + num).innerHTML.match(/(comment-)(\d+)/)[2],
-			$new_sucs = $('#success_' + num ), $new_sucs.hide(),
-			$new_comm = $('#new_comm_' + num ), $new_comm.hide(),
-			$cancel.text(cancel_edit)
-		) : $cancel.text(cancel_text);
 
+		if ( num ) {
+			t.I('comment').value = comm_array[num];
+			edit = t.I('new_comm_' + num).innerHTML.match(/(comment-)(\d+)/)[2];
+			$new_sucs = $('#success_' + num ); $new_sucs.hide();
+			$new_comm = $('#new_comm_' + num ); $new_comm.hide();
+			$cancel.text(cancel_edit);
+			if (element && $(element).attr('data-replyto')) {
+				replyToText = $(element).attr('data-replyto');
+			}
+		} else {
+			$cancel.text(cancel_text);
+			replyToText = element;
+		}
 		t.respondId = respondId;
 		postId = postId || false;
 
@@ -138,14 +164,10 @@ addComment = {
 			easing: 'swing'
 		});
 
-		replyTo = replyTo || false;
-
-		var $replyTitle = $("#respond #reply-title");
-
-		if (replyTo) {
+		if (replyToText) {
 			if (!$replyTitle.data("original-title"))
 				$replyTitle.data("original-title", $replyTitle.html());
-			$replyTitle.html(replyTo);
+			$replyTitle.html(replyToText);
 		}
 
 		if ( post && postId ) post.value = postId;
@@ -164,6 +186,7 @@ addComment = {
 			this.style.display = 'none';
 			this.onclick = null;
 
+			// 取消编辑或取消回复时，将标题恢复为最初的“发表评论”
 			if ($replyTitle.data("original-title"))
 				$replyTitle.html($replyTitle.data("original-title"));
 

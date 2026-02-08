@@ -1,7 +1,7 @@
 <nav id="menu">
 <dl class="menuside">
 <dd class="mm-search">
-	<form class="mm-search-form" method="get" action="<?php echo home_url('/'); ?>">
+	<form class="mm-search-form" method="get" action="<?php echo esc_url( home_url('/') ); ?>">
 		<input class="mm-search-input" required="" placeholder="Search" type="text" name="s" autocomplete="off">
 	</form>
 </dd>

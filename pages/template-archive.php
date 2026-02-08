@@ -7,8 +7,8 @@ Template Name: 归档页面
 <?php $theme = wp_get_theme(); $themeversion = $theme -> get('Version'); ?>
 <script type="text/javascript" src="<?php echo esc_url(get_template_directory_uri() . '/assets/js/archives.min.js?ver=' . $themeversion); ?>"></script>
 <div class="container">
-<div class="main">
-<div class="crumb">当前位置： <a title="返回首页" href="<?php echo home_url('/'); ?>">首页</a> &gt; <h1><?php the_title(); ?></h1></div>
+<div class="main" role="main">
+<div class="crumb">当前位置： <a title="返回首页" href="<?php echo esc_url( home_url('/') ); ?>">首页</a> &gt; <h1><?php the_title(); ?></h1></div>
 	<div class="article">
 	<?php if (weisay_option('wei_statistics') != 'hide') : ?>
 	<div class="article-stat">

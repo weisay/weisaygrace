@@ -26,7 +26,7 @@ if (!empty($start_date) && strtotime($start_date) !== false && strtotime($start_
 </div>
 </div>
 </div>
-<?php if (is_single() || is_page() ) { ?>
+<?php if (weisay_option('wei_typing') == 'open' && (is_single() || is_page())) { ?>
 <script type="text/javascript" src="<?php echo esc_url(get_template_directory_uri() . '/assets/js/activate-power-mode.min.js'); ?>"></script>
 <script type="text/javascript">POWERMODE.colorful = true; POWERMODE.shake = false; document.body.addEventListener('input', POWERMODE);</script>
 <?php }?>

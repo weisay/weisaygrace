@@ -1,8 +1,8 @@
 <?php if (weisay_option('wei_layout') !== 'card') : ?>
 <?php get_header(); ?>
 <div class="container">
-<div class="main">
-<div class="crumb">当前位置： <a title="返回首页" href="<?php echo home_url('/'); ?>">首页</a> &gt; <?php if (have_posts()) : ?><?php $post = $posts[0]; ?><?php if (is_category()) { ?><h1><?php single_cat_title(); ?></h1>
+<div class="main" role="main">
+<div class="crumb">当前位置： <a title="返回首页" href="<?php echo esc_url( home_url('/') ); ?>">首页</a> &gt; <?php if (have_posts()) : ?><?php $post = $posts[0]; ?><?php if (is_category()) { ?><h1><?php single_cat_title(); ?></h1>
 <?php } elseif( is_tag() ) { ?><h1><?php single_tag_title(); ?></h1>
 <?php } elseif (is_day()) { ?><h1><?php the_time('Y年n月j日'); ?>发布的所有文章</h1>
 <?php } elseif (is_month()) { ?><h1><?php the_time('Y年n月'); ?>发布的所有文章</h1>

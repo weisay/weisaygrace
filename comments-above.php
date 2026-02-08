@@ -1,4 +1,3 @@
-<?php if (weisay_option('wei_abovecomments') !== '2') : ?>
 <?php
 // Do not delete these lines
 if ( !empty($_SERVER['SCRIPT_FILENAME'] ) && 'comments.php' == basename($_SERVER['SCRIPT_FILENAME'])) {
@@ -14,16 +13,6 @@ if ( post_password_required() ) {
 $comment_paging_nonce = wp_create_nonce('comment_paging_nonce');
 ?>
 <div id="comments" class="comments-area">
-<?php if ( have_comments() ) : ?>
-<h3 id="comments-title" class="article-title"><span class="mobile-hide">《<?php the_title(); ?>》有 </span><?php comments_number('', '1 条', '% 条' );?>评论</h3>
-<div id="comment-ajax">
-<ol class="comment-list">
-<?php wp_list_comments('type=comment&callback=weisay_comment&end-callback=weisay_end_comment&max_depth=' .get_option('thread_comments_depth'). ' '); ?>
-</ol>
-<div class="pagination" id="commentpager"><?php paginate_comments_links(); ?></div>
-</div>
-<script type="text/javascript">var commentPagingNonce = '<?php echo esc_js( $comment_paging_nonce ); ?>';</script>
-<?php endif; // if ( have_comments() ) ?>
 <?php if ( ('0' == $post->comment_count) && comments_open() ) : ?>
 <h3 class="article-title"><span class="mobile-hide">《<?php the_title(); ?>》</span>等您坐沙发呢！</h3>
 <?php endif; // if ( ('0' == $post->comment_count) && comments_open() ) ?>
@@ -135,10 +124,17 @@ const changeMsg="[ 更改 ]",closeMsg="[ 隐藏 ]";function toggleCommentAuthorI
 <?php endif; // if ( get_option('comment_registration') && !is_user_logged_in() ) ?>
 </div>
 <?php endif; // if ( comments_open() ) ?>
+<?php if ( have_comments() ) : ?>
+<h3 id="comments-title" class="article-title"><span class="mobile-hide">《<?php the_title(); ?>》有 </span><?php comments_number('', '1 条', '% 条' );?>评论</h3>
+<div id="comment-ajax">
+<ol class="comment-list">
+<?php wp_list_comments('type=comment&callback=weisay_comment&end-callback=weisay_end_comment&max_depth=' .get_option('thread_comments_depth'). ' '); ?>
+</ol>
+<div class="pagination" id="commentpager"><?php paginate_comments_links(); ?></div>
+</div>
+<script type="text/javascript">var commentPagingNonce = '<?php echo esc_js( $comment_paging_nonce ); ?>';</script>
+<?php endif; // if ( have_comments() ) ?>
 <?php if ( ! comments_open() ) : ?>
 <h3 class="article-title">报歉！评论已关闭。</h3>
 <?php endif; // if ( ! comments_open() ) ?>
 </div>
-<?php else : ?>
-<?php require_once get_template_directory() . '/comments-above.php'; ?>
-<?php endif; ?>

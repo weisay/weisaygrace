@@ -1,6 +1,6 @@
 <?php get_header(); ?>
 <div class="container">
-<div class="main <?php echo (weisay_option('wei_layout_card_sidebar') == '1') ? 'main-aside' : 'main-all'; ?>">
+<div class="main <?php echo (weisay_option('wei_layout_card_sidebar') == '1') ? 'main-aside' : 'main-all'; ?>" role="main">
 <div class="post-card <?php echo (weisay_option('wei_layout_card_col') == '4') ? 'card-4' : ((weisay_option('wei_layout_card_col') == '2') ? 'card-2' : 'card-3'); ?>">
 <?php if (have_posts()) : ?>
 <?php while (have_posts()) : the_post(); ?>

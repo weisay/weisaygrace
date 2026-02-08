@@ -94,6 +94,9 @@
 .dark .fixed-index::-webkit-scrollbar-thumb{border-radius:0.65rem;box-shadow:inset 0 0 5px rgba(0, 0, 0, 0.1);background:#767a80;}
 .dark .fixed-index::-webkit-scrollbar-thumb:hover{background:#8a8e94;}
 .dark .fixed-index::-webkit-scrollbar-track{border-radius:0.65rem;box-shadow:inset 0 0 5px rgba(0, 0, 0, 0.1);background:#454a50;}
+.dark .qrcode-scanimg{border:1px solid #3a3f45;}
+.dark .qrcode-scanimg span{color:#9da1a7;}
+.dark .qrcode-img{background:#2c3138;border:1px solid #3a3f45;}
 .dark .article-author{border-top:1px solid #32363c;}
 .dark .article-author-info p{color:#8a8e94}
 .dark .shang a{background:var(--color_link_dark);color:#252a30;}

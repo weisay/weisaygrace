@@ -146,7 +146,7 @@ echo $replyButton;
 ?>
 </span>
 <?php if (weisay_option('wei_touching') == 'open' && current_user_can('manage_options')) : ?>
-<span class="touching-comments-button"><a class="karma-link" data-karma="<?php echo $comment->comment_karma; ?>" href="<?php echo wp_nonce_url( site_url('/comment-karma'), 'KARMA_NONCE' ); ?>" onclick="return post_karma(<?php comment_ID(); ?>, this.href, this)">
+<span class="touching-comments-button"><a class="karma-link" data-karma="<?php echo $comment->comment_karma; ?>" href="<?php echo wp_nonce_url( home_url('/comment-karma'), 'KARMA_NONCE' ); ?>" onclick="return post_karma(<?php comment_ID(); ?>, this.href, this)">
 <?php if ($comment->comment_karma == 0) {
 echo '<i class="iconfont hearticon" title="加入走心">&#xe602;</i>';
 } else {
@@ -278,7 +278,7 @@ function AjaxCommentsPage() {
 		$pageid = isset($_POST['pageid']) ? absint($_POST['pageid']) : 1;
 		// postid 必须有效
 		if ( $postid <= 0 ) {
-			wp_die( esc_html__( 'Invalid post ID.', 'textdomain' ) );
+			wp_die( esc_html__( 'Invalid post ID.', 'theme-textdomain' ) );
 		}
 		// 构造 Post 对象
 		$post = new stdClass();
